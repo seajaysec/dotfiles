@@ -1,3 +1,22 @@
+ipy() {
+  local PY_BIN
+  local IPYTHON
+  local PYV
+  # This quick way will work if ipython is in the virtualenv
+  PY_BIN="$(python -c 'import sys; print(sys.executable)')"
+  IPYTHON="$(dirname "$PY_BIN")/ipython"
+  if [[ -x "$IPYTHON" ]]; then
+    "$IPYTHON"
+  else
+    # Ask the current python what version it is
+    PYV="$(python -c 'import sys; print(".".join(str(i) for i in sys.version_info[:2]))')"
+    echo "Looking for iPython for Python $PYV"
+    # In a new shell (where pyenv should load if equipped) try to find that version
+    PY_BIN="$($SHELL -i -c "python$PYV -c 'import sys; print(sys.executable)'")"
+    "$(dirname "$PY_BIN")/ipython"
+  fi
+}
+
 unroll() {
   pbpaste | tr ', ' '\n' | sort -Vu | sed '/^[[:space:]]*$/d' > ./.tmp_ip_list.txt
   cdrr=$(nmap -sL -n -T5 --open -iL ./.tmp_ip_list.txt 2>/dev/null | grepip | sort -Vu)
