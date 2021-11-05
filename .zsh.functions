@@ -149,10 +149,12 @@ lncna(){
   cd /root/AggressorScripts
   find /opt/ -type f -name "*.cna" -exec ln -s {} . ';' 2>/dev/null
 }
+
 lnps(){
   cd /root/winx/pwsh
   find /opt/ -type f -name "*.ps1" -exec ln -s {} . ';' 2>/dev/null
 }
+
 lnexe(){
   cd /root/winx/exe
   find /opt/ -type f -name "*.exe" -exec ln -s {} . ';' 2>/dev/null
@@ -179,6 +181,7 @@ winxup(){
 subdirexec() {
     find . -maxdepth 1 -type d \( ! -name . \) -exec bash -c "cd '{}' && pwd && $1 && echo 'success'" \;
 }
+
 subdirgitadd() {
     find . -maxdepth 1 -type d \( ! -name . \) -exec bash -c "cd '{}' && pwd && git add -u && echo 'success'" \;
 }
@@ -186,11 +189,15 @@ subdirgitadd() {
 lscsv() {
     ls -lT | awk '/^-/ && $1=$1' OFS=","
 }
+
 whodat(){ openssl s_client -showcerts -connect $1:443 | grep 'CN=' }
+
 whocerts(){ echo "1. Running openssl check:" && echo | openssl s_client -showcerts -servername $1 -connect $1:443 2>/dev/null | openssl x509 -inform pem -noout -text &&  echo "2. Running nslookup" && nslookup -vc -type=ANY $1 && echo "3. Running nmap" && nmap -p 443 --script ssl-cert $1 }
+
 mcd() {
     mkdir -p "$1" && cd "$1";
 }
+
 mp4togif() {
     ffmpeg -i $1.mp4 -r 10 -f image2pipe -vcodec ppm - | \
   convert -delay 5 -loop 0 - output.gif
