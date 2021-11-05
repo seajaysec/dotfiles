@@ -1,0 +1,248 @@
+unroll() {
+  pbpaste | tr ', ' '\n' | sort -Vu | sed '/^[[:space:]]*$/d' > ./.tmp_ip_list.txt
+  cdrr=$(nmap -sL -n -T5 --open -iL ./.tmp_ip_list.txt 2>/dev/null | grepip | sort -Vu)
+  echo $cdrr
+  echo $cdrr | pbcopy
+  cdrc=$(echo $cdrr | wc -l)
+  echo '\n' $cdrc 'IPs'
+  rm ./.tmp_ip_list.txt
+}
+
+unroll_nosort() {
+  pbpaste | tr ', ' '\n' | sed '/^[[:space:]]*$/d' > ./.tmp_ip_list.txt
+  cdrr=$(nmap -sL -n -T5 --open -iL ./.tmp_ip_list.txt 2>/dev/null | grepip)
+  echo $cdrr
+  echo $cdrr | pbcopy
+  cdrc=$(echo $cdrr | wc -l)
+  echo '\n' $cdrc 'IPs'
+  rm ./.tmp_ip_list.txt
+}
+
+cdf() {
+	target=`osascript -e 'tell application "Finder" to if (count of Finder windows) > 0 then get POSIX path of (target of front Finder window as text)'`
+	if [ "$target" != "" ]; then
+		cd "$target"; pwd
+	else
+		echo 'No Finder window found' >&2
+	fi
+}
+
+pskill(){
+  ps -ef | rg -i $1 | rg -v 'rg' | sed 's/  \+/ /g' | cut -d ' ' -f 2 | xargs kill -9
+}
+# playing with dvwa
+csrf(){
+	curl -s -c $1 "$2" | awk -F 'value' '/user_token/ {print $2}' | cut -d "'" -f 2
+}
+sessionid(){
+	grep PHPSESSID $1 | awk -F ' ' '{print $7}'
+}
+
+lr2sr(){
+  lr1=$(pbpaste | cut -d '.' -f 1-4 | cut -d '-' -f 1)
+  lr2=$(pbpaste | cut -d '.' -f 7)
+  echo $lr1-$lr2
+}
+
+cd() { builtin cd "$@"; ls; }
+
+cidr2ip() {
+  cdrr=$(nmap -sL -n "$1" 2>/dev/null | grepip | sort -Vu)
+  echo $cdrr
+  cdrc=$(echo $cdrr | wc -l)
+  echo '\n' $cdrc 'IPs'
+  }
+
+msf(){
+  service postgresql start
+  msfdb init
+  tmp_ip=`localip`
+  sed -i '$ d' /root/.msf5/msfconsole.rc
+  echo -e "set lhost" $tmp_ip >> /root/.msf5/msfconsole.rc
+  msfconsole -r /root/.msf5/msfconsole.rc
+}
+gistx(){
+  cd /opt/gists
+  rm -rf .git
+  git init
+  git remote add origin `clipboard`
+  git pull origin master
+  echo '\nDONEZO\n'
+  ls
+}
+
+mountshares(){
+  vmware-hgfsclient | while read folder; do
+    echo "[i] Mounting ${folder}   (/mnt/hgfs/${folder})"
+    mkdir -p "/mnt/hgfs/${folder}"
+    umount -f "/mnt/hgfs/${folder}" 2>/dev/null
+    vmhgfs-fuse -o allow_other -o auto_unmount ".host:/${folder}" "/mnt/hgfs/${folder}"
+    done
+    sleep 2s
+}
+restart-vm-tools(){
+  killall -q -w vmtoolsd
+  vmware-user-suid-wrapper vmtoolsd -n vmusr 2>/dev/null
+  vmtoolsd -b /var/run/vmroot 2>/dev/null
+}
+clipboard(){ 
+if command -v xclip 1>/dev/null; then
+    if [[ -p /dev/stdin ]] ; then
+        xclip -i -selection clipboard
+    else
+        xclip -o -selection clipboard
+    fi
+else
+    echo "Remember to install xclip"
+fi
+}
+webmap(){
+  docker stop webmap
+  docker rm webmap
+  docker pull rev3rse/webmap
+  curl -sL http://bit.ly/webmapsetup | bash
+}
+
+# mkenv(){
+# cwd_tmp=`sudo echo 'env_'"${PWD##*/}"`
+# sudo python -m virtualenv $cwd_tmp
+# }
+# mk3nv(){
+# cwd_tmp=`sudo echo 'env_'"${PWD##*/}"`
+# sudo python3 -m venv $cwd_tmp
+# }
+
+empireapi() {
+}
+localip(){
+  ifconfig | grep 'inet ' | grep -v '127.0.0.1' | cut -d: -f2 | awk '{ print $2}' | tail -n 1
+}
+localips(){
+  ifconfig | grep 'inet ' | grep -v '127.0.0.1' | cut -d: -f2 | awk '{ print $2}'
+}
+winxallthethings(){
+  echo 'finding cna files'
+  builtin cd /root/AggressorScripts
+  find /opt/ -type f -name "*.cna" -exec ln -s {} . ';' 2>/dev/null
+  echo 'finding bat files'
+  builtin cd /root/winx/bat
+  find /opt/ -type f -name "*.bat" -exec ln -s {} . ';' 2>/dev/null
+  echo 'finding powershell files'
+  builtin cd /root/winx/pwsh
+  find /opt/ -type f -name "*.ps1" -exec ln -s {} . ';' 2>/dev/null
+  echo 'finding exe files'
+  builtin cd /root/winx/exe
+  find /opt/ -type f -name "*.exe" -exec ln -s {} . ';' 2>/dev/null
+  echo 'finding dll files'
+  builtin cd /root/winx/dll
+  find /opt/ -type f -name "*.dll" -exec ln -s {} . ';' 2>/dev/null
+  builtin cd ~/winx
+  echo 'all done'
+}
+
+lncna(){
+  cd /root/AggressorScripts
+  find /opt/ -type f -name "*.cna" -exec ln -s {} . ';' 2>/dev/null
+}
+lnps(){
+  cd /root/winx/pwsh
+  find /opt/ -type f -name "*.ps1" -exec ln -s {} . ';' 2>/dev/null
+}
+lnexe(){
+  cd /root/winx/exe
+  find /opt/ -type f -name "*.exe" -exec ln -s {} . ';' 2>/dev/null
+}
+
+lnbat(){
+  cd /root/winx/bat
+  find /opt/ -type f -name "*.bat" -exec ln -s {} . ';' 2>/dev/null
+}
+
+lndll(){
+  cd /root/winx/dll
+  find /opt/ -type f -name "*.dll" -exec ln -s {} . ';' 2>/dev/null
+}
+
+winxup(){
+  lnps
+  lnexe
+  lnbat
+  lndll
+  cd ..
+}
+
+subdirexec() {
+    find . -maxdepth 1 -type d \( ! -name . \) -exec bash -c "cd '{}' && pwd && $1 && echo 'success'" \;
+}
+subdirgitadd() {
+    find . -maxdepth 1 -type d \( ! -name . \) -exec bash -c "cd '{}' && pwd && git add -u && echo 'success'" \;
+}
+
+lscsv() {
+    ls -lT | awk '/^-/ && $1=$1' OFS=","
+}
+whodat(){ openssl s_client -showcerts -connect $1:443 | grep 'CN=' }
+whocerts(){ echo "1. Running openssl check:" && echo | openssl s_client -showcerts -servername $1 -connect $1:443 2>/dev/null | openssl x509 -inform pem -noout -text &&  echo "2. Running nslookup" && nslookup -vc -type=ANY $1 && echo "3. Running nmap" && nmap -p 443 --script ssl-cert $1 }
+mcd() {
+    mkdir -p "$1" && cd "$1";
+}
+mp4togif() {
+    ffmpeg -i $1.mp4 -r 10 -f image2pipe -vcodec ppm - | \
+  convert -delay 5 -loop 0 - output.gif
+}
+
+dotfiles() {
+  cd ~
+  bash /root/scripts/backpack.sh
+  git add -f /root/.zshrc
+  git add -f /root/.zsh.aliases
+  git add -f /root/.zsh.functions
+  git add -f /root/.tmux.conf
+  git add -f /root/.tmux.conf.local
+  git add -f /root/.backup
+  git add -f /root/scripts
+  git add -f /root/.config/sublime-text-3
+  git add -f /root/.cme/cme.conf
+  git add -f /root/.config/
+  git add -f /root/.config/bat/themes/tomorrow.tmTheme
+  git commit -m 'scripted update'
+  git remote add origin git@github.com:chrsjhnsn/.kalidots
+  git push -u origin master
+}
+
+reinstall_apt(){
+  apt-get install dselect
+  dpkg --set-selections < pkglist.textapt-get dselect-upgrade
+}
+
+az_all_users(){
+  az ad user list --output=table --query='[].{Created:createdDateTime,UPN:userPrincipalName,Name:displayName,Title:jobTitle,Department:department,Email:mail,UserId:mailNickname,Phone:telephoneNumber,Mobile:mobile,Enabled:accountEnabled}'
+}
+
+az_user_upn(){
+  az ad user list --output=json --query='[].{Created:createdDateTime,UPN:userPrincipalName,Name:displayName,Title:jobTitle,Department:department,Email:mail,UserId:mailNickname,Phone:telephoneNumber,Mobile:mobile,Enabled:accountEnabled}' --upn='$1'
+}
+
+az_dump_groups(){
+  az ad group list --output=json --query='[].{Group:displayName,Description:description}'
+}
+
+az_dump_group_members(){
+  az ad group member list --output=json --query='[].{Created:createdDateTime,UPN:userPrincipalName,Name:displayName,Title:jobTitle,Department:department,Email:mail,UserId:mailNickname,Phone:telephoneNumber,Mobile:mobile,Enabled:accountEnabled}' --group='$1'
+}
+
+az_dump_apps(){
+  az ad app list --output=table --query='[].{Name:displayName,URL:homepage}'
+}
+
+az_examine_app(){
+  az ad app list --output=json --identifier-uri='$1'
+}
+
+az_all_spns(){
+  az ad sp list --output=table --query='[].{Name:displayName,Enabled:accountEnabled,URL:homepage,Publisher:publisherName,MetadataURL:samlMetadataUrl}'
+}
+
+az_one_spn(){
+  az ad sp list --output=table --display-name='$1'
+}
