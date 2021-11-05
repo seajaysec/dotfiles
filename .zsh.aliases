@@ -17,7 +17,6 @@ alias de='deactivate'
 alias editHosts='sudo edit /etc/hosts'                  # editHosts:        Edit /etc/hosts file
 alias egadz="nmap -p0-65535 egadz.metasploit.com -oA egresscheck"
 alias egress-assess="docker run -it piesecurity/egress-assess"
-alias empire='cd /opt/Empire && ./empire --rest --username empireadmin --password V#4BZCT4/cDx7aZQ'
 alias envconfig="subl ~/.env.sh"
 alias extract='dtrx'
 alias f='open -a Finder ./'
