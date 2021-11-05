@@ -30,6 +30,7 @@ cdf() {
 pskill(){
   ps -ef | rg -i $1 | rg -v 'rg' | sed 's/  \+/ /g' | cut -d ' ' -f 2 | xargs kill -9
 }
+
 # playing with dvwa
 csrf(){
 	curl -s -c $1 "$2" | awk -F 'value' '/user_token/ {print $2}' | cut -d "'" -f 2
@@ -61,6 +62,7 @@ msf(){
   echo -e "set lhost" $tmp_ip >> /root/.msf5/msfconsole.rc
   msfconsole -r /root/.msf5/msfconsole.rc
 }
+
 gistx(){
   cd /opt/gists
   rm -rf .git
@@ -80,11 +82,13 @@ mountshares(){
     done
     sleep 2s
 }
+
 restart-vm-tools(){
   killall -q -w vmtoolsd
   vmware-user-suid-wrapper vmtoolsd -n vmusr 2>/dev/null
   vmtoolsd -b /var/run/vmroot 2>/dev/null
 }
+
 clipboard(){ 
 if command -v xclip 1>/dev/null; then
     if [[ -p /dev/stdin ]] ; then
@@ -96,6 +100,7 @@ else
     echo "Remember to install xclip"
 fi
 }
+
 webmap(){
   docker stop webmap
   docker rm webmap
@@ -112,14 +117,14 @@ webmap(){
 # sudo python3 -m venv $cwd_tmp
 # }
 
-empireapi() {
-}
 localip(){
   ifconfig | grep 'inet ' | grep -v '127.0.0.1' | cut -d: -f2 | awk '{ print $2}' | tail -n 1
 }
+
 localips(){
   ifconfig | grep 'inet ' | grep -v '127.0.0.1' | cut -d: -f2 | awk '{ print $2}'
 }
+
 winxallthethings(){
   echo 'finding cna files'
   builtin cd /root/AggressorScripts
