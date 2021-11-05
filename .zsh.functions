@@ -203,25 +203,6 @@ mp4togif() {
   convert -delay 5 -loop 0 - output.gif
 }
 
-dotfiles() {
-  cd ~
-  bash /root/scripts/backpack.sh
-  git add -f /root/.zshrc
-  git add -f /root/.zsh.aliases
-  git add -f /root/.zsh.functions
-  git add -f /root/.tmux.conf
-  git add -f /root/.tmux.conf.local
-  git add -f /root/.backup
-  git add -f /root/scripts
-  git add -f /root/.config/sublime-text-3
-  git add -f /root/.cme/cme.conf
-  git add -f /root/.config/
-  git add -f /root/.config/bat/themes/tomorrow.tmTheme
-  git commit -m 'scripted update'
-  git remote add origin git@github.com:chrsjhnsn/.kalidots
-  git push -u origin master
-}
-
 reinstall_apt(){
   apt-get install dselect
   dpkg --set-selections < pkglist.textapt-get dselect-upgrade
