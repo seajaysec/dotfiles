@@ -34,6 +34,7 @@ export PATH="/usr/local/opt/libressl/bin:$PATH"
 export PATH="/usr/local/opt/curl/bin:$PATH"
 export PATH="/snap/bin:$PATH"
 export PATH="/root/go/bin:$PATH"
+export PATH="/usr/local/bin:$PATH"
 export GOPATH=$HOME/go/
 export GIO_EXTRA_MODULES=/usr/lib/x86_64-linux-gnu/gio/modules/
 export TERM=xterm-256color
