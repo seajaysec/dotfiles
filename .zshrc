@@ -15,10 +15,7 @@ export VISUAL=vim
 export GREP_OPTIONS='--color=always'
 export ACK_PAGER_COLOR="{$PAGER:-less -R}"
 export MONO_GAC_PREFIX="/usr/local"
-export GITROB_ACCESS_TOKEN=4c6488d319611cc266c43894359eeaa9cc4b9fd0
-export CENSYS_API_ID=3d666534-b970-491c-904a-fbfb2f1a2e35
-export CENSYS_API_SECRET=igV9Q5OQ2R0DtDAD78bs8J61zQIKcjKx
-export PATH="/home/linuxbrew/.linuxbrew/bin:$PATH"
+export PATH="/usr/local/bin:$PATH"
 export PATH="/usr/local/sbin:/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin:/opt/X11/bin"
 export PATH=~/.local/bin:$PATH
 export PATH=/usr/local/bin:$PATH
