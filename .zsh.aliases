@@ -71,7 +71,6 @@ alias pipr3='pip3 install -r requirements.txt'
 alias pipr='pip install -r requirements.txt'
 alias psi3='python3 setup.py install'
 alias psi='python setup.py install'f
-alias python='/usr/local/bin/python3'
 alias reinstall='apt install --reinstall -y'
 alias rmenv='sudo rm -rf env_*'
 alias ruler='go run ruler.go'
