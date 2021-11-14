@@ -15,6 +15,7 @@ export VISUAL=vim
 export GREP_OPTIONS='--color=always'
 export ACK_PAGER_COLOR="{$PAGER:-less -R}"
 export MONO_GAC_PREFIX="/usr/local"
+export PATH=/usr/local/bin:$PATH
 export PATH="/usr/local/bin:$PATH"
 export PATH="/usr/local/sbin:/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin:/opt/X11/bin"
 export PATH=~/.local/bin:$PATH
