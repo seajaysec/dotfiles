@@ -87,7 +87,7 @@ tmux_conf_theme_mode_attr='bold'
 
 # status line style
 tmux_conf_theme_status_fg='#bd93f9'                     # light gray
-tmux_conf_theme_status_bg='#6272a4'                     # dark gray
+tmux_conf_theme_status_bg='#282a36'                     # dark gray
 tmux_conf_theme_status_attr='none'
 
 # terminal title
@@ -109,7 +109,7 @@ tmux_conf_theme_terminal_title='#h ❐ #S ● #I #W'
 #     - #{username}
 #     - #{username_ssh}
 tmux_conf_theme_window_status_fg='#bd93f9'              # light gray
-tmux_conf_theme_window_status_bg='#6272a4'              # dark gray
+tmux_conf_theme_window_status_bg='#282a36'              # dark gray
 tmux_conf_theme_window_status_attr='none'
 tmux_conf_theme_window_status_format='#I #W'
 #tmux_conf_theme_window_status_format='#{circled_window_index} #W'
