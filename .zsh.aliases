@@ -113,7 +113,7 @@ alias netCons='lsof -i'                             # netCons:      Show all ope
 alias netminer="mono --arch=32 /opt/NetworkMiner_2-3-1/NetworkMiner.exe &"
 alias netstat='grc netstat'
 alias nmap='grc nmap'
-alias nmap='grc nmap --randomize-hosts --script-args http.useragent="Mozilla/5.0 (Windows NT 10.0; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/39.0.2171.71 Safari/537.36 Edge/12.0i" --script-timeout 10m'
+alias nmapr='grc nmap --randomize-hosts --script-args http.useragent="Mozilla/5.0 (Windows NT 10.0; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/39.0.2171.71 Safari/537.36 Edge/12.0i" --script-timeout 10m'
 alias ntpdate='grc ntpdate'
 alias openPorts='sudo lsof -i | grep LISTEN'        # openPorts:    All listening connections
 alias pbc='ghead -c -1 | pbcopy'
