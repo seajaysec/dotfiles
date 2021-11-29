@@ -49,6 +49,7 @@ fpath=(~/.zsh.d/ $fpath)
 
 [ -f ~/.fzf.zsh ] && source ~/.fzf.zsh
 
+# Enable autocompletion
 autoload -Uz compinit
 compinit
 
