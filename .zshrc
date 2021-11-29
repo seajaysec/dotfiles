@@ -44,9 +44,6 @@ source ~/dotfiles/.zsh.functions
 bindkey '^[[A' history-substring-search-up
 bindkey '^[[B' history-substring-search-down
 
-[[ -s "/etc/grc.zsh"  ]] && source /etc/grc.zsh
-fpath=(~/.zsh.d/ $fpath)
-
 [ -f ~/.fzf.zsh ] && source ~/.fzf.zsh
 
 # Enable autocompletion
