@@ -96,7 +96,6 @@ alias lsof='grc lsof'
 alias lspci='grc lspci'
 alias lst='exa --tree --level'
 alias ls='exa -a'
-alias l='/bin/lscript/l'
 alias make='grc make'
 alias mkdir='mkdir -pv'                     # Preferred 'mkdir' implementation
 alias mkv3nv='mkvenv --python=/usr/bin/python3'
