@@ -98,7 +98,6 @@ alias lst='exa --tree --level'
 alias ls='exa -a'
 alias make='grc make'
 alias mkdir='mkdir -pv'                     # Preferred 'mkdir' implementation
-alias mkv3nv='mkvenv --python=/usr/bin/python3'
 alias more='less'
 alias mount='grc mount'
 alias mtr='grc mtr'
