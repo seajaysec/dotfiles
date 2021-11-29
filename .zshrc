@@ -1,5 +1,5 @@
 if [ -z "$TMUX" ]; then
-  exec tmux new-session -A -s macShell
+  exec tmux new-session -A -s mac
 fi
 
 # Enable Powerlevel10k instant prompt. Should stay close to the top of ~/.zshrc.
