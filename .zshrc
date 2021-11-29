@@ -44,7 +44,7 @@ source ~/dotfiles/.zsh.functions
 bindkey '^[[A' history-substring-search-up
 bindkey '^[[B' history-substring-search-down
 
-[[ -s "~/dotfiles/grc.zsh"  ]] && source ~/dotfiles/grc.zsh
+[[ -s "/etc/grc.zsh"  ]] && source /etc/grc.zsh
 fpath=(~/.zsh.d/ $fpath)
 
 [ -f ~/.fzf.zsh ] && source ~/.fzf.zsh
