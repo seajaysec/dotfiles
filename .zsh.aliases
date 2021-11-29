@@ -3,7 +3,7 @@ alias asciicast2gif='docker run --rm -v $PWD:/data asciinema/asciicast2gif'
 alias audiofix="sudo kill -9 `ps ax | grep 'coreaudiod' | grep -v grep | awk '{print $1}'`"
 alias badkarma='/opt/badKarma/badkarma.py &'
 alias btfix='blueutil -p 0 && sleep 1 && blueutil -p 1'
-alias bubu='brew update; brew upgrade; brew doctor; brew cleanup'
+alias bubu='brew update; brew upgrade; brew cleanup --prune; brew doctor'
 alias cgrep="grep --color=always"
 alias classc="grepip | cut -d '.' -f 1-3 | sed -e 's#\$#.0/24#g' | sort -Vu"
 alias clipsort="pbpaste | sort -Vu | pbcopy"
