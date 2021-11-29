@@ -44,8 +44,6 @@ source ~/dotfiles/.zsh.functions
 bindkey '^[[A' history-substring-search-up
 bindkey '^[[B' history-substring-search-down
 
-[ -f ~/.fzf.zsh ] && source ~/.fzf.zsh
-
 # Enable autocompletion
 autoload -Uz compinit
 compinit
