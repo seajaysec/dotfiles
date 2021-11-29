@@ -258,3 +258,9 @@ az_all_spns(){
 az_one_spn(){
   az ad sp list --output=table --display-name='$1'
 }
+
+tm(){
+  if [ -z "$TMUX" ]; then
+  exec tmux new-session -A -s mac
+fi
+}
