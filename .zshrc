@@ -71,7 +71,7 @@ POWERLEVEL9K_HISTORY_BACKGROUND='clear'
 # POWERLEVEL9K_HISTORY_FOREGROUND='white'
 POWERLEVEL9K_LEFT_PROMPT_ELEMENTS=(dir dir_writable_joined virtualenv anaconda pyenv)
 POWERLEVEL9K_TIME_FORMAT="%D{%H:%M:%S • %d.%m.%y}"
-POWERLEVEL9K_RIGHT_PROMPT_ELEMENTS=(status history command_execution_time time ip)
+POWERLEVEL9K_RIGHT_PROMPT_ELEMENTS=(status time ip)
 
 plugins=(tmux history-substring-search git colored-man-pages colorize fast-syntax-highlighting autoupdate command-not-found cp emoji man nmap sublime sudo vi-mode vim-interaction zsh-autosuggestions autoswitch_virtualenv you-should-use $plugins)
 
