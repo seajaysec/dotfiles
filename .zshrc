@@ -27,6 +27,7 @@ export LANG=en_US.UTF-8
 export ARCHFLAGS="-arch x86_64"
 export FZF_DEFAULT_COMMAND='rg --hidden --no-ignore -l ""'
 
+ZSH_THEME="powerlevel10k/powerlevel10k"
 
 
 plugins=(tmux history-substring-search git colored-man-pages colorize fast-syntax-highlighting autoupdate command-not-found cp emoji man nmap sublime sudo vi-mode vim-interaction zsh-autosuggestions autoswitch_virtualenv you-should-use $plugins)
