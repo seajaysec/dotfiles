@@ -34,12 +34,6 @@ plugins=(tmux history-substring-search git colored-man-pages colorize fast-synta
 ### OMZ Pre-Source Settings
 # Automatic update OMZ without confirmation prompt
 zstyle ':omz:update' mode auto
-# Underscores (_) and hyphens (-) will be interchangeable
-HYPHEN_INSENSITIVE=true
-# Correct command names and filenames passed as arguments? No way, it's annoying.
-ENABLE_CORRECTION=false
-# Prints a red ellipsis to indicate that Zsh is still processing a completion request.
-COMPLETION_WAITING_DOTS=true
 # Quietly update OMZ plugins
 ZSH_CUSTOM_AUTOUPDATE_QUIET="true"
 
@@ -50,6 +44,12 @@ source ~/dotfiles/.zsh.functions
 ### OMZ Post-Source Settings
 # Oh My Zsh automatically sets the title of your terminal. Stopping that with this.
 DISABLE_AUTO_TITLE=true
+# Underscores (_) and hyphens (-) will be interchangeable
+HYPHEN_INSENSITIVE=true
+# Correct command names and filenames passed as arguments? No way, it's annoying.
+ENABLE_CORRECTION=false
+# Prints a red ellipsis to indicate that Zsh is still processing a completion request.
+COMPLETION_WAITING_DOTS=true
 
 bindkey '^[[A' history-substring-search-up
 bindkey '^[[B' history-substring-search-down
