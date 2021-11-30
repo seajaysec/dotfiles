@@ -36,7 +36,7 @@ plugins=(tmux history-substring-search git colored-man-pages colorize fast-synta
 zstyle ':omz:update' mode auto
 # Underscores (_) and hyphens (-) will be interchangeable
 HYPHEN_INSENSITIVE=true
-# Correct command names and filenames passed as arguments
+# Correct command names and filenames passed as arguments? No way, it's annoying.
 ENABLE_CORRECTION=false
 # Prints a red ellipsis to indicate that Zsh is still processing a completion request
 COMPLETION_WAITING_DOTS=true
