@@ -38,6 +38,7 @@ zstyle ':omz:update' mode auto
 HYPHEN_INSENSITIVE=true
 # Correct command names and filenames passed as arguments
 ENABLE_CORRECTION=true
+# Prints a red ellipsis to indicate that Zsh is still processing a completion reques
 COMPLETION_WAITING_DOTS=true
 DISABLE_AUTO_TITLE=true
 # Quietly update OMZ plugins
