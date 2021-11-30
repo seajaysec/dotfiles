@@ -5,8 +5,6 @@ if [[ -r "${XDG_CACHE_HOME:-$HOME/.cache}/p10k-instant-prompt-${(%):-%n}.zsh" ]]
   source "${XDG_CACHE_HOME:-$HOME/.cache}/p10k-instant-prompt-${(%):-%n}.zsh"
 fi
 
-# Automatic update OMZ without confirmation prompt
-zstyle ':omz:update' mode auto
 export ZSH=~/.oh-my-zsh
 export EDITOR=vim
 export VISUAL=vim
@@ -33,9 +31,13 @@ ZSH_THEME="powerlevel10k/powerlevel10k"
 
 plugins=(tmux history-substring-search git colored-man-pages colorize fast-syntax-highlighting autoupdate command-not-found cp emoji man nmap sublime sudo vi-mode vim-interaction zsh-autosuggestions autoswitch_virtualenv you-should-use $plugins)
 
-ENABLE_CORRECTION="false"
-COMPLETION_WAITING_DOTS="false"
-DISABLE_AUTO_TITLE="true"
+### OMZ Settings
+# Automatic update OMZ without confirmation prompt
+zstyle ':omz:update' mode auto
+HYPHEN_INSENSITIVE=true
+ENABLE_CORRECTION=false
+COMPLETION_WAITING_DOTS=false
+DISABLE_AUTO_TITLE=true
 # Quietly update OMZ plugins
 ZSH_CUSTOM_AUTOUPDATE_QUIET="true"
 
