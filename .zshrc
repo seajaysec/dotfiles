@@ -38,8 +38,9 @@ zstyle ':omz:update' mode auto
 HYPHEN_INSENSITIVE=true
 # Correct command names and filenames passed as arguments
 ENABLE_CORRECTION=true
-# Prints a red ellipsis to indicate that Zsh is still processing a completion reques
+# Prints a red ellipsis to indicate that Zsh is still processing a completion request
 COMPLETION_WAITING_DOTS=true
+# Oh My Zsh automatically sets the title of your terminal. Stopping that with this.
 DISABLE_AUTO_TITLE=true
 # Quietly update OMZ plugins
 ZSH_CUSTOM_AUTOUPDATE_QUIET="true"
