@@ -37,7 +37,6 @@ zstyle ':omz:update' mode auto
 # Underscores (_) and hyphens (-) will be interchangeable
 HYPHEN_INSENSITIVE=true
 ENABLE_CORRECTION=true
-ENABLE_CORRECTION=false
 COMPLETION_WAITING_DOTS=false
 DISABLE_AUTO_TITLE=true
 # Quietly update OMZ plugins
