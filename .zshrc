@@ -5,7 +5,7 @@ if [[ -r "${XDG_CACHE_HOME:-$HOME/.cache}/p10k-instant-prompt-${(%):-%n}.zsh" ]]
   source "${XDG_CACHE_HOME:-$HOME/.cache}/p10k-instant-prompt-${(%):-%n}.zsh"
 fi
 
-# Automatic update OMZ without confirmation prompt:
+# Automatic update OMZ without confirmation prompt
 zstyle ':omz:update' mode auto
 export ZSH=~/.oh-my-zsh
 export EDITOR=vim
