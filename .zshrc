@@ -35,6 +35,7 @@ plugins=(tmux history-substring-search git colored-man-pages colorize fast-synta
 # Automatic update OMZ without confirmation prompt
 zstyle ':omz:update' mode auto
 HYPHEN_INSENSITIVE=true
+ENABLE_CORRECTION=true
 ENABLE_CORRECTION=false
 COMPLETION_WAITING_DOTS=false
 DISABLE_AUTO_TITLE=true
