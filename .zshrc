@@ -36,6 +36,7 @@ plugins=(tmux history-substring-search git colored-man-pages colorize fast-synta
 zstyle ':omz:update' mode auto
 # Underscores (_) and hyphens (-) will be interchangeable
 HYPHEN_INSENSITIVE=true
+# Correct command names and filenames passed as arguments
 ENABLE_CORRECTION=true
 COMPLETION_WAITING_DOTS=false
 DISABLE_AUTO_TITLE=true
