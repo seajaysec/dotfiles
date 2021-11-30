@@ -38,7 +38,7 @@ zstyle ':omz:update' mode auto
 HYPHEN_INSENSITIVE=true
 # Correct command names and filenames passed as arguments
 ENABLE_CORRECTION=true
-COMPLETION_WAITING_DOTS=false
+COMPLETION_WAITING_DOTS=true
 DISABLE_AUTO_TITLE=true
 # Quietly update OMZ plugins
 ZSH_CUSTOM_AUTOUPDATE_QUIET="true"
