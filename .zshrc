@@ -34,6 +34,7 @@ plugins=(tmux history-substring-search git colored-man-pages colorize fast-synta
 ### OMZ Settings
 # Automatic update OMZ without confirmation prompt
 zstyle ':omz:update' mode auto
+# Underscores (_) and hyphens (-) will be interchangeable
 HYPHEN_INSENSITIVE=true
 ENABLE_CORRECTION=true
 ENABLE_CORRECTION=false
