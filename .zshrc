@@ -36,6 +36,7 @@ plugins=(tmux history-substring-search git colored-man-pages colorize fast-synta
 ENABLE_CORRECTION="false"
 COMPLETION_WAITING_DOTS="false"
 DISABLE_AUTO_TITLE="true"
+# Quietly update OMZ plugins
 ZSH_CUSTOM_AUTOUPDATE_QUIET="true"
 
 source $ZSH/oh-my-zsh.sh
