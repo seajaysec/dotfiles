@@ -131,6 +131,7 @@ alias reinstall='apt install --reinstall -y'
 alias rmenv='sudo rm -rf env_*'
 alias ruler='go run ruler.go'
 alias sar='grc sar'
+alias sd='sudo '
 alias semanage='grc semanage'
 alias sensors='grc sensors'
 alias showBlocked='sudo ipfw list'                  # showBlocked:  All ipfw rules inc/ blocked IPs
