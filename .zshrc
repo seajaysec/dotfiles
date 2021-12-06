@@ -26,9 +26,9 @@ export LESS=" -R"
 export LANG=en_US.UTF-8
 export ARCHFLAGS="-arch x86_64"
 export FZF_DEFAULT_COMMAND='rg --hidden --no-ignore -l ""'
+export HOMEBREW_NO_ENV_HINTS=1
 
 ZSH_THEME="powerlevel10k/powerlevel10k"
-export HOMEBREW_NO_ENV_HINTS=1
 
 plugins=(tmux history-substring-search git colored-man-pages colorize fast-syntax-highlighting autoupdate command-not-found cp emoji man nmap sublime sudo vi-mode vim-interaction zsh-autosuggestions autoswitch_virtualenv you-should-use $plugins)
 
@@ -36,7 +36,7 @@ plugins=(tmux history-substring-search git colored-man-pages colorize fast-synta
 # Automatic update OMZ without confirmation prompt
 zstyle ':omz:update' mode auto
 # Quietly update OMZ plugins
-ZSH_CUSTOM_AUTOUPDATE_QUIET=1
+ZSH_CUSTOM_AUTOUPDATE_QUIET=true
 
 source $ZSH/oh-my-zsh.sh
 source ~/dotfiles/.zsh.aliases
