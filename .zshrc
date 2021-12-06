@@ -36,7 +36,7 @@ plugins=(tmux history-substring-search git colored-man-pages colorize fast-synta
 # Automatic update OMZ without confirmation prompt
 zstyle ':omz:update' mode auto
 # Quietly update OMZ plugins
-ZSH_CUSTOM_AUTOUPDATE_QUIET="true"
+ZSH_CUSTOM_AUTOUPDATE_QUIET=1
 
 source $ZSH/oh-my-zsh.sh
 source ~/dotfiles/.zsh.aliases
