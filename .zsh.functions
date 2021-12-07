@@ -27,7 +27,10 @@ az_one_spn(){
 }
 
 az_user_upn(){
-  az ad user list --output=json --query='[].{Created:createdDateTime,UPN:userPrincipalName,Name:displayName,Title:jobTitle,Department:department,Email:mail,UserId:mailNickname,Phone:telephoneNumber,Mobile:mobile,Enabled:accountEnabled}' --upn='$1'
+  az ad user list --output=json \
+  --query='[].{Created:createdDateTime,UPN:userPrincipalName,Name:displayName,\
+  Title:jobTitle,Department:department,Email:mail,UserId:mailNickname,Phone:telephoneNumber,\
+  Mobile:mobile,Enabled:accountEnabled}' --upn='$1'
 }
 
 cd() { builtin cd "$@"; ls; }
