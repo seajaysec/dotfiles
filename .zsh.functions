@@ -168,11 +168,13 @@ sessionid(){
 }
 
 subdirexec() {
-    find . -maxdepth 1 -type d \( ! -name . \) -exec bash -c "cd '{}' && pwd && $1 && echo 'success'" \;
+    find . -maxdepth 1 -type d \( ! -name . \)\
+    -exec bash -c "cd '{}' && pwd && $1 && echo 'success'" \;
 }
 
 subdirgitadd() {
-    find . -maxdepth 1 -type d \( ! -name . \) -exec bash -c "cd '{}' && pwd && git add -u && echo 'success'" \;
+    find . -maxdepth 1 -type d \( ! -name . \)\
+    -exec bash -c "cd '{}' && pwd && git add -u && echo 'success'" \;
 }
 
 unroll() {
