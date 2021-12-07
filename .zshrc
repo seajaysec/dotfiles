@@ -5,38 +5,38 @@ if [[ -r "${XDG_CACHE_HOME:-$HOME/.cache}/p10k-instant-prompt-${(%):-%n}.zsh" ]]
   source "${XDG_CACHE_HOME:-$HOME/.cache}/p10k-instant-prompt-${(%):-%n}.zsh"
 fi
 
-export ZSH = ~/.oh-my-zsh
-export EDITOR = vim
-export VISUAL = vim
-export GREP_OPTIONS = '--color = always'
-export ACK_PAGER_COLOR = "{$PAGER:-less -R}"
-export MONO_GAC_PREFIX = "/usr/local"
-export PATH = /usr/local/bin:$PATH
-export PATH = /usr/local/sbin:/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin:$PATH
-export PATH = ~/.local/bin:$PATH
-export PATH = ~/.npm-packages/bin:$PATH
-export PATH = ~/.npm-packages/lib/node_modules/n/bin:$PATH
-export PATH = /usr/local/sbin:$PATH
-export PATH = /bin/lscript:$PATH
-export GOPATH = $HOME/go$GOPATH
-export MANPATH = /usr/local/man:$MANPATH
-export TERM = xterm-256color
-export LESSOPEN = "| $(which highlight) %s --out-format xterm256 --line-numbers --quiet --force --style moria"
-export LESS = " -R"
-export LANG = en_US.UTF-8
-export ARCHFLAGS = "-arch x86_64"
-export FZF_DEFAULT_COMMAND = 'rg --hidden --no-ignore -l ""'
-export HOMEBREW_NO_ENV_HINTS = 1
+export ZSH=~/.oh-my-zsh
+export EDITOR=vim
+export VISUAL=vim
+export GREP_OPTIONS='--color=always'
+export ACK_PAGER_COLOR="{$PAGER:-less -R}"
+export MONO_GAC_PREFIX="/usr/local"
+export PATH=/usr/local/bin:$PATH
+export PATH=/usr/local/sbin:/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin:$PATH
+export PATH=~/.local/bin:$PATH
+export PATH=~/.npm-packages/bin:$PATH
+export PATH=~/.npm-packages/lib/node_modules/n/bin:$PATH
+export PATH=/usr/local/sbin:$PATH
+export PATH=/bin/lscript:$PATH
+export GOPATH=$HOME/go$GOPATH
+export MANPATH=/usr/local/man:$MANPATH
+export TERM=xterm-256color
+export LESSOPEN="| $(which highlight) %s --out-format xterm256 --line-numbers --quiet --force --style moria"
+export LESS=" -R"
+export LANG=en_US.UTF-8
+export ARCHFLAGS="-arch x86_64"
+export FZF_DEFAULT_COMMAND='rg --hidden --no-ignore -l ""'
+export HOMEBREW_NO_ENV_HINTS=1
 
-ZSH_THEME = "powerlevel10k/powerlevel10k"
+ZSH_THEME="powerlevel10k/powerlevel10k"
 
-plugins = (tmux history-substring-search git colored-man-pages colorize fast-syntax-highlighting autoupdate command-not-found cp emoji man nmap sublime sudo vi-mode vim-interaction zsh-autosuggestions autoswitch_virtualenv you-should-use $plugins)
+plugins=(tmux history-substring-search git colored-man-pages colorize fast-syntax-highlighting autoupdate command-not-found cp emoji man nmap sublime sudo vi-mode vim-interaction zsh-autosuggestions autoswitch_virtualenv you-should-use $plugins)
 
 ### OMZ Pre-Source Settings
 # Automatic update OMZ without confirmation prompt
 zstyle ':omz:update' mode auto
 # Quietly update OMZ plugins
-ZSH_CUSTOM_AUTOUPDATE_QUIET  =  true
+ZSH_CUSTOM_AUTOUPDATE_QUIET = true
 
 source $ZSH/oh-my-zsh.sh
 source ~/dotfiles/.zsh.aliases
@@ -44,13 +44,13 @@ source ~/dotfiles/.zsh.functions
 
 ### OMZ Post-Source Settings
 # Oh My Zsh automatically sets the title of your terminal. Stopping that with this.
-DISABLE_AUTO_TITLE  =  true
+DISABLE_AUTO_TITLE = true
 # Underscores (_) and hyphens (-) will be interchangeable
-HYPHEN_INSENSITIVE  =  true
+HYPHEN_INSENSITIVE = true
 # Correct command names and filenames passed as arguments? No way, it's annoying.
-ENABLE_CORRECTION  =  false
+ENABLE_CORRECTION = false
 # Prints a red ellipsis to indicate that Zsh is still processing a completion request.
-COMPLETION_WAITING_DOTS  =  true
+COMPLETION_WAITING_DOTS = true
 
 bindkey '^[[A' history-substring-search-up
 bindkey '^[[B' history-substring-search-down
