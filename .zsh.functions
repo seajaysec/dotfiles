@@ -1,9 +1,12 @@
 az_all_spns(){
-  az ad sp list --output=table --query='[].{Name:displayName,Enabled:accountEnabled,URL:homepage,Publisher:publisherName,MetadataURL:samlMetadataUrl}'
+  az ad sp list --output=table --query='[].{Name:displayName,Enabled:accountEnabled,\
+  URL:homepage,Publisher:publisherName,MetadataURL:samlMetadataUrl}'
 }
 
 az_all_users(){
-  az ad user list --output=table --query='[].{Created:createdDateTime,UPN:userPrincipalName,Name:displayName,Title:jobTitle,Department:department,Email:mail,UserId:mailNickname,Phone:telephoneNumber,Mobile:mobile,Enabled:accountEnabled}'
+  az ad user list --output=table --query='[].{Created:createdDateTime,UPN:userPrincipalName,Name:displayName,\
+  Title:jobTitle,Department:department,Email:mail,UserId:mailNickname,Phone:telephoneNumber,\
+  Mobile:mobile,Enabled:accountEnabled}'
 }
 
 az_dump_apps(){
@@ -11,7 +14,10 @@ az_dump_apps(){
 }
 
 az_dump_group_members(){
-  az ad group member list --output=json --query='[].{Created:createdDateTime,UPN:userPrincipalName,Name:displayName,Title:jobTitle,Department:department,Email:mail,UserId:mailNickname,Phone:telephoneNumber,Mobile:mobile,Enabled:accountEnabled}' --group='$1'
+  az ad group member list --output=json \
+  --query='[].{Created:createdDateTime,UPN:userPrincipalName,Name:displayName,\
+  Title:jobTitle,Department:department,Email:mail,UserId:mailNickname,Phone:telephoneNumber,\
+  Mobile:mobile,Enabled:accountEnabled}' --group='$1'
 }
 
 az_dump_groups(){
