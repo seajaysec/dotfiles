@@ -37,7 +37,7 @@ echo "${yellow}==>${reset} Running Updates..."
 brew update 2>&1
 brew outdated 2>&1
 brew upgrade 2>&1
-brew cleanup -s 2>&1
+brew cleanup --prune=1 -s 2>&1
 echo "${green}==>${reset} Finished Updates"
 
 ## Brew Diagnotic
