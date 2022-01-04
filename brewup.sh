@@ -42,7 +42,7 @@ echo "${green}==>${reset} Finished Updates"
 
 ## Brew Diagnotic
 echo "${yellow}==>${reset} Running Brew Diagnotic..."
-brew doctor 2>&1
+brew doctor
 brew missing 2>&1
 echo -e "${green}==>${reset} Brew Diagnotic Finished."
 
