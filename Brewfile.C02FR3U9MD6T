@@ -64,7 +64,7 @@ brew "lua"
 brew "mapcidr"
 brew "mas"
 brew "mp3wrap"
-brew "neo4j"
+brew "neo4j", link: false
 brew "nmap"
 brew "node"
 brew "poetry"
