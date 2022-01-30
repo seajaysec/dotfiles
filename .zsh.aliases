@@ -60,7 +60,7 @@ alias gitstash='for d in ./*/ ; do (cd "$d" && git stash); done'
 alias gitup='find . -type d -depth 1 -exec git --git-dir={}/.git --work-tree=$PWD/{} pull origin master \;'
 alias gmake='grc gmake'
 alias go='grc go'
-alias grepeml='grep -E -o "\b[a-zA-Z0-9.-]+@[a-zA-Z0-9.-]+\.[a-zA-Z0-9.-]+\b"'
+alias grepeml='grep -Eo "\b[a-zA-Z0-9.-]+@[a-zA-Z0-9.-]+\.[a-zA-Z0-9.-]+\b"'
 alias grepip="grep -Eo '\b((([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])(\.)){3}([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5]))\b'"
 alias g++='grc g++'
 alias https='http --default-scheme=https'
