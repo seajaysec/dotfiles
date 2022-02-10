@@ -1,3 +1,4 @@
+tap "buo/cask-upgrade"
 tap "homebrew/bundle"
 tap "homebrew/cask"
 tap "homebrew/cask-drivers"
@@ -64,7 +65,7 @@ brew "lua"
 brew "mapcidr"
 brew "mas"
 brew "mp3wrap"
-brew "neo4j"
+brew "neo4j", link: false
 brew "nmap"
 brew "node"
 brew "poetry"
