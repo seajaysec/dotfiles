@@ -18,7 +18,6 @@ export PATH=~/.npm-packages/bin:$PATH
 export PATH=~/.npm-packages/lib/node_modules/n/bin:$PATH
 export PATH=/usr/local/sbin:$PATH
 export PATH=/bin/lscript:$PATH
-export GOPATH=$HOME/go$GOPATH
 export MANPATH=/usr/local/man:$MANPATH
 export TERM=xterm-256color
 export LESSOPEN="| $(which highlight) %s --out-format xterm256 --line-numbers --quiet --force --style moria"
@@ -27,6 +26,11 @@ export LANG=en_US.UTF-8
 export ARCHFLAGS="-arch x86_64"
 export FZF_DEFAULT_COMMAND='rg --hidden --no-ignore -l ""'
 export HOMEBREW_NO_ENV_HINTS=1
+# Golang vars
+export GOROOT=/usr/local/go
+export GOPATH=$HOME/go
+export PATH=$GOPATH/bin:$GOROOT/bin:$HOME/.local/bin:$PATH
+
 
 ZSH_THEME="powerlevel10k/powerlevel10k"
 
@@ -65,7 +69,3 @@ compinit
 [[ ! -f ~/.p10k.zsh ]] || source ~/.p10k.zsh
 [ -f ~/.fzf.zsh ] && source ~/.fzf.zsh
 
-# Golang vars
-export GOROOT=/usr/local/go
-export GOPATH=$HOME/go
-export PATH=$GOPATH/bin:$GOROOT/bin:$HOME/.local/bin:$PATH
