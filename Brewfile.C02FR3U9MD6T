@@ -50,7 +50,7 @@ brew "gd"
 brew "gnu-sed"
 brew "gtk+3"
 brew "gnumeric"
-brew "go"
+brew "go", link: false
 brew "gradle"
 brew "grepcidr"
 brew "httpie"
@@ -142,6 +142,7 @@ mas "Pocket", id: 568494494
 mas "Readder", id: 1484944100
 mas "Reeder", id: 1529448980
 mas "StopTheMadness", id: 1376402589
+mas "Strongbox", id: 1270075435
 mas "ToothFairy", id: 1191449274
 mas "Tweaks for Reddit", id: 1524828965
 mas "Tweetbot", id: 1384080005
