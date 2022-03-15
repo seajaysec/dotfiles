@@ -45,6 +45,7 @@ ZSH_CUSTOM_AUTOUPDATE_QUIET=true
 source $ZSH/oh-my-zsh.sh
 source ~/dotfiles/.zsh.aliases
 source ~/dotfiles/.zsh.functions
+source ~/secrets.sh
 
 ### OMZ Post-Source Settings
 # Oh My Zsh automatically sets the title of your terminal. Stopping that with this.

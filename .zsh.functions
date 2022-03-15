@@ -57,6 +57,16 @@ cidr2ip() {
   echo '\n' $cdrc 'IPs'
 }
 
+cisa() {
+  cisa_csv=$(curl -s https://www.cisa.gov/sites/default/files/csv/known_exploited_vulnerabilities.csv)
+  cisa_cve=$(echo $cisa_csv | tail -n +2 | cut -d ',' -f 1 | sort -Vu | sed -e 's/^/"/;s/$/",/' | tr '\n' ' ' | sed 's/.\{2\}$//')
+  echo "\nCVE List: "
+  echo $cisa_csv
+  echo "\nCVE Count: "
+  echo $cisa_csv | wc -l
+  echo $cisa_cve | pbcopy
+}
+
 clipboard(){ 
 if command -v xclip 1>/dev/null; then
     if [[ -p /dev/stdin ]] ; then
@@ -133,6 +143,10 @@ mcd() {
 # cwd_tmp=`sudo echo 'env_'"${PWD##*/}"`
 # sudo python3 -m venv $cwd_tmp
 # }
+
+md5s() {
+  sed '' '$a\' | while read line; do echo $line | md5sum | echo $line "," | awk '{print $1}'; done
+}
 
 mountshares(){
   vmware-hgfsclient | while read folder; do
