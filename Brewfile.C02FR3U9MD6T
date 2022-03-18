@@ -50,7 +50,7 @@ brew "gd"
 brew "gnu-sed"
 brew "gtk+3"
 brew "gnumeric"
-brew "go", link: false
+brew "go"
 brew "gradle"
 brew "grepcidr"
 brew "httpie"
