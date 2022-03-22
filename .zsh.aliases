@@ -163,5 +163,6 @@ alias vmstat='grc vmstat'
 alias wdiff='grc wdiff'
 alias whois='grc whois'
 alias who='grc who'
+alias xargs='xargs '
 alias zshconfig="code ~/.zshrc"
 alias zshrefresh='source ~/.zshrc'
