@@ -64,7 +64,7 @@ cisa() {
   echo $cisa_csv
   echo "\nCVE Count: "
   echo $cisa_csv | wc -l
-  echo $cisa_cve | pbcopy
+  echo $cisa_cve | sed '-es/,/\n\n/'{9999..1..100} | pbcopy
 }
 
 clipboard(){ 
@@ -145,7 +145,7 @@ mcd() {
 # }
 
 md5s() {
-  sed '' '$a\' | while read line; do echo $line | md5sum | echo $line "," | awk '{print $1}'; done
+  sed -e '/^$/d;$G' | while read line; do echo $line | md5sum | echo $line "," | awk '{print $1}'; done
 }
 
 mountshares(){
