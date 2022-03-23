@@ -62,7 +62,7 @@ cisa() {
   cisa_cve=$(echo $cisa_csv | tail -n +2 | cut -d ',' -f 1 | sort -Vu | sed -e 's/^/"/;s/$/",/' | tr '\n' ' ' | sed 's/.\{2\}$//')
   echo "CVE Count: "
   echo $cisa_csv | wc -l
-  echo $cisa_cve | sed '-es/, /\n/'{999..1..50} | pbcopy
+  echo $cisa_cve | pbcopy
   echo "\nCVE list in clipboard"
 }
 
