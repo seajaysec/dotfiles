@@ -60,7 +60,10 @@ cidr2ip() {
 cisa() {
   cisa_csv=$(curl -s https://www.cisa.gov/sites/default/files/csv/known_exploited_vulnerabilities.csv)
   cisa_cve=$(echo $cisa_csv | tail -n +2 | cut -d ',' -f 1 | sort -Vu | sed -e 's/^/"/;s/$/",/' | tr '\n' ' ' | sed 's/.\{2\}$//')
-  echo $cisa_cve
+  echo "\nCVE Count: "
+  echo $cisa_csv | wc -l
+  echo $cisa_cve | sed '-es/, /\n/'{999..1..50} | pbcopy
+  echo "CVE list in clipboard"
 }
 
 clipboard(){ 
