@@ -46,7 +46,7 @@ alias fix_stty='stty sane'                  # fix_stty:     Restore terminal set
 alias flushDNS='dscacheutil -flushcache'            # flushDNS:     Flush out the DNS Cache
 alias free='grc free'
 alias ftf='fzf-tmux'
-alias fzf='fzf --color=light'
+alias fzf='fzf --color=dark'
 alias f='open -a Finder ./'
 alias gaf='git add -f'
 alias gas='grc gas'
