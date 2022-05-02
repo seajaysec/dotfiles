@@ -57,7 +57,7 @@ brew "grepcidr"
 brew "httpie"
 brew "imagemagick"
 brew "ipcalc"
-brew "ipython"
+brew "ipython", link: false
 brew "isort"
 brew "jq"
 brew "krb5"
