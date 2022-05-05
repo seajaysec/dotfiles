@@ -42,6 +42,7 @@ alias fdisk='grc fdisk'
 alias fff='find / -type f -iname $1 2>/dev/null'
 alias fhf='history | ftf'
 alias findmnt='grc findmnt'
+alias firefox='/Applications/Firefox.app/Contents/MacOS/firefox'
 alias fix_stty='stty sane'                  # fix_stty:     Restore terminal settings when screwed up
 alias flushDNS='dscacheutil -flushcache'            # flushDNS:     Flush out the DNS Cache
 alias free='grc free'
