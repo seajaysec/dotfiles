@@ -10,7 +10,7 @@ tap "osx-cross/avr"
 tap "qmk/qmk"
 brew "adns"
 brew "sqlite"
-brew "python@3.9"
+brew "python@3.9", link: false
 brew "glib"
 brew "cairo"
 brew "jpeg"
