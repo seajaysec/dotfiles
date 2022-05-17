@@ -71,7 +71,7 @@ brew "mapcidr"
 brew "mas"
 brew "mint"
 brew "mp3wrap"
-brew "neo4j"
+brew "neo4j", link: false
 brew "nmap"
 brew "node"
 brew "pdfgrep"
@@ -146,6 +146,7 @@ cask "unshaky"
 cask "visual-studio-code"
 cask "vmware-fusion"
 cask "wireshark"
+cask "xquartz"
 mas "1Password for Safari", id: 1569813296
 mas "Dark Reader for Safari", id: 1438243180
 mas "FuzzyTime", id: 950297057
