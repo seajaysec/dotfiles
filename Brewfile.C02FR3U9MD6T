@@ -73,7 +73,7 @@ brew "mint"
 brew "mp3wrap"
 brew "neo4j", link: false
 brew "nmap"
-brew "node"
+brew "node", link: false
 brew "pdfgrep"
 brew "poetry"
 brew "py3cairo"
