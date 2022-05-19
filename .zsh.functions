@@ -143,8 +143,11 @@ mcd() {
 # sudo python3 -m venv $cwd_tmp
 # }
 
-md5s() {
-  sed -e '/^$/d;$G' | while read line; do echo $line | md5sum | echo $line "," | awk '{print $1}'; done
+md5list () {
+  while read -r line || [ -n "$line" ]
+  do
+    echo -n $line | md5
+  done
 }
 
 mountshares(){
