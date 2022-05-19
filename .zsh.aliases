@@ -57,10 +57,6 @@ alias getJSON='curl -i -H "Accept: application/json" -H "Content-Type: applicati
 alias getXML='curl -H "Accept: application/xml" -H "Content-Type: application/xml" -X GET'
 alias getfacl='grc getfacl'
 alias getsebool='grc getsebool'
-alias gitallsecrets="docker run --rm -it abhartiya/tools_gitallsecrets "
-alias gitstashup='gitstash && gitup'
-alias gitstash='for d in ./*/ ; do (cd "$d" && git stash); done'
-alias gitup='find . -type d -depth 1 -exec git --git-dir={}/.git --work-tree=$PWD/{} pull origin master \;'
 alias gmake='grc gmake'
 alias grepeml='grep -Eo "\b[a-zA-Z0-9.-]+@[a-zA-Z0-9.-]+\.[a-zA-Z0-9.-]+\b"'
 alias grepip="grep -Eo '\b((([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])(\.)){3}([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5]))\b'"
