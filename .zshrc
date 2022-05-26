@@ -34,7 +34,7 @@ export PATH=$GOPATH/bin:$GOROOT/bin:$HOME/.local/bin:$PATH
 
 ZSH_THEME="powerlevel10k/powerlevel10k"
 
-plugins=(tmux history-substring-search git colored-man-pages colorize fast-syntax-highlighting autoupdate command-not-found cp emoji man nmap sublime sudo vi-mode vim-interaction zsh-autosuggestions autoswitch_virtualenv you-should-use $plugins)
+plugins=(tmux history-substring-search git colored-man-pages colorize F-Sy-H autoupdate command-not-found cp emoji man nmap sublime sudo vi-mode vim-interaction zsh-autosuggestions autoswitch_virtualenv you-should-use $plugins)
 
 ### OMZ Pre-Source Settings
 # Automatic update OMZ without confirmation prompt
