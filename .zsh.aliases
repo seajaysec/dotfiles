@@ -2,6 +2,7 @@ alias ant='grc ant'
 alias anything='grc anything'
 alias apache='grc apache'
 alias apy='apt install -y'
+alias archey='neofetch'
 alias asciicast2gif='docker run --rm -v $PWD:/data asciinema/asciicast2gif'
 alias as='grc as'
 alias audiofix="sudo kill -9 `ps ax | grep 'coreaudiod' | grep -v grep | awk '{print $1}'`"
@@ -110,7 +111,6 @@ alias myip='curl ip.appspot.com'                    # myip:         Public facin
 alias mysudo='sudo -E env "PATH=$PATH"'
 alias ncat='rlwrap ncat'
 alias nc='rlwrap nc'
-alias neofetch='neofetch --ascii_colors 6'
 alias netCons='lsof -i'                             # netCons:      Show all open TCP/IP sockets
 alias netminer="mono --arch=32 /opt/NetworkMiner_2-3-1/NetworkMiner.exe &"
 alias netstat='grc netstat'
