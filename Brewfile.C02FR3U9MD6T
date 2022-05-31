@@ -19,7 +19,6 @@ brew "pango"
 brew "aom"
 brew "apr"
 brew "apr-util"
-brew "archey"
 brew "argon2"
 brew "libssh2"
 brew "aria2"
@@ -72,6 +71,7 @@ brew "mas"
 brew "mint"
 brew "mp3wrap"
 brew "neo4j"
+brew "neofetch"
 brew "nmap"
 brew "node"
 brew "pdfgrep"
@@ -164,7 +164,6 @@ mas "Pocket", id: 568494494
 mas "Readder", id: 1484944100
 mas "Reeder", id: 1529448980
 mas "Simplefax", id: 1165017252
-mas "StopTheMadness", id: 1376402589
 mas "Strongbox", id: 1270075435
 mas "ToothFairy", id: 1191449274
 mas "Tweaks for Reddit", id: 1524828965
