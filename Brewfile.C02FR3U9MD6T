@@ -76,7 +76,7 @@ brew "neofetch"
 brew "nmap"
 brew "node"
 brew "pdfgrep"
-brew "poetry"
+brew "poetry", link: false
 brew "py3cairo"
 brew "pyenv"
 brew "pyenv-virtualenv"
@@ -154,7 +154,6 @@ cask "xquartz"
 mas "1Password for Safari", id: 1569813296
 mas "Dark Reader for Safari", id: 1438243180
 mas "FuzzyTime", id: 950297057
-mas "Honey", id: 1472777122
 mas "Keystroke Pro", id: 1572206224
 mas "Magnet", id: 441258766
 mas "MindNode", id: 1289197285
@@ -162,6 +161,7 @@ mas "Msg Viewer Pro", id: 1019539949
 mas "MusicHarbor", id: 1440405750
 mas "NepTunes", id: 1006739057
 mas "Paste Plain Text", id: 1407015686
+mas "PayPal Honey", id: 1472777122
 mas "Pixelmator Pro", id: 1289583905
 mas "Pocket", id: 568494494
 mas "Readder", id: 1484944100
