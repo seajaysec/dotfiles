@@ -6,11 +6,6 @@ if [ $(arch) = "arm64" ]; then
   export PATH="/opt/homebrew/bin:/opt/homebrew/sbin:$PATH"
 fi
 
-## Fix for brew doctor warnings if using pyenv
-if which pyenv >/dev/null 2>&1; then
-  brew='env PATH=${PATH//$(pyenv root)\/shims:/} brew'
-fi
-
 ## checks if mas, terminal-notifier are installed, if not will promt to install
 if [ -z $(which mas) ]; then
   brew install mas 2>/dev/null
@@ -32,9 +27,6 @@ cd $(dirname "$(realpath "$0")")
 
 git pull 2>&1
 
-## Fix potential tap issues
-brew tap --repair
-
 ## Brew packages update and cleanup
 echo "${yellow}==>${reset} Running Updates..."
 brew update 2>&1
@@ -42,15 +34,6 @@ brew outdated 2>&1
 brew upgrade 2>&1
 brew cleanup --prune=1 -s 2>&1
 echo "${green}==>${reset} Finished Updates"
-
-## Brew Diagnotic
-echo "${yellow}==>${reset} Running Brew Diagnotic..."
-brew doctor
-brew missing 2>&1
-echo -e "${green}==>${reset} Brew Diagnotic Finished."
-
-## Link all unlinked kegs
-brew list -1 | while read line; do brew unlink $line; brew link $line; done
 
 ## Creating Dump File with hostname
 brew bundle dump --force --file="./${brewFileName}"
