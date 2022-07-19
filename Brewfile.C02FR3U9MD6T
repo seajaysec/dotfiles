@@ -72,7 +72,7 @@ brew "mapcidr"
 brew "mas"
 brew "mint"
 brew "mp3wrap"
-brew "neo4j", link: false
+brew "neo4j"
 brew "neofetch"
 brew "nmap"
 brew "node"
