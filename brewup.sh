@@ -32,6 +32,9 @@ cd $(dirname "$(realpath "$0")")
 
 git pull 2>&1
 
+## Fix potential tap issues
+brew tap --repair
+
 ## Brew packages update and cleanup
 echo "${yellow}==>${reset} Running Updates..."
 brew update 2>&1
@@ -45,6 +48,13 @@ echo "${yellow}==>${reset} Running Brew Diagnotic..."
 brew doctor
 brew missing 2>&1
 echo -e "${green}==>${reset} Brew Diagnotic Finished."
+
+## Link all unlinked kegs
+ls -1 /usr/local/Library/LinkedKegs | while read line; do
+    echo $line
+    brew unlink $line
+    brew link --force $line
+done
 
 ## Creating Dump File with hostname
 brew bundle dump --force --file="./${brewFileName}"
