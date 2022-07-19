@@ -50,11 +50,7 @@ brew missing 2>&1
 echo -e "${green}==>${reset} Brew Diagnotic Finished."
 
 ## Link all unlinked kegs
-ls -1 /usr/local/Library/LinkedKegs | while read line; do
-    echo $line
-    brew unlink $line
-    brew link --force $line
-done
+brew list -1 | while read line; do brew unlink $line; brew link $line; done
 
 ## Creating Dump File with hostname
 brew bundle dump --force --file="./${brewFileName}"
