@@ -39,7 +39,7 @@ az_user_upn(){
   Mobile:mobile,Enabled:accountEnabled}' --upn='$1'
 }
 
-brewclean(){
+bcbc(){
 ## Fix for brew doctor warnings if using pyenv
 if which pyenv >/dev/null 2>&1; then
   brew='env PATH=${PATH//$(pyenv root)\/shims:/} brew'
