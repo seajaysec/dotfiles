@@ -54,7 +54,7 @@ brew doctor
 brew missing 2>&1
 echo -e "${green}==>${reset} Brew Diagnotic Finished."
 
-#   ## Link all unlinked kegs
+  ## Link all unlinked kegs
 # brew list -1 | while read line; do brew unlink $line; brew link $line; done
 # }
 
