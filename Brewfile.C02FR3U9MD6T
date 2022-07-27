@@ -155,6 +155,7 @@ cask "xquartz"
 mas "1Password for Safari", id: 1569813296
 mas "Dark Reader for Safari", id: 1438243180
 mas "FuzzyTime", id: 950297057
+mas "Kagi Inc.", id: 1622835804
 mas "Keystroke Pro", id: 1572206224
 mas "Magnet", id: 441258766
 mas "MindNode", id: 1289197285
