@@ -97,7 +97,7 @@ brew "telnet"
 brew "tldr"
 brew "tmux"
 brew "wget"
-brew "wireshark"
+brew "wireshark", link: false
 brew "youtube-dl"
 brew "zsh"
 brew "browsh-org/browsh/browsh"
