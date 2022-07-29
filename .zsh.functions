@@ -44,7 +44,6 @@ bcbc(){
 if which pyenv >/dev/null 2>&1; then
   brew='env PATH=${PATH//$(pyenv root)\/shims:/} brew'
 fi
-}
 
 ## Fix potential tap issues
 brew tap --repair
@@ -57,7 +56,7 @@ echo -e "${green}==>${reset} Brew Diagnotic Finished."
 
   ## Link all unlinked kegs
 # brew list -1 | while read line; do brew unlink $line; brew link $line; done
-# }
+}
 
 cd() { builtin cd "$@"; ls; }
 
