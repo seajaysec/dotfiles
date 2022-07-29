@@ -44,6 +44,7 @@ bcbc(){
 if which pyenv >/dev/null 2>&1; then
   brew='env PATH=${PATH//$(pyenv root)\/shims:/} brew'
 fi
+}
 
 ## Fix potential tap issues
 brew tap --repair
