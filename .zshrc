@@ -13,6 +13,7 @@ export ACK_PAGER_COLOR="{$PAGER:-less -R}"
 export MONO_GAC_PREFIX="/usr/local"
 export PATH=/usr/local/bin:$PATH
 export PATH=/usr/local/sbin:/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin:$PATH
+export PATH=/Library/Python/3.8/bin:$PATH
 export PATH=~/.local/bin:$PATH
 export PATH=~/.npm-packages/bin:$PATH
 export PATH=~/.npm-packages/lib/node_modules/n/bin:$PATH
