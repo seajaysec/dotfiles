@@ -19,6 +19,7 @@ export PATH=~/.npm-packages/bin:$PATH
 export PATH=~/.npm-packages/lib/node_modules/n/bin:$PATH
 export PATH=/usr/local/sbin:$PATH
 export PATH=/bin/lscript:$PATH
+export PATH=/usr/local/anaconda3/bin:$PATH
 export MANPATH=/usr/local/man:$MANPATH
 export TERM=xterm-256color
 export LESSOPEN="| $(which highlight) %s --out-format xterm256 --line-numbers --quiet --force --style moria"
