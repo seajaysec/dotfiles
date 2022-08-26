@@ -2,8 +2,8 @@
 
 # <bitbar.title>Mute/Video/Screen State for Zoom</bitbar.title>
 # <bitbar.version>v1.0</bitbar.version>
-# <bitbar.author>nickjvturner</bitbar.author>
-# <bitbar.author.github>nickjvturner</bitbar.author.github>
+# <bitbar.author>seajaysec</bitbar.author>
+# <bitbar.author.github>seajaysec</bitbar.author.github>
 # <bitbar.desc>Mute/Video/Screen State for Zoom</bitbar.desc>
 # <bitbar.dependencies>Applescript</bitbar.dependencies>
 
