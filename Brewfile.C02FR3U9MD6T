@@ -13,6 +13,7 @@ brew "glib"
 brew "sqlite"
 brew "python@3.9"
 brew "cairo"
+brew "python@3.10"
 brew "harfbuzz"
 brew "jpeg", link: true
 brew "pango"
