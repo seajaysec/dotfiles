@@ -15,7 +15,6 @@ brew "python@3.9"
 brew "cairo"
 brew "harfbuzz"
 brew "pango"
-brew "jpeg", link: true
 brew "aom"
 brew "apr"
 brew "apr-util"
@@ -47,6 +46,7 @@ brew "exa"
 brew "flac"
 brew "unbound"
 brew "lame"
+brew "jpeg", link: true
 brew "python@3.10"
 brew "libsndfile"
 brew "snappy"
@@ -165,6 +165,8 @@ cask "vmware-fusion"
 cask "wireshark"
 cask "xquartz"
 mas "1Password for Safari", id: 1569813296
+mas "AdGuard for Safari", id: 1440147259
+mas "Auto HD FPS for YouTube", id: 1546729687
 mas "Dark Reader for Safari", id: 1438243180
 mas "FuzzyTime", id: 950297057
 mas "Hush", id: 1544743900
