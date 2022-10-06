@@ -49,8 +49,8 @@ source ~/dotfiles/.zsh.aliases
 source ~/dotfiles/.zsh.functions
 source ~/secrets.sh
 
-SAVEHIST=10000 # Number of entries
-HISTSIZE=10000
+SAVEHIST=100000 # Number of entries
+HISTSIZE=100000
 HISTFILE=~/.zsh/history # File
 setopt APPEND_HISTORY # Don't erase history
 setopt EXTENDED_HISTORY # Add additional data to history like timestamp
