@@ -169,6 +169,7 @@ cask "via"
 cask "visual-studio-code"
 cask "vlc"
 cask "vmware-fusion"
+cask "webex"
 cask "wireshark"
 cask "xquartz"
 mas "1Password for Safari", id: 1569813296
