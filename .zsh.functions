@@ -1,3 +1,12 @@
+alph_sort(){
+  for f in *; do
+  if [ -f "$f" ]; then
+    mkdir -p "${f:0:1}"
+    mv "$f" "${f:0:1}"
+  fi
+done
+}
+
 az_all_spns(){
   az ad sp list --output=table --query='[].{Name:displayName,Enabled:accountEnabled,\
   uyURL:homepage,Publisher:publisherName,MetadataURL:samlMetadataUrl}'
