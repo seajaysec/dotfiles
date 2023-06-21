@@ -109,6 +109,7 @@ brew "net-snmp"
 brew "nmap"
 brew "node"
 brew "openjdk@11", link: true
+brew "pandoc"
 brew "poppler"
 brew "qt"
 brew "pdfgrep"
@@ -225,6 +226,7 @@ mas "Pixelmator Pro", id: 1289583905
 mas "Pocket", id: 568494494
 mas "Readder", id: 1484944100
 mas "Reeder", id: 1529448980
+mas "Save to Raindrop.io", id: 1549370672
 mas "Simplefax", id: 1165017252
 mas "Spring", id: 1508706541
 mas "StopTheMadness", id: 1376402589
