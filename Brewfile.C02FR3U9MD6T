@@ -94,6 +94,7 @@ brew "jq"
 brew "krb5"
 brew "libdnet"
 brew "libelf"
+brew "libmagic"
 brew "libmaxminddb"
 brew "libssh"
 brew "lolcat"
@@ -143,6 +144,7 @@ brew "wget"
 brew "wireshark", link: false
 brew "yafc"
 brew "youtube-dl"
+brew "zbar"
 brew "zsh"
 brew "browsh-org/browsh/browsh"
 brew "qmk/qmk/qmk"
@@ -158,6 +160,7 @@ cask "bettertouchtool"
 cask "box-drive"
 cask "burp-suite"
 cask "chatgpt"
+cask "chromedriver"
 cask "chromium"
 cask "dbeaver-community"
 cask "discord"
@@ -167,6 +170,7 @@ cask "fpc-laz"
 cask "fpc-src-laz"
 cask "github"
 cask "google-chrome"
+cask "hammerspoon"
 cask "iterm2"
 cask "keepassxc"
 cask "keka"
@@ -189,6 +193,7 @@ cask "qlimagesize"
 cask "qlmarkdown"
 cask "qlstephen"
 cask "qmk-toolbox"
+cask "qt-creator"
 cask "sapmachine-jdk"
 cask "sketch"
 cask "slack"
@@ -208,10 +213,12 @@ cask "xquartz"
 mas "1Password for Safari", id: 1569813296
 mas "AdGuard for Safari", id: 1440147259
 mas "Auto HD FPS for YouTube", id: 1546729687
+mas "Be Focused Pro", id: 961632517
 mas "Dark Reader for Safari", id: 1438243180
 mas "FuzzyTime", id: 950297057
 mas "Hand Mirror", id: 1502839586
 mas "Hush", id: 1544743900
+mas "Ivory", id: 6444602274
 mas "Kagi Inc.", id: 1622835804
 mas "Keystroke Pro", id: 1572206224
 mas "Magnet", id: 441258766
@@ -220,6 +227,7 @@ mas "Msg Viewer Pro", id: 1019539949
 mas "MusicHarbor", id: 1440405750
 mas "NepTunes", id: 1006739057
 mas "Page Screenshot for Safari", id: 1472715727
+mas "Paprika Recipe Manager 3", id: 1303222628
 mas "Paste Plain Text", id: 1407015686
 mas "PayPal Honey", id: 1472777122
 mas "Pixelmator Pro", id: 1289583905
@@ -253,6 +261,7 @@ vscode "bierner.markdown-footnotes"
 vscode "bierner.markdown-mermaid"
 vscode "bierner.markdown-preview-github-styles"
 vscode "bierner.markdown-yaml-preamble"
+vscode "bpruitt-goddard.mermaid-markdown-syntax-highlighting"
 vscode "christian-kohler.path-intellisense"
 vscode "chrmarti.regex"
 vscode "chunsen.bracket-select"
