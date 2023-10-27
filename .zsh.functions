@@ -110,6 +110,11 @@ csrf(){
 	curl -s -c $1 "$2" | awk -F 'value' '/user_token/ {print $2}' | cut -d "'" -f 2
 }
 
+frmt(){
+  awk '{ if ($1 ~ /^[0-9]+\.[0-9]+\.[0-9]+\.[0-9]+$/) printf("    '\''%s'\'',\n", $1); else printf("    '\''%s'\'',\n", $1); }'
+
+}
+
 gistx(){
   cd /opt/gists
   rm -rf .git
