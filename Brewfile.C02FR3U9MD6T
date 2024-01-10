@@ -66,6 +66,7 @@ brew "flac"
 brew "unbound"
 brew "lame"
 brew "libsndfile"
+brew "libssh"
 brew "snappy"
 brew "tesseract"
 brew "ffmpeg"
@@ -110,7 +111,6 @@ brew "libdnet"
 brew "libelf"
 brew "libmagic"
 brew "libmaxminddb"
-brew "libssh"
 brew "lolcat"
 brew "lua"
 brew "mapcidr"
@@ -178,7 +178,6 @@ cask "balenaetcher"
 cask "bettertouchtool"
 cask "box-drive"
 cask "burp-suite"
-cask "chromedriver"
 cask "chromium"
 cask "dbeaver-community"
 cask "discord"
@@ -225,6 +224,7 @@ mas "1Password for Safari", id: 1569813296
 mas "AdGuard for Safari", id: 1440147259
 mas "Auto HD FPS for YouTube", id: 1546729687
 mas "Be Focused Pro", id: 961632517
+mas "com.bandan.Declutter", id: 1574021257
 mas "Dark Reader for Safari", id: 1438243180
 mas "FuzzyTime", id: 950297057
 mas "Hand Mirror", id: 1502839586
@@ -258,7 +258,6 @@ mas "Tweetbot", id: 1384080005
 mas "Type2Phone", id: 472717129
 mas "Vinegar", id: 1591303229
 mas "Wipr", id: 1320666476
-mas "Xcode", id: 497799835
 mas "Xnip", id: 1221250572
 vscode "4tron.stack-overflow-view"
 vscode "adpyke.codesnap"
