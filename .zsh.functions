@@ -125,10 +125,16 @@ gistx(){
   ls
 }
 
-# Function to match email addresses using ripgrep, then filter to only show the emails with grep
+# Function to match email addresses using ripgrep, then filter to only show the emails with grep, case-insensitive and error-suppressed
 grepeml() {
-  rg -Nao --no-ignore -e "\b[a-zA-Z0-9.-]+@[a-zA-Z0-9.-]+\.[a-zA-Z0-9.-]+\b" "$@" |
-  grep -Eo "\b[a-zA-Z0-9.-]+@[a-zA-Z0-9.-]+\.[a-zA-Z0-9.-]+\b"
+  rg -Nao --no-ignore -i "\b[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}\b" "$@" 2>/dev/null |
+  grep -Eoi "\b[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}\b"
+}
+
+# Function to match IPv4 addresses using ripgrep, then filter to only show the IPs with grep
+grepip() {
+  rg -Nao --no-ignore -e '\b((([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])(\.)){3}([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5]))\b' "$@" |
+  grep -Eo '\b((([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])(\.)){3}([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5]))\b'
 }
 
 # Function to match both IPv4 and IPv6 addresses using ripgrep, then filter to only show the IPs with grep
@@ -138,18 +144,11 @@ grepip46() {
   grep -Eo '\b((([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])(\.)){3}([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5]))\b|([0-9a-f]{1,4}:){3,7}[0-9a-f]{1,4}'
 }
 
-# Function to match IPv4 addresses using ripgrep, then filter to only show the IPs with grep
-grepip() {
-  rg -Nao --no-ignore -e '\b((([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])(\.)){3}([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5]))\b' "$@" |
-  grep -Eo '\b((([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])(\.)){3}([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5]))\b'
-}
-
-# Function to match IPv6 addresses using ripgrep, then filter to only show the IPv6 addresses with grep
+# Function to match IPv6 addresses using ripgrep, then filter to only show the IPv6 addresses with grep, case-insensitive and error-suppressed
 grepipv6() {
-  rg -Nao --no-ignore -e '([0-9a-f]{1,4}:){3,7}[0-9a-f]{1,4}' "$@" |
-  grep -Eo '([0-9a-f]{1,4}:){3,7}[0-9a-f]{1,4}'
+  rg -Nao --no-ignore -i '([0-9a-fA-F]{1,4}:){3,7}[0-9a-fA-F]{1,4}' "$@" 2>/dev/null |
+  grep -Eoi '([0-9a-fA-F]{1,4}:){3,7}[0-9a-fA-F]{1,4}'
 }
-
 
 ipy() {
   local PY_BIN
