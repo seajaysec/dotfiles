@@ -128,8 +128,7 @@ alias ps='grc ps'
 alias publicip='host myip.opendns.com resolver1.opendns.com | grepip | tail -n 1'
 alias reinstall='apt install --reinstall -y'
 alias revdig='dig +noall +answer -x'
-alias rgg="rg -i -z --max-columns-preview --max-columns 500 --hidden --no-ignore --pre-glob \
-    '*.{pdf,xl[tas][bxm],xl[wsrta],do[ct],do[ct][xm]<Plug>PeepOpen[po]t[xm]<Plug>PeepOpen[op]t,html,htm,xhtm,xhtml,epub,chm,od[stp]}' --pre rgpipe"
+alias rgg="rg -i -z --max-columns-preview --max-columns 500 --hidden --no-ignore --pre-glob '*.{pdf,xl[tas][bxm],xl[wsrta],do[ct],do[ct][xm],p[po]t[xm],p[op]t,html,htm,xhtm,xhtml,epub,chm,od[stp]}' --pre rgpipe"
 alias rmenv='sudo rm -rf env_*'
 alias ruler='go run ruler.go'
 alias sar='grc sar'
