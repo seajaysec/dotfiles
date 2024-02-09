@@ -59,10 +59,6 @@ alias getXML='curl -H "Accept: application/xml" -H "Content-Type: application/xm
 alias getfacl='grc getfacl'
 alias getsebool='grc getsebool'
 alias gmake='grc gmake'
-alias grepeml='grep -Eo "\b[a-zA-Z0-9.-]+@[a-zA-Z0-9.-]+\.[a-zA-Z0-9.-]+\b"'
-#alias grepip="grep -Eo '\b((([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])(\.)){3}([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5]))\b'"
-alias grepipv6="grep -Eo '([0-9a-f]{1,4}:+){3,7}[0-9a-f]{1,4}'"
-#alias grepip46="grep -Eo '\b((([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])(\.)){3}([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5]))\b'\|'([0-9a-f]{1,4}:+){3,7}[0-9a-f]{1,4}'"
 alias g++='grc g++'
 alias history='history 0'
 alias https='http --default-scheme=https'
