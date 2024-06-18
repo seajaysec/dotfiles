@@ -26,7 +26,10 @@ export LESSOPEN="| $(which highlight) %s --out-format xterm256 --line-numbers --
 export LESS=" -R"
 export LANG=en_US.UTF-8
 export ARCHFLAGS="-arch x86_64"
-export FZF_DEFAULT_COMMAND='rg --hidden --no-ignore -l ""'
+# brew install the_silver_searcher
+export FZF_DEFAULT_COMMAND='ag --hidden -g ""'
+# Commenting out ripgrep fzf temporarily for testing ag...
+# export FZF_DEFAULT_COMMAND='rg --hidden --no-ignore -l ""'
 export HOMEBREW_NO_ENV_HINTS=1
 # Golang vars
 export GOROOT=/usr/local/go
@@ -49,16 +52,25 @@ source ~/dotfiles/.zsh.aliases
 source ~/dotfiles/.zsh.functions
 source ~/secrets.sh
 
-SAVEHIST=100000 # Number of entries
-HISTSIZE=100000
+HISTSIZE=10000000
+SAVEHIST=10000000
+
 HISTFILE=~/.zsh/history # File
-# HISTFILE=~/.zsh/history atuin import zsh # File and atuin import
-setopt APPEND_HISTORY # Don't erase history
-setopt EXTENDED_HISTORY # Add additional data to history like timestamp
-setopt INC_APPEND_HISTORY # Add immediately
+HISTORY_IGNORE="(ls|cd|pwd|exit|cd)*"
+setopt APPEND_HISTORY        # append to history file (Default)
+setopt EXTENDED_HISTORY      # Write the history file in the ':start:elapsed;command' format.
 setopt HIST_FIND_NO_DUPS # Don't show duplicates in search
+setopt HIST_IGNORE_ALL_DUPS  # Delete an old recorded event if a new event is a duplicate.
+setopt HIST_IGNORE_DUPS      # Do not record an event that was just recorded again.
+setopt HIST_IGNORE_SPACE     # Do not record an event starting with a space.
+setopt HIST_NO_STORE         # Don't store history commands
+setopt HIST_REDUCE_BLANKS    # Remove superfluous blanks from each command line being added to the history.
+setopt HIST_SAVE_NO_DUPS     # Do not write a duplicate event to the history file.
+setopt HIST_VERIFY           # Do not execute immediately upon history expansion.
+setopt INC_APPEND_HISTORY    # Write to the history file immediately, not when the shell exits.
 setopt NO_HIST_BEEP # Don't beep
-setopt SHARE_HISTORY # Share history between session/terminals
+setopt SHARE_HISTORY         # Share history between all sessions.
+HIST_STAMPS="yyyy-mm-dd"
 
 ### OMZ Post-Source Settings
 # Oh My Zsh automatically sets the title of your terminal. Stopping that with this.
@@ -108,4 +120,12 @@ unset __conda_setup
 test -e "${HOME}/.iterm2_shell_integration.zsh" && source "${HOME}/.iterm2_shell_integration.zsh"
 
 
-eval "$(atuin init zsh)"
+
+# bun completions
+[ -s "/Users/Chris.J.Farrell/.bun/_bun" ] && source "/Users/Chris.J.Farrell/.bun/_bun"
+
+# bun
+export BUN_INSTALL="$HOME/.bun"
+export PATH="$BUN_INSTALL/bin:$PATH"
+
+. "$HOME/.cargo/env"
