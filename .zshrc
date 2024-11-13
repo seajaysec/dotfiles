@@ -26,10 +26,7 @@ export LESSOPEN="| $(which highlight) %s --out-format xterm256 --line-numbers --
 export LESS=" -R"
 export LANG=en_US.UTF-8
 export ARCHFLAGS="-arch x86_64"
-# brew install the_silver_searcher
 export FZF_DEFAULT_COMMAND='ag --hidden -g ""'
-# Commenting out ripgrep fzf temporarily for testing ag...
-# export FZF_DEFAULT_COMMAND='rg --hidden --no-ignore -l ""'
 export HOMEBREW_NO_ENV_HINTS=1
 # Golang vars
 export GOROOT=/usr/local/go
