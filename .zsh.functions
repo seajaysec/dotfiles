@@ -6,15 +6,6 @@ mcd() {
     mkdir -p "$1" && cd "$1";
 }
 
-cdf() {
-    target=`osascript -e 'tell application "Finder" to if (count of Finder windows) > 0 then get POSIX path of (target of front Finder window as text)'`
-    if [ "$target" != "" ]; then
-        cd "$target"; pwd
-    else
-        echo 'No Finder window found' >&2
-    fi
-}
-
 alph_sort(){
     for f in *; do
         if [ -f "$f" ]; then
@@ -45,7 +36,6 @@ cidr2ip() {
     echo '\n' $cdrc 'IPs'
 }
 
-# Combining unroll and unroll_nosort into a single function with an optional flag
 unroll() {
     pbpaste | tr ', ' '\n' | sed '/^[[:space:]]*$/d' > ./.tmp_ip_list.txt
     local sort_flag=${1:-"sort"}
@@ -59,49 +49,6 @@ unroll() {
     cdrc=$(echo $cdrr | wc -l)
     echo '\n' $cdrc 'IPs'
     rm ./.tmp_ip_list.txt
-}
-
-# Azure CLI Functions
-# ------------------
-az_all_spns(){
-    az ad sp list --output=table --query='[].{Name:displayName,Enabled:accountEnabled,\
-    uyURL:homepage,Publisher:publisherName,MetadataURL:samlMetadataUrl}'
-}
-
-az_all_users(){
-    az ad user list --output=table --query='[].{Created:createdDateTime,UPN:userPrincipalName,Name:displayName,\
-    Title:jobTitle,Department:department,Email:mail,UserId:mailNickname,Phone:telephoneNumber,\
-    Mobile:mobile,Enabled:accountEnabled}'
-}
-
-az_dump_apps(){
-    az ad app list --output=table --query='[].{Name:displayName,URL:homepage}'
-}
-
-az_dump_group_members(){
-    az ad group member list --output=json \
-    --query='[].{Created:createdDateTime,UPN:userPrincipalName,Name:displayName,\
-    Title:jobTitle,Department:department,Email:mail,UserId:mailNickname,Phone:telephoneNumber,\
-    Mobile:mobile,Enabled:accountEnabled}' --group='$1'
-}
-
-az_dump_groups(){
-    az ad group list --output=json --query='[].{Group:displayName,Description:description}'
-}
-
-az_examine_app(){
-    az ad app list --output=json --identifier-uri='$1'
-}
-
-az_one_spn(){
-    az ad sp list --output=table --display-name='$1'
-}
-
-az_user_upn(){
-    az ad user list --output=json \
-    --query='[].{Created:createdDateTime,UPN:userPrincipalName,Name:displayName,\
-    Title:jobTitle,Department:department,Email:mail,UserId:mailNickname,Phone:telephoneNumber,\
-    Mobile:mobile,Enabled:accountEnabled}' --upn='$1'
 }
 
 # Pattern Matching Functions
@@ -151,15 +98,6 @@ whocerts(){
     && nmap -p 443 --script ssl-cert $1
 }
 
-cisa() {
-    cisa_csv=$(curl -s https://www.cisa.gov/sites/default/files/csv/known_exploited_vulnerabilities.csv)
-    cisa_cve=$(echo $cisa_csv | tail -n +2 | cut -d ',' -f 1 | sort -Vu | sed -e 's/^/"/;s/$/",/' | tr '\n' ' ' | sed 's/.\{2\}$//')
-    echo "CVE Count: "
-    echo -n $cisa_csv | wc -l
-    echo -n $cisa_cve | pbcopy
-    echo "\nCVE list in clipboard"
-}
-
 # System Maintenance
 # ----------------
 bcbc(){
@@ -197,17 +135,6 @@ ipy() {
 
 # Clipboard Operations
 # ------------------
-clipboard(){ 
-    if command -v xclip 1>/dev/null; then
-        if [[ -p /dev/stdin ]] ; then
-            xclip -i -selection clipboard
-        else
-            xclip -o -selection clipboard
-        fi
-    else
-        echo "Remember to install xclip"
-    fi
-}
 
 impaste(){
     tempfile=$(mktemp -t clipboard.XXXXXXXXXX.png)
