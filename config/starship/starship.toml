@@ -3,21 +3,19 @@
 format = """
 $sudo\
 $username\
-[](fg:color_orange bg:color_purple)\
-$hostname\
-[](fg:color_purple bg:color_yellow)\
+[](fg:prev_bg bg:color_yellow)\
 $directory\
-[](fg:prev_bg bg:color_aqua)\
+[](fg:prev_bg bg:color_aqua)\
 $git_branch\
 $git_status\
 $git_state\
-[](fg:prev_bg bg:color_blue)\
+[](fg:prev_bg bg:color_blue)\
 $python\
 $package\
-[](fg:prev_bg bg:color_bg1)\
-[](fg:prev_bg)\
+[](fg:prev_bg bg:color_bg1)\
+[](fg:prev_bg)\
 $fill\
-[](fg:color_bg1)\
+[](fg:color_bg1)\
 $cmd_duration\
 $status\
 $line_break\
@@ -92,24 +90,3 @@ format = "[](bg:prev_bg fg:color_red)[$status $symbol]($style)"
 [fill]
 symbol = '─'
 style = 'fg:prev_fg'
-
-[hostname]
-ssh_only = false
-format = '[ $hostname($ssh_symbol) ](fg:color_fg0 bg:color_purple)[$localip](fg:color_fg0 bg:color_purple)'
-trim_at = '-'
-disabled = false
-
-[custom.localip]
-description = "Show local and VPN IPs"
-command = """
-primary_ip=$(ipconfig getifaddr en0)
-vpn_ip=$(ipconfig getifaddr utun0 2>/dev/null)
-if [ ! -z "$vpn_ip" ]; then
-    echo "$primary_ip|$vpn_ip"
-else
-    echo "$primary_ip"
-fi
-"""
-when = true
-format = '[ $output ](fg:color_fg0 bg:color_purple)'
-shell = ["bash", "--noprofile", "--norc"]
