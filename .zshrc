@@ -144,6 +144,7 @@ plug "zsh-users/zsh-autosuggestions"
 plug "zdharma-continuum/fast-syntax-highlighting"
 plug "zsh-users/zsh-history-substring-search"
 plug "MichaelAquilina/zsh-you-should-use"
+plug "MichaelAquilina/zsh-autoswitch-virtualenv"
 
 source ~/dotfiles/completions.zsh
 
