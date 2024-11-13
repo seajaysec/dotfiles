@@ -1,175 +1,69 @@
 # System Commands Enhancement
-alias cp='cp -iv'                           # Preferred 'cp' implementation
-alias mv='mv -iv'                           # Preferred 'mv' implementation
-alias mkdir='mkdir -pv'                     # Preferred 'mkdir' implementation
-alias less='less -m -N -g -i -J --line-numbers --underline-special'
-alias more='less'
-alias sudo='sudo '                          # Ensure sudo works with aliases
-alias mysudo='sudo -E env "PATH=$PATH"'
-alias history='history 0'
-alias fix_stty='stty sane'                  # Restore terminal settings when screwed up
+alias cp='cp -iv'                           # Interactive and verbose copy
+alias mv='mv -iv'                           # Interactive and verbose move
+alias mkdir='mkdir -pv'                     # Create parent directories as needed, verbose
+alias less='less -m -N -g -i -J --line-numbers --underline-special'  # Enhanced less with line numbers and search features
+alias more='less'                           # Redirect more to less for better functionality
+alias sudo='sudo '                          # Ensure sudo works with aliases by preserving the trailing space
+alias mysudo='sudo -E env "PATH=$PATH"'     # Preserve environment variables when using sudo
+alias history='history 0'                   # Show full history without line numbers
+alias fix_stty='stty sane'                  # Reset terminal settings when they get messed up
 
-# File Navigation & Listing
-alias ls='eza -a'
-alias lsl='eza -lah --git --grid'
-alias lst='eza --tree --level'
-alias f='cd "$(osascript -e '\''tell application "Finder" to if (count of windows) > 0 then get POSIX path of (target of front window as alias)'\'' 2>/dev/null)"'
+# File Navigation & Listing (using modern eza instead of ls)
+alias ls='eza -a'                           # Modern ls replacement with all files
+alias lsl='eza -lah --git --grid'          # Detailed list with git status and grid layout
+alias lst='eza --tree --level'              # Tree view with specified depth
+alias f='cd "$(osascript -e '\''tell application "Finder" to if (count of windows) > 0 then get POSIX path of (target of front window as alias)'\'' 2>/dev/null)"'  # Jump to current Finder location
 
-# Network Tools & Information                   # Public facing IP Address
-alias publicip='host myip.opendns.com resolver1.opendns.com | grepip | tail -n 1'
-alias revdig='dig +noall +answer -x'
-alias getJSON='curl -i -H "Accept: application/json" -H "Content-Type: application/json"'
-alias getXML='curl -H "Accept: application/xml" -H "Content-Type: application/xml" -X GET'
-alias https='http --default-scheme=https'
-alias ipInfo0='ipconfig getpacket en0'              # Get info on connections for en0
-alias ipInfo1='ipconfig getpacket en1'              # Get info on connections for en1
-alias myips="ifconfig | rg 'inet ' -B 4 | rg -v 'options' | rg -v 'ether' | rg -v 'inet6' | rg -v 'media' | rg -v 'status' | sed 's/netmask/:/g' | cut -d ':' -f 1"
-alias ncat='rlwrap ncat'
-alias nc='rlwrap nc'
+# Network Tools & Information
+alias publicip='host myip.opendns.com resolver1.opendns.com | grepip | tail -n 1'  # Get public IP using OpenDNS
+alias revdig='dig +noall +answer -x'        # Reverse DNS lookup
+alias getJSON='curl -i -H "Accept: application/json" -H "Content-Type: application/json"'  # Curl with JSON headers
+alias getXML='curl -H "Accept: application/xml" -H "Content-Type: application/xml" -X GET'  # Curl with XML headers
+alias myips="ifconfig | rg 'inet ' -B 4 | rg -v 'options' | rg -v 'ether' | rg -v 'inet6' | rg -v 'media' | rg -v 'status' | sed 's/netmask/:/g' | cut -d ':' -f 1"  # List all local IPs
+alias ncat='rlwrap ncat'                    # Netcat with readline support
+alias nc='rlwrap nc'                        # Netcat with readline support (shorthand)
 
 # Network Monitoring & Security
-alias lsock='sudo /usr/sbin/lsof -i -P'             # Display open sockets
-alias lsockT='sudo /usr/sbin/lsof -nP | grep TCP'   # Display only open TCP sockets
-alias lsockU='sudo /usr/sbin/lsof -nP | grep UDP'   # Display only open UDP sockets
-alias netCons='lsof -i'                             # Show all open TCP/IP sockets
-alias openPorts='sudo lsof -i | grep LISTEN'        # All listening connections
-alias showBlocked='sudo ipfw list'                  # All ipfw rules inc/ blocked IPs
-alias nmapr='grc nmap --randomize-hosts --script-args http.useragent="Mozilla/5.0 (Windows NT 10.0; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/39.0.2171.71 Safari/537.36 Edge/12.0i" --script-timeout 10m'
+alias lsock='sudo /usr/sbin/lsof -i -P'             # List all open network files
+alias lsockT='sudo /usr/sbin/lsof -nP | grep TCP'   # List only TCP connections
+alias lsockU='sudo /usr/sbin/lsof -nP | grep UDP'   # List only UDP connections
+alias nmapr='grc nmap --randomize-hosts --script-args http.useragent="Mozilla/5.0 (Windows NT 10.0; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/39.0.2171.71 Safari/537.36 Edge/12.0i" --script-timeout 10m'  # Nmap with randomized hosts and browser UA
 
 # System Maintenance
-alias flushDNS='dscacheutil -flushcache'            # Flush DNS Cache
-alias audiofix="sudo kill -9 `ps ax | grep 'coreaudiod' | grep -v grep | awk '{print $1}'`"
-alias btfix='blueutil -p 0 && sleep 1 && blueutil -p 1'
-alias bubu='tldr --update && brewup'
+alias flushDNS='dscacheutil -flushcache'    # Clear DNS cache on macOS
+alias audiofix="sudo kill -9 `ps ax | grep 'coreaudiod' | grep -v grep | awk '{print $1}'`"  # Reset audio daemon
+alias btfix='blueutil -p 0 && sleep 1 && blueutil -p 1'  # Reset Bluetooth on macOS
+alias bubu='tldr --update && brewup'        # Update tldr pages and Homebrew packages
 
 # Development & Git
-alias gaf='git add -f'
-alias gcx='builtin cd ~/gits && git clone --recurse-submodules -j8 `pbpaste` && cd ./*(/om[1])'
+alias gaf='git add -f'                      # Force add files to git (including ignored)
+alias gcx='builtin cd ~/gits && git clone --recurse-submodules -j8 `pbpaste` && cd ./*(/om[1])'  # Clone repo from clipboard with submodules
 
 # Docker Management
-alias dockstop='docker stop $(docker ps -a -q)'
-alias dockrm='docker rm $(docker ps -a -q)'
-alias asciicast2gif='docker run --rm -v $PWD:/data asciinema/asciicast2gif'
-alias egress-assess="docker run -it piesecurity/egress-assess"
-alias simplyemail='docker run -ti simplysecurity/simplyemail -all -v -verify -e'
+alias dockstop='docker stop $(docker ps -a -q)'  # Stop all running containers
+alias dockrm='docker rm $(docker ps -a -q)'      # Remove all stopped containers
 
 # Python & Virtual Environment
-alias de='deactivate'
-alias pipr3='python3 -m pip install -r requirements.txt'
-alias pipr='python -m pip install -r requirements.txt'
-alias psi3='python3 setup.py install'
-alias psi='python setup.py install'
-alias srcenv='source env_*/bin/activate'
-alias rmenv='sudo rm -rf env_*'
+alias de='deactivate'                       # Deactivate Python virtual environment
+alias pipr3='python3 -m pip install -r requirements.txt'  # Install Python3 requirements
+alias srcenv='source env_*/bin/activate'    # Activate virtual environment
+alias rmenv='sudo rm -rf env_*'             # Remove virtual environment directories
 
 # Text Processing & Clipboard
-alias grepcve="grep -ioE 'CVE-[0-9]{4}-[0-9]{4,}' | tr '[:lower:]' '[:upper:]' | sort -u"
-alias clipsort="pbpaste | grep -v "^$" | sort -Vu | pbcopy"
-alias commacount="pbpaste | grep -o ',' | wc -l"
-alias lastword="pbpaste | sed -e 's/[[:space:]]*$//' | grep -oE '[^ ]+$' | ghead -c -1 | pbcopy"
-alias pbc='ghead -c -1 | pbcopy'
-alias srt='grep -v "^$" | gsed "s/^[[:space:]]*//g" | sort -Vu | LC_COLLATE=C sort --ignore-case'
-alias srtc='grep -v "^$" | gsed "s/^[[:space:]]*//g" | sort -V | LC_COLLATE=C sort --ignore-case | uniq -c | sort -nr'
-alias uniqip='pbpaste | grepip | sort -Vu | pbcopy'
+alias grepcve="grep -ioE 'CVE-[0-9]{4}-[0-9]{4,}' | tr '[:lower:]' '[:upper:]' | sort -u"  # Extract and normalize CVE IDs
+alias clipsort="pbpaste | grep -v "^$" | sort -Vu | pbcopy"  # Sort clipboard contents
+alias srt='grep -v "^$" | gsed "s/^[[:space:]]*//g" | sort -Vu | LC_COLLATE=C sort --ignore-case'  # Sort and clean text
+alias uniqip='pbpaste | grepip | sort -Vu | pbcopy'  # Extract, sort, and deduplicate IPs from clipboard
 
 # Terminal & Session Management
-alias cmux='$HOME/.tmux/plugins/tmux-logging/scripts/save_complete_history.sh && code ~/tmuxlogs/`ls ~/tmuxlogs/ -tr | tail -1`'
-alias tm='tmux attach -t ${tmux_session:-work} || tmux new -s ${tmux_session:-work}'
-alias tmm='read new_sesh && tmux attach -t ${tmux_session:-$new_sesh} || tmux new -s ${tmux_session:-$new_sesh}'
-
-# Configuration Shortcuts
-alias editHosts='sudo edit /etc/hosts'
-alias envconfig="subl ~/.env.sh"
-alias zshconfig="code ~/.zshrc"
-alias zshrefresh='source ~/.zshrc'
+alias tm='tmux attach -t ${tmux_session:-work} || tmux new -s ${tmux_session:-work}'  # Attach to tmux session or create new
+alias cmux='$HOME/.tmux/plugins/tmux-logging/scripts/save_complete_history.sh && code ~/tmuxlogs/`ls ~/tmuxlogs/ -tr | tail -1`'  # Save and open tmux history
 
 # File Search & Navigation
-alias fff='find / -type f -iname $1 2>/dev/null'
-alias fhf='history | ftf'
-alias ftf='fzf-tmux'
-alias fzf='fzf --color=dark'
+alias fff='find / -type f -iname $1 2>/dev/null'  # Find files by name across filesystem
+alias ftf='fzf-tmux'                              # Fuzzy finder in tmux
+alias fzf='fzf --color=dark'                      # Fuzzy finder with dark theme
 
-# Application Shortcuts
-alias firefox='/Applications/Firefox.app/Contents/MacOS/firefox'
-alias extract='dtrx'
-alias icat="kitty +kitten icat"
-alias torb='xhost si:localuser:toruser && sudo -u toruser -H torbrowser-launcher'
-
-# GRC (Generic Colouriser) Enhanced Commands
-alias ant='grc ant'
-alias apache='grc apache'
-alias as='grc as'
-alias blkid='grc blkid'
-alias cc='grc cc'
-alias configure='grc configure'
-alias curl='grc curl'
-alias cvs='grc cvs'
-alias df='grc df'
-alias diff='grc diff'
-alias dig='grc dig'
-alias dnf='grc dnf'
-alias docker='grc docker'
-alias docker-compose='grc docker-compose'
-alias docker-machine='grc docker-machine'
-alias du='grc du'
-alias env='grc env'
-alias fdisk='grc fdisk'
-alias findmnt='grc findmnt'
-alias free='grc free'
-alias gas='grc gas'
-alias gcc='grc gcc'
-alias g++='grc g++'
-alias getfacl='grc getfacl'
-alias getsebool='grc getsebool'
-alias gmake='grc gmake'
-alias id='grc id'
-alias ifconfig='grc ifconfig'
-alias iostat='grc iostat'
-alias ip='grc ip'
-alias iptables='grc iptables'
-alias iwconfig='grc iwconfig'
-alias journalctl='grc journalctl'
-alias kubectl='grc kubectl'
-alias last='grc last'
-alias ldap='grc ldap'
-alias ld='grc ld'
-alias lolcat='grc lolcat'
-alias lsattr='grc lsattr'
-alias lsblk='grc lsblk'
-alias lsmod='grc lsmod'
-alias lsof='grc lsof'
-alias lspci='grc lspci'
-alias make='grc make'
-alias mount='grc mount'
-alias mtr='grc mtr'
-alias mvn='grc mvn'
-alias netstat='grc netstat'
-alias nmap='grc nmap'
-alias ntpdate='grc ntpdate'
-alias php='grc php'
-alias ping='grc ping'
-alias ping6='grc ping6'
-alias proftpd='grc proftpd'
-alias ps='grc ps'
-alias sar='grc sar'
-alias semanage='grc semanage'
-alias sensors='grc sensors'
-alias showmount='grc showmount'
-alias sockstat='grc sockstat'
-alias ss='grc ss'
-alias stat='grc stat'
-alias sysctl='grc sysctl'
-alias systemctl='grc systemctl'
-alias tcpdump='grc tcpdump'
-alias traceroute='grc traceroute'
-alias traceroute6='grc traceroute6'
-alias tune2fs='grc tune2fs'
-alias ulimit='grc ulimit'
-alias uptime='grc uptime'
-alias vmstat='grc vmstat'
-alias wdiff='grc wdiff'
-alias whois='grc whois'
-alias who='grc who'
-
-# Ensure xargs works with aliases
-alias xargs='xargs '
+# Ensure Command Interoperability
+alias xargs='xargs '                        # Preserve alias expansion in xargs
