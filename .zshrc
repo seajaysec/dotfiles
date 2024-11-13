@@ -103,14 +103,14 @@ path+=($BUN_INSTALL/bin)
 ###############################
 HISTFILE=~/.zsh/history        # History file location
 HISTSIZE=10000000              # Maximum events in internal history
-SAVEHIST=10000000             # Maximum events in history file
+SAVEHIST=10000000              # Maximum events in history file
 HISTORY_IGNORE="(ls|cd|pwd|exit|cd)*"  # Commands to ignore
 HIST_STAMPS="yyyy-mm-dd"       # Timestamp format
 
 # History Options
 setopt APPEND_HISTORY          # Append to history instead of overwriting
 setopt EXTENDED_HISTORY        # Save timestamp and duration
-setopt SHARE_HISTORY          # Share history between sessions
+setopt SHARE_HISTORY           # Share history between sessions
 
 # Duplicate Management
 setopt HIST_IGNORE_ALL_DUPS   # Remove older duplicate entries
