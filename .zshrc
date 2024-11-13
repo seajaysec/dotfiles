@@ -22,7 +22,6 @@ export VISUAL=vim
 # Search and Display
 export GREP_OPTIONS='--color=always'
 export ACK_PAGER_COLOR="{$PAGER:-less -R}"
-export LESSOPEN="| $(which highlight) %s --out-format xterm256 --line-numbers --quiet --force --style moria"
 export LESS=" -R"
 export FZF_DEFAULT_COMMAND='ag --hidden -g ""'
 
@@ -30,17 +29,14 @@ export FZF_DEFAULT_COMMAND='ag --hidden -g ""'
 export HOMEBREW_NO_ENV_HINTS=1
 
 # Path Configuration (consolidated)
+typeset -U path  # Ensure unique paths
 path=(
-    /usr/local/sbin
-    /usr/local/bin
-    /usr/bin
-    /bin
-    /usr/sbin
-    /sbin
+    /usr/local/{sbin,bin}
+    /usr/{bin,sbin}
+    /{bin,sbin}
     ~/Library/Python/3.8/bin
     ~/.local/bin
-    ~/.npm-packages/bin
-    ~/.npm-packages/lib/node_modules/n/bin
+    ~/.npm-packages/{bin,lib/node_modules/n/bin}
     /bin/lscript
     /usr/local/anaconda3/bin
     $path
@@ -53,42 +49,41 @@ export MANPATH=/usr/local/man:$MANPATH
 # Golang
 export GOROOT=/usr/local/go
 export GOPATH=$HOME/go
-export PATH=$GOPATH/bin:$GOROOT/bin:$PATH
+path+=($GOPATH/bin $GOROOT/bin)
 
 # Mono
 export MONO_GAC_PREFIX="/usr/local"
 
 # Bun
 export BUN_INSTALL="$HOME/.bun"
-export PATH="$BUN_INSTALL/bin:$PATH"
+path+=($BUN_INSTALL/bin)
 
 ###############################
 # Oh-My-Zsh Configuration
 ###############################
 ZSH_THEME="powerlevel10k/powerlevel10k"
 
+# Reduce plugin load for faster startup
 plugins=(
-    tmux 
-    history-substring-search 
     git 
+    history-substring-search 
     colored-man-pages 
-    colorize 
     F-Sy-H 
-    autoupdate 
     command-not-found 
-    cp 
-    emoji 
-    man 
-    nmap 
-    sublime 
-    sudo 
-    vi-mode 
-    vim-interaction 
     zsh-autosuggestions 
-    autoswitch_virtualenv 
-    you-should-use 
-    $plugins
+    you-should-use
 )
+
+# Lazy load slower plugins
+lazy_load_nvm() {
+    unset -f nvm node npm
+    export NVM_DIR="$HOME/.nvm"
+    [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"
+}
+
+for cmd in nvm node npm; do
+    eval "${cmd}() { lazy_load_nvm; ${cmd} \$@ }"
+done
 
 # Update settings
 zstyle ':omz:update' mode auto
@@ -109,19 +104,20 @@ SAVEHIST=10000000
 HISTORY_IGNORE="(ls|cd|pwd|exit|cd)*"
 HIST_STAMPS="yyyy-mm-dd"
 
-setopt APPEND_HISTORY
-setopt EXTENDED_HISTORY
-setopt HIST_FIND_NO_DUPS
-setopt HIST_IGNORE_ALL_DUPS
-setopt HIST_IGNORE_DUPS
-setopt HIST_IGNORE_SPACE
-setopt HIST_NO_STORE
-setopt HIST_REDUCE_BLANKS
-setopt HIST_SAVE_NO_DUPS
-setopt HIST_VERIFY
-setopt INC_APPEND_HISTORY
-setopt NO_HIST_BEEP
-setopt SHARE_HISTORY
+setopt APPEND_HISTORY EXTENDED_HISTORY HIST_FIND_NO_DUPS HIST_IGNORE_ALL_DUPS 
+setopt HIST_IGNORE_DUPS HIST_IGNORE_SPACE HIST_NO_STORE HIST_REDUCE_BLANKS 
+setopt HIST_SAVE_NO_DUPS HIST_VERIFY INC_APPEND_HISTORY NO_HIST_BEEP SHARE_HISTORY
+
+###############################
+# Completion Optimization
+###############################
+# Load completion system faster
+autoload -Uz compinit
+if [ $(date +'%j') != $(stat -f '%Sm' -t '%j' ~/.zcompdump) ]; then
+  compinit
+else
+  compinit -C
+fi
 
 ###############################
 # Source Configurations
@@ -138,41 +134,44 @@ bindkey '^[[A' history-substring-search-up
 bindkey '^[[B' history-substring-search-down
 
 ###############################
-# Completion
-###############################
-autoload -Uz compinit
-compinit
-
-###############################
-# External Tools Integration
+# Async Load External Tools
 ###############################
 # Powerlevel10k
 [[ ! -f ~/.p10k.zsh ]] || source ~/.p10k.zsh
 
-# FZF
-[ -f ~/.fzf.zsh ] && source ~/.fzf.zsh
-
-# Conda
-__conda_setup="$('/usr/local/anaconda3/bin/conda' 'shell.zsh' 'hook' 2> /dev/null)"
-if [ $? -eq 0 ]; then
-    eval "$__conda_setup"
-else
-    if [ -f "/usr/local/anaconda3/etc/profile.d/conda.sh" ]; then
-        . "/usr/local/anaconda3/etc/profile.d/conda.sh"
+# Lazy load conda
+conda() {
+    unfunction conda
+    # Add conda to path
+    export PATH="/usr/local/anaconda3/bin:$PATH"
+    __conda_setup="$('/usr/local/anaconda3/bin/conda' 'shell.zsh' 'hook' 2> /dev/null)"
+    if [ $? -eq 0 ]; then
+        eval "$__conda_setup"
     else
-        export PATH="/usr/local/anaconda3/bin:$PATH"
+        if [ -f "/usr/local/anaconda3/etc/profile.d/conda.sh" ]; then
+            . "/usr/local/anaconda3/etc/profile.d/conda.sh"
+        fi
     fi
-fi
-unset __conda_setup
+    conda "$@"
+}
 
-# iTerm2
-test -e "${HOME}/.iterm2_shell_integration.zsh" && source "${HOME}/.iterm2_shell_integration.zsh"
+# Lazy load less intensive tools
+{
+    # FZF
+    [ -f ~/.fzf.zsh ] && source ~/.fzf.zsh
+    
+    # iTerm2
+    test -e "${HOME}/.iterm2_shell_integration.zsh" && source "${HOME}/.iterm2_shell_integration.zsh"
+    
+    # Bun completions
+    [ -s "$HOME/.bun/_bun" ] && source "$HOME/.bun/_bun"
+    
+    # Cargo
+    [ -f "$HOME/.cargo/env" ] && source "$HOME/.cargo/env"
+    
+    # Zoxide
+    eval "$(zoxide init zsh)"
+} &!
 
-# Bun completions
-[ -s "/Users/Chris.J.Farrell/.bun/_bun" ] && source "/Users/Chris.J.Farrell/.bun/_bun"
-
-# Cargo
-. "$HOME/.cargo/env"
-
-# Zoxide
-eval "$(zoxide init zsh)"
+# Load lessopen last as it's least critical
+export LESSOPEN="| $(which highlight) %s --out-format xterm256 --line-numbers --quiet --force --style moria"
