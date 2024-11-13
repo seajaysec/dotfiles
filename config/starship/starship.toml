@@ -3,19 +3,20 @@
 format = """
 $sudo\
 $username\
-[](fg:prev_bg bg:color_yellow)\
+$hostname\
+[](fg:prev_bg bg:color_yellow)\
 $directory\
-[](fg:prev_bg bg:color_aqua)\
+[](fg:prev_bg bg:color_aqua)\
 $git_branch\
 $git_status\
 $git_state\
-[](fg:prev_bg bg:color_blue)\
+[](fg:prev_bg bg:color_blue)\
 $python\
 $package\
-[](fg:prev_bg bg:color_bg1)\
-[](fg:prev_bg)\
+[](fg:prev_bg bg:color_bg1)\
+[](fg:prev_bg)\
 $fill\
-[](fg:color_bg1)\
+[](fg:color_bg1)\
 $cmd_duration\
 $status\
 $line_break\
@@ -90,3 +91,19 @@ format = "[](bg:prev_bg fg:color_red)[$status $symbol]($style)"
 [fill]
 symbol = '─'
 style = 'fg:prev_fg'
+
+[hostname]
+ssh_only = false
+format = '[ @$hostname ](fg:color_fg0 bg:color_orange)[$ssh_symbol](fg:color_fg0 bg:color_orange)[ $localip ](fg:color_fg0 bg:color_orange)[ $vpn ](fg:color_fg0 bg:color_orange)'
+trim_at = "-"
+disabled = false
+
+[custom.localip]
+when = true
+command = "ip -o route get to 8.8.8.8 | sed -n 's/.*src \\([0-9.]\\+\\).*/\\1/p'"
+format = "[ $output](fg:color_fg0 bg:color_orange)"
+
+[custom.vpn]
+when = "ip link show tun0 2>/dev/null || ip link show wg0 2>/dev/null"
+command = "ip -o addr show dev tun0 2>/dev/null | sed -n 's/.*inet \\([0-9.]\\+\\).*/\\1/p' || ip -o addr show dev wg0 2>/dev/null | sed -n 's/.*inet \\([0-9.]\\+\\).*/\\1/p'"
+format = "[ VPN:$output](fg:color_fg0 bg:color_orange)"
