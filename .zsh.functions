@@ -110,7 +110,7 @@ whocerts() {
         openssl s_client -showcerts -connect $domain:443 2>/dev/null | grep 'CN='
     else
         echo "1. Running openssl check:" && echo \
-        | openssl s_client -showcerts -servername $domain -connect $domain:443 2>/dev/null \
+        | openssl s_client -showcerts -connect -servername $domain -connect $domain:443 2>/dev/null \
         | openssl x509 -inform pem -noout -text \
         && echo "2. Running nslookup" \
         && nslookup -vc -type=ANY $domain \
