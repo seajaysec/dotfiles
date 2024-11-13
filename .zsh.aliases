@@ -4,8 +4,6 @@ alias mv='mv -iv'                           # Preferred 'mv' implementation
 alias mkdir='mkdir -pv'                     # Preferred 'mkdir' implementation
 alias less='less -m -N -g -i -J --line-numbers --underline-special'
 alias more='less'
-alias sudo='sudo '
-alias sd='sudo '
 alias mysudo='sudo -E env "PATH=$PATH"'
 alias history='history 0'
 alias fix_stty='stty sane'                  # Restore terminal settings when screwed up
@@ -14,8 +12,7 @@ alias fix_stty='stty sane'                  # Restore terminal settings when scr
 alias ls='eza -a'
 alias lsl='eza -lah --git --grid'
 alias lst='eza --tree --level'
-alias lr='ls -R | grep ":$" | sed -e '\''s/:$//'\'' -e '\''s/[^-][^\/]*\//--/g'\'' -e '\''s/^/   /'\'' -e '\''s/-/|/'\'' | less'
-alias f='open -a Finder ./'
+alias f='cd "$(osascript -e "tell application \\"Finder\\" to if (count of windows) > 0 then get POSIX path of (target of front window as alias)")"'
 
 # Network Tools & Information
 alias myip='curl ip.appspot.com'                    # Public facing IP Address
