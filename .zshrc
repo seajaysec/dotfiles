@@ -116,47 +116,20 @@ setopt INC_APPEND_HISTORY     # Add commands as they are typed
 setopt NO_HIST_BEEP           # No beep when accessing non-existent history
 
 ###############################
-# Oh-My-Zsh Configuration
+# Plugin Management
 ###############################
-ZSH_THEME=""
+# Source zap plugin manager
+[ -f "$HOME/.local/share/zap/zap.zsh" ] && source "$HOME/.local/share/zap/zap.zsh"
 
-# Essential plugins for daily use
-plugins=(
-    git                      # Git integration and aliases
-    history-substring-search # Better history search
-    colored-man-pages        # Colored man pages
-    F-Sy-H                   # Syntax highlighting
-    command-not-found        # Suggest packages for unknown commands
-    zsh-autosuggestions      # Command suggestions
-    you-should-use           # Remind about aliases
-)
+# Core plugins
+plug "zsh-users/zsh-autosuggestions"
+plug "zdharma-continuum/fast-syntax-highlighting"
+plug "zsh-users/zsh-history-substring-search"
+plug "MichaelAquilina/zsh-you-should-use"
 
-# NVM (Node Version Manager) lazy loading
-lazy_load_nvm() {
-    unset -f nvm node npm
-    export NVM_DIR="$HOME/.nvm"
-    [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"
-}
 
-# Create lazy load triggers for Node-related commands
-for cmd in nvm node npm; do
-    eval "${cmd}() { lazy_load_nvm; ${cmd} \$@ }"
-done
 
-# Update behavior
-zstyle ':omz:update' mode auto
-ZSH_CUSTOM_AUTOUPDATE_QUIET=true
-
-# General shell behavior
-DISABLE_AUTO_TITLE=true        # Don't auto-set terminal title
-HYPHEN_INSENSITIVE=true        # Treat - and _ interchangeably
-ENABLE_CORRECTION=false        # Disable command correction
-COMPLETION_WAITING_DOTS=true   # Show dots during completion
-
-###############################
-# Completion Optimization
-###############################
-# Load completion system faster
+# Load completions
 autoload -Uz compinit
 if [ $(date +'%j') != $(stat -f '%Sm' -t '%j' ~/.zcompdump) ]; then
   compinit
@@ -164,10 +137,23 @@ else
   compinit -C
 fi
 
+# Better completion settings
+zstyle ':completion:*' menu select
+zstyle ':completion:*' matcher-list 'm:{a-zA-Z}={A-Za-z}'
+zstyle ':completion:*' list-colors "${(s.:.)LS_COLORS}"
+zstyle ':completion:*' verbose yes
+zstyle ':completion:*:descriptions' format '%B%d%b'
+zstyle ':completion:*:messages' format '%d'
+zstyle ':completion:*:warnings' format 'No matches for: %d'
+zstyle ':completion:*:corrections' format '%B%d (errors: %e)%b'
+
+# Remove Oh-My-Zsh specific configurations
+unset ZSH
+unset ZSH_THEME
+
 ###############################
 # Source Configurations
 ###############################
-source $ZSH/oh-my-zsh.sh
 source ~/secrets.sh
 
 # Global flag to track if dotfiles are loaded
