@@ -1,4 +1,5 @@
 format = """
+[](bold blue)\
 $username\
 $hostname\
 $localip\
@@ -6,19 +7,22 @@ $directory\
 $git_branch\
 $git_commit\
 $git_state\
-$git_metrics\
 $git_status\
+$git_metrics\
 $time\
 $cmd_duration\
 $line_break\
+[](bold blue)\
+$kubernetes\
+$docker_context\
+$container\
 $python\
 $nodejs\
 $rust\
 $golang\
-$docker_context\
-$kubernetes\
-$container\
-$shell\
+$aws\
+$gcloud\
+$line_break\
 $character"""
 
 # Increase timeout for better experience
@@ -29,8 +33,8 @@ command_timeout = 500
 add_newline = true
 
 [username]
-style_user = "blue bold"
-style_root = "red bold"
+style_user = "bold blue"
+style_root = "bold red"
 format = "[$user]($style)"
 disabled = false
 show_always = true
@@ -42,7 +46,7 @@ disabled = false
 
 [localip]
 ssh_only = false
-format = "[$localipv4](bold yellow) "
+format = "󰩟 [$localipv4](bold yellow) "
 disabled = false
 
 [directory]
@@ -50,17 +54,17 @@ truncation_length = 8
 truncate_to_repo = true
 format = "[$path]($style)[$read_only]($read_only_style) "
 style = "bold cyan"
-read_only = "🔒"
+read_only = "󰌾"
 read_only_style = "red"
 
 [character]
-success_symbol = "[❯](bold green)"
-error_symbol = "[❯](bold red)"
-vicmd_symbol = "[❮](bold green)"
+success_symbol = "❯"
+error_symbol = "[❯](red)"
+vicmd_symbol = "[❮](green)"
 
 [git_branch]
 format = "[$symbol$branch]($style) "
-symbol = "🌱 "
+symbol = " "
 style = "bold purple"
 
 [git_commit]
@@ -74,16 +78,16 @@ style = "bright-black"
 [git_status]
 format = '([\[$all_status$ahead_behind\]]($style) )'
 style = "bold red"
-conflicted = "🏳"
-ahead = "🏎💨${count}"
-behind = "😰${count}"
-diverged = "😵${ahead_count}${behind_count}"
-untracked = "🤷‍"
-stashed = "📦"
-modified = "📝"
+conflicted = "󰞇 "
+ahead = "⇡${count}"
+behind = "⇣${count}"
+diverged = "⇕${ahead_count}⇣${behind_count}"
+untracked = "?"
+stashed = "󰆓 "
+modified = "!"
 staged = '[++\($count\)](green)'
-renamed = "👅"
-deleted = "🗑"
+renamed = "󰑕 "
+deleted = "✘"
 
 [git_metrics]
 added_style = "bold green"
@@ -92,8 +96,8 @@ disabled = false
 
 [time]
 disabled = false
-format = '[\[ $time \]](bold yellow) '
-time_format = "%T"
+format = '[$time](bold yellow) '
+time_format = "%H:%M:%S"
 use_12hr = false
 
 [cmd_duration]
@@ -103,41 +107,41 @@ show_milliseconds = false
 
 [python]
 format = '[${symbol}${pyenv_prefix}(${version} )(\($virtualenv\) )]($style)'
-symbol = "🐍 "
+symbol = " "
 style = "bold green"
 pyenv_version_name = true
 pyenv_prefix = "pyenv "
 
 [nodejs]
 format = "[$symbol($version )]($style)"
-symbol = "⬢ "
+symbol = " "
 style = "bold green"
 
 [rust]
 format = "[$symbol($version )]($style)"
-symbol = "🦀 "
+symbol = " "
 style = "bold red"
 
 [golang]
 format = "[$symbol($version )]($style)"
-symbol = "🐹 "
+symbol = " "
 style = "bold cyan"
 
 [docker_context]
 format = "[$symbol$context]($style) "
-symbol = "🐋 "
+symbol = " "
 style = "blue bold"
 only_with_files = true
 
 [kubernetes]
 format = '[$symbol$context( \($namespace\))]($style) '
-symbol = "⛵ "
+symbol = "󱃾 "
 style = "bold cyan"
 disabled = false
 
 [container]
 format = '[$symbol \[$name\]]($style) '
-symbol = "⬢"
+symbol = ""
 style = "red bold"
 
 [shell]
@@ -157,9 +161,9 @@ disabled = false
 [aws]
 format = '[$symbol($profile )(\($region\) )]($style)'
 style = "bold yellow"
-symbol = "🅰 "
+symbol = " "
 
 [gcloud]
 format = '[$symbol$account(@$domain)(\($region\))]($style) '
 style = "bold blue"
-symbol = "🇬 "
+symbol = " "
