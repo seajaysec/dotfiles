@@ -123,9 +123,30 @@ fi
 # Source Configurations
 ###############################
 source $ZSH/oh-my-zsh.sh
-source ~/dotfiles/.zsh.aliases
-source ~/dotfiles/.zsh.functions
 source ~/secrets.sh
+
+# Async load aliases and functions with timeout
+{
+    sleep 0.1  # Small delay to prioritize shell availability
+    source ~/dotfiles/.zsh.aliases
+    source ~/dotfiles/.zsh.functions
+} &!
+
+# Ensure aliases/functions are available if needed immediately
+function ensure_dotfiles() {
+    # If the background job hasn't completed, source immediately
+    if [[ ! -f ~/dotfiles/.zsh.aliases.zwc ]]; then
+        source ~/dotfiles/.zsh.aliases
+        source ~/dotfiles/.zsh.functions
+    fi
+    # Remove this function after first use
+    unfunction ensure_dotfiles
+}
+
+# Create wrapper for common commands that might need aliases/functions
+for cmd in g git d docker k kubectl; do
+    eval "function $cmd() { ensure_dotfiles; $cmd \$@ }"
+done
 
 ###############################
 # Key Bindings
