@@ -1,14 +1,4 @@
 ###############################
-# Early Initialization - P10k
-###############################
-# Enable Powerlevel10k instant prompt. Should stay close to the top.
-# Initialization code that may require console input (password prompts, [y/n] confirmations, etc.)
-# must go above this block; everything else may go below.
-if [[ -r "${XDG_CACHE_HOME:-$HOME/.cache}/p10k-instant-prompt-${(%):-%n}.zsh" ]]; then
-  source "${XDG_CACHE_HOME:-$HOME/.cache}/p10k-instant-prompt-${(%):-%n}.zsh"
-fi
-
-###############################
 # Core Environment Variables
 ###############################
 # Shell basics
@@ -128,7 +118,7 @@ setopt NO_HIST_BEEP           # No beep when accessing non-existent history
 ###############################
 # Oh-My-Zsh Configuration
 ###############################
-ZSH_THEME="powerlevel10k/powerlevel10k"
+ZSH_THEME=""
 
 # Essential plugins for daily use
 plugins=(
@@ -229,7 +219,7 @@ bindkey "^[[F" end-of-line
 # Async Load External Tools
 ###############################
 # Powerlevel10k
-[[ ! -f ~/.p10k.zsh ]] || source ~/.p10k.zsh
+# [[ ! -f ~/.p10k.zsh ]] || source ~/.p10k.zsh
 
 # Lazy load conda
 conda() {
@@ -293,3 +283,5 @@ REPORTTIME=10
 # Automatically list directory contents on 'cd'
 auto-ls() { ls; }
 chpwd_functions=(${chpwd_functions[@]} "auto-ls")
+
+eval "$(starship init zsh)"
