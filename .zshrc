@@ -183,30 +183,26 @@ source ~/secrets.sh
 # Global flag to track if dotfiles are loaded
 DOTFILES_LOADED=0
 
-# Async load aliases and functions with timeout
-{
-    sleep 0.1  # Small delay to prioritize shell availability
+# Function to load dotfiles
+function load_dotfiles() {
     source ~/dotfiles/.zsh.aliases
     source ~/dotfiles/.zsh.functions
     DOTFILES_LOADED=1
-} &!
-
-# Ensure aliases/functions are available if needed immediately
-function ensure_dotfiles() {
-    if [[ $DOTFILES_LOADED -eq 0 ]]; then
-        source ~/dotfiles/.zsh.aliases
-        source ~/dotfiles/.zsh.functions
-        DOTFILES_LOADED=1
-    fi
-    # Only remove the function if files are actually loaded
-    if [[ $DOTFILES_LOADED -eq 1 ]]; then
-        unfunction ensure_dotfiles
-    fi
 }
 
-# Create wrapper for common commands that might need aliases/functions
+# Initial load of dotfiles
+load_dotfiles
+
+# Async reload of dotfiles for future updates
+{
+    sleep 0.1
+    load_dotfiles
+} &!
+
+# Remove the ensure_dotfiles function since we're loading immediately
+# but keeping the command wrappers for potential future updates
 for cmd in g git d docker k kubectl; do
-    eval "function $cmd() { ensure_dotfiles; command $cmd \$@ }"
+    eval "function $cmd() { [[ \$DOTFILES_LOADED -eq 0 ]] && load_dotfiles; command \$cmd \$@ }"
 done
 
 ###############################
