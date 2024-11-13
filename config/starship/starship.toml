@@ -88,4 +88,4 @@ format = "[](bg:prev_bg fg:color_red)[$status $symbol]($style)"
 
 [fill]
 symbol = '─'
-style = 'fg:prev_fg'
+style = 'fg:color_fg0'
