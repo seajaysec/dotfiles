@@ -132,13 +132,13 @@ ZSH_THEME="powerlevel10k/powerlevel10k"
 
 # Essential plugins for daily use
 plugins=(
-    git                     # Git integration and aliases
+    git                      # Git integration and aliases
     history-substring-search # Better history search
-    colored-man-pages       # Colored man pages
-    F-Sy-H                 # Syntax highlighting
-    command-not-found      # Suggest packages for unknown commands
-    zsh-autosuggestions    # Command suggestions
-    you-should-use         # Remind about aliases
+    colored-man-pages        # Colored man pages
+    F-Sy-H                   # Syntax highlighting
+    command-not-found        # Suggest packages for unknown commands
+    zsh-autosuggestions      # Command suggestions
+    you-should-use           # Remind about aliases
 )
 
 # NVM (Node Version Manager) lazy loading
