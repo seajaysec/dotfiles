@@ -90,6 +90,7 @@ alias gc!='git commit -v --amend'
 alias gca='git commit -v -a'
 alias gca!='git commit -v -a --amend'
 alias gcam='git commit -a -m'
+alias gce='git commit --allow-empty -m'  # Commit empty with message
 alias gcb='git checkout -b'
 alias gcf='git config --list'
 alias gcl='git clone --recurse-submodules'
@@ -203,9 +204,6 @@ alias gupav='git pull --rebase --autostash -v'
 alias gupv='git pull --rebase -v'
 alias gwch='git whatchanged -p --abbrev-commit --pretty=medium'
 alias gwip='git add -A; git rm $(git ls-files --deleted) 2> /dev/null; git commit --no-verify --no-gpg-sign -m "--wip-- [skip ci]"'
-
-# Add this with the other git aliases
-alias gce='git commit --allow-empty -m'  # Commit empty with message
 
 # Helper functions for git aliases
 function git_current_branch() {
