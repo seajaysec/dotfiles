@@ -70,7 +70,6 @@ detect_extensions = ["py", "pyc", "pyd", "pyo", "pyi", "ipynb"]
 detect_files = ["requirements.txt", "pyproject.toml", "Pipfile", "tox.ini", "setup.py", "setup.cfg", ".python-version"]
 python_binary = ["python", "python3", "python2"]
 version_format = "v${raw}"
-virtualenv_format = '($virtualenv)'
 
 [package]
 format = '[$symbol$version](fg:color_fg0 bg:color_blue)'
