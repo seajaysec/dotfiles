@@ -13,7 +13,7 @@ $git_state\
 $python\
 $package\
 [](fg:prev_bg bg:color_bg1)\
-[](fg:prev_bg)\
+[](fg:color_fg0)\
 $fill\
 [](fg:color_bg1)\
 $cmd_duration\
