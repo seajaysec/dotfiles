@@ -159,9 +159,9 @@ ZSH_CUSTOM_AUTOUPDATE_QUIET=true
 
 # General shell behavior
 DISABLE_AUTO_TITLE=true        # Don't auto-set terminal title
-HYPHEN_INSENSITIVE=true       # Treat - and _ interchangeably
-ENABLE_CORRECTION=false       # Disable command correction
-COMPLETION_WAITING_DOTS=true  # Show dots during completion
+HYPHEN_INSENSITIVE=true        # Treat - and _ interchangeably
+ENABLE_CORRECTION=false        # Disable command correction
+COMPLETION_WAITING_DOTS=true   # Show dots during completion
 
 ###############################
 # Completion Optimization
