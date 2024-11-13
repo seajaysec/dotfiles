@@ -4,6 +4,7 @@ alias mv='mv -iv'                           # Preferred 'mv' implementation
 alias mkdir='mkdir -pv'                     # Preferred 'mkdir' implementation
 alias less='less -m -N -g -i -J --line-numbers --underline-special'
 alias more='less'
+alias sudo='sudo '                          # Ensure sudo works with aliases
 alias mysudo='sudo -E env "PATH=$PATH"'
 alias history='history 0'
 alias fix_stty='stty sane'                  # Restore terminal settings when screwed up
