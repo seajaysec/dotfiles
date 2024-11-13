@@ -102,7 +102,7 @@ sessionid(){
     grep PHPSESSID $1 | awk -F ' ' '{print $7}'
 }
 
-check_cert() {
+whocerts() {
     local domain=$1
     local detail=${2:-"brief"}  # Default to brief check
     
