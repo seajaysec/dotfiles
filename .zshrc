@@ -118,8 +118,25 @@ setopt NO_HIST_BEEP           # No beep when accessing non-existent history
 ###############################
 # Plugin Management
 ###############################
-# Source zap plugin manager
+# Initialize zap plugin manager
 [ -f "$HOME/.local/share/zap/zap.zsh" ] && source "$HOME/.local/share/zap/zap.zsh"
+
+# Plugin Management
+plug() {
+    if [[ ! -f "$HOME/.local/share/zap/zap.zsh" ]]; then
+        echo "Installing zap..."
+        zsh <(curl -s https://raw.githubusercontent.com/zap-zsh/zap/master/install.sh) --branch release-v1
+        source "$HOME/.local/share/zap/zap.zsh"
+    fi
+    
+    local plugin_dir="$HOME/.local/share/zsh/plugins/${1:t}"
+    if [[ ! -d "$plugin_dir" ]]; then
+        git clone "https://github.com/${1}" "$plugin_dir"
+    fi
+    source "$plugin_dir/${1:t}.plugin.zsh" 2>/dev/null || \
+    source "$plugin_dir/${1:t}.zsh" 2>/dev/null || \
+    source "$plugin_dir/${1:t}.sh" 2>/dev/null
+}
 
 # Core plugins
 plug "zsh-users/zsh-autosuggestions"
