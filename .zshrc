@@ -58,6 +58,18 @@ export MONO_GAC_PREFIX="/usr/local"
 export BUN_INSTALL="$HOME/.bun"
 path+=($BUN_INSTALL/bin)
 
+# Better command history with timestamps and duration
+export HIST_STAMPS="mm/dd/yyyy"
+
+# Improve less behavior
+export LESS='-F -i -J -M -R -W -x4 -X -z-4'
+
+# Improve ripgrep configuration
+export RIPGREP_CONFIG_PATH="$HOME/.ripgreprc"
+
+# More accurate file timestamps in history
+export HIST_STAMPS="yyyy-mm-dd"
+
 ###############################
 # Oh-My-Zsh Configuration
 ###############################
@@ -154,6 +166,20 @@ done
 bindkey '^[[A' history-substring-search-up
 bindkey '^[[B' history-substring-search-down
 
+# Better word navigation (Alt+arrow keys)
+bindkey "^[f" forward-word
+bindkey "^[b" backward-word
+
+# Ctrl+Delete to delete word forward
+bindkey "^[[3;5~" kill-word
+
+# Ctrl+Backspace to delete word backward
+bindkey '^H' backward-kill-word
+
+# Home/End keys
+bindkey "^[[H" beginning-of-line
+bindkey "^[[F" end-of-line
+
 ###############################
 # Async Load External Tools
 ###############################
@@ -196,3 +222,58 @@ conda() {
 
 # Load lessopen last as it's least critical
 export LESSOPEN="| $(which highlight) %s --out-format xterm256 --line-numbers --quiet --force --style moria"
+
+###############################
+# FZF Improvements
+###############################
+# Add after FZF configuration
+export FZF_DEFAULT_OPTS="
+  --height 40% 
+  --layout=reverse 
+  --border 
+  --info=inline
+  --preview='[[ \$(file --mime {}) =~ binary ]] && echo {} is a binary file || (bat --style=numbers --color=always {} || cat {}) 2>/dev/null | head -300'
+  --preview-window='right:hidden:wrap'
+  --bind='f3:execute(bat --style=numbers {} || less -f {}),f2:toggle-preview,ctrl-d:half-page-down,ctrl-u:half-page-up,ctrl-y:execute-silent(echo {+} | pbcopy)'
+"
+
+###############################
+# Completion Improvements
+###############################
+# Add after existing completion configuration
+# Better completion styles
+zstyle ':completion:*:*:*:*:*' menu select
+zstyle ':completion:*' matcher-list 'm:{a-zA-Z}={A-Za-z}' # Case insensitive completion
+zstyle ':completion:*' list-colors "${(s.:.)LS_COLORS}"   # Colored completion
+zstyle ':completion:*' special-dirs true                  # Complete . and .. special directories
+zstyle ':completion:*:*:kill:*:processes' list-colors '=(#b) #([0-9]#) ([0-9a-z-]#)*=01;34=0=01'
+
+# Cache completion for better performance
+zstyle ':completion::complete:*' use-cache 1
+zstyle ':completion::complete:*' cache-path $ZSH_CACHE_DIR
+
+###############################
+# Performance Improvements
+###############################
+# Add near the top after environment variables
+# Faster git completion
+__git_files () { 
+    _wanted files expl 'local files' _files     
+}
+
+# Disable automatic updates for better startup time
+DISABLE_AUTO_UPDATE=true
+
+###############################
+# Better Terminal Experience
+###############################
+# Add near the end
+# Command execution time stamp shown in the history
+HIST_STAMPS="mm/dd/yyyy"
+
+# Report CPU usage for commands running longer than 10 seconds
+REPORTTIME=10
+
+# Automatically list directory contents on 'cd'
+auto-ls() { ls; }
+chpwd_functions=(${chpwd_functions[@]} "auto-ls")
