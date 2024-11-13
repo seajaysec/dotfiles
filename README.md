@@ -39,27 +39,32 @@ brew install \
     imagemagick         # Image processing \
     openssl             # SSL/TLS toolkit \
     python              # Python interpreter \
-    ipython             # Enhanced Python REPL
+    ipython             # Enhanced Python REPL \
+    starship            # Cross-shell prompt
 ```
 
 ### Shell Setup
 
-1. Install Oh My Zsh:
-`sh -c "$(curl -fsSL https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/tools/install.sh)"`
+1. Run the installation script:
+```bash
+./install.sh
+```
 
-2. Install Powerlevel10k theme:
-`git clone --depth=1 https://github.com/romkatv/powerlevel10k.git ${ZSH_CUSTOM:-$HOME/.oh-my-zsh/custom}/themes/powerlevel10k`
+This will set up:
+- Zap plugin manager
+- Core zsh plugins:
+  - Fast Syntax Highlighting
+  - Autosuggestions
+  - History Substring Search
+  - You Should Use (alias reminder)
 
-3. Install required Oh My Zsh plugins:
-
-Fast Syntax Highlighting:
-`git clone https://github.com/zdharma-continuum/fast-syntax-highlighting.git ${ZSH_CUSTOM:-$HOME/.oh-my-zsh/custom}/plugins/F-Sy-H`
-
-Autosuggestions:
-`git clone https://github.com/zsh-users/zsh-autosuggestions ${ZSH_CUSTOM:-~/.oh-my-zsh/custom}/plugins/zsh-autosuggestions`
-
-You Should Use:
-`git clone https://github.com/MichaelAquilina/zsh-you-should-use.git ${ZSH_CUSTOM:-~/.oh-my-zsh/custom}/plugins/you-should-use`
+2. Copy configuration files:
+```bash
+mkdir -p ~/dotfiles/config/starship
+cp .zshrc ~/.zshrc
+cp completions.zsh ~/dotfiles/
+cp config/starship/starship.toml ~/dotfiles/config/starship/
+```
 
 ### Development Tools
 
@@ -113,8 +118,17 @@ mkdir -p ~/dotfiles/config/starship
 1. Restart your terminal or source the new configuration:
 `source ~/.zshrc`
 
-2. Run p10k configure if you want to customize Powerlevel10k:
-`p10k configure`
+## Features
+
+- Fast, modern shell setup with minimal dependencies
+- Starship prompt for beautiful, informative terminal prompt
+- Smart command history with substring search
+- Syntax highlighting and autosuggestions
+- Advanced tab completions
+- Git integration
+- Docker and Kubernetes aliases
+- Efficient directory navigation with zoxide
+- Modern CLI tools (ripgrep, fd, bat, etc.)
 
 ## Usage Notes
 
@@ -126,5 +140,14 @@ mkdir -p ~/dotfiles/config/starship
 ## Maintenance
 
 - Update Homebrew packages: `brew update && brew upgrade`
-- Update Oh My Zsh: `omz update`
+- Update plugins: `cd ~/.local/share/zsh/plugins/* && git pull`
 - Update tldr pages: `tldr --update`
+- Update Starship: `brew upgrade starship`
+
+## Performance
+
+This configuration prioritizes performance while maintaining functionality:
+- Fast startup time through efficient plugin management
+- Lazy loading for heavy tools
+- Optimized completion system
+- Minimal dependencies
