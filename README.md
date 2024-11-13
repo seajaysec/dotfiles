@@ -88,8 +88,11 @@ Anaconda Python Distribution:
 ### Directory Structure
 
 Set up required directories:
-`sudo mkdir -p /opt/gists`
-`sudo chown $USER:staff /opt/gists`
+```bash
+sudo mkdir -p /opt/gists
+sudo chown $USER:staff /opt/gists
+mkdir -p ~/dotfiles/config/starship
+```
 
 ### Environment Configuration
 
@@ -97,6 +100,7 @@ Set up required directories:
 - .zshrc → ~/.zshrc
 - .zsh.functions → ~/dotfiles/.zsh.functions
 - .zsh.aliases → ~/dotfiles/.zsh.aliases
+- config/starship/starship.toml → ~/dotfiles/config/starship/starship.toml
 
 2. Create secrets file:
 `touch ~/secrets.sh`

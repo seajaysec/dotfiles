@@ -284,4 +284,5 @@ REPORTTIME=10
 auto-ls() { ls; }
 chpwd_functions=(${chpwd_functions[@]} "auto-ls")
 
+export STARSHIP_CONFIG=~/dotfiles/config/starship/starship.toml
 eval "$(starship init zsh)"
