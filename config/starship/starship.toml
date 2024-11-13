@@ -94,16 +94,22 @@ style = 'fg:prev_fg'
 
 [hostname]
 ssh_only = false
-format = '[ @$hostname ](fg:color_fg0 bg:color_orange)[$ssh_symbol](fg:color_fg0 bg:color_orange)[ $localip ](fg:color_fg0 bg:color_orange)[ $vpn ](fg:color_fg0 bg:color_orange)'
+format = '[ @$hostname ](fg:color_fg0 bg:color_orange)[$ssh_symbol](fg:color_fg0 bg:color_orange)'
 trim_at = "-"
 disabled = false
 
 [custom.localip]
 when = true
-command = "ip -o route get to 8.8.8.8 | sed -n 's/.*src \\([0-9.]\\+\\).*/\\1/p'"
+command = "ipconfig getifaddr en0 || ipconfig getifaddr en1"
 format = "[ $output](fg:color_fg0 bg:color_orange)"
 
 [custom.vpn]
-when = "ip link show tun0 2>/dev/null || ip link show wg0 2>/dev/null"
-command = "ip -o addr show dev tun0 2>/dev/null | sed -n 's/.*inet \\([0-9.]\\+\\).*/\\1/p' || ip -o addr show dev wg0 2>/dev/null | sed -n 's/.*inet \\([0-9.]\\+\\).*/\\1/p'"
+when = "ifconfig utun0 2>/dev/null || ifconfig tun0 2>/dev/null"
+command = """
+if ifconfig utun0 >/dev/null 2>&1; then
+    ipconfig getifaddr utun0
+elif ifconfig tun0 >/dev/null 2>&1; then
+    ipconfig getifaddr tun0
+fi
+"""
 format = "[ VPN:$output](fg:color_fg0 bg:color_orange)"
