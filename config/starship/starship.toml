@@ -76,7 +76,7 @@ format = '[$symbol$version](fg:color_fg0 bg:color_blue)'
 
 [cmd_duration]
 style = "bg:color_fg0"
-format = '[[  $duration ](fg:color_fg0 bg:color_bg1)]($style)'
+format = '[[  $duration ](fg:color_fg0 bg:color_fg0)]($style)'
 min_time = 50
 show_milliseconds = true
 
