@@ -88,6 +88,40 @@ iTerm2 Terminal Emulator:
 Anaconda Python Distribution:
 `brew install --cask anaconda`
 
+### Terminal Customization
+
+#### Nerd Fonts
+Install a patched Nerd Font for proper icon support:
+
+1. Download Hack Nerd Font from [Nerd Fonts](https://www.nerdfonts.com/font-downloads):
+```bash
+brew tap homebrew/cask-fonts
+brew install --cask font-hack-nerd-font
+```
+
+2. Configure iTerm2:
+- Open iTerm2 Preferences (⌘,)
+- Go to Profiles > Text
+- Select "Hack Nerd Font" or "Hack Nerd Font Mono" in both Font fields
+
+#### Color Scheme
+This configuration has been tested with the Dracula theme:
+
+1. Download the iTerm2 Dracula theme:
+```bash
+curl -O https://raw.githubusercontent.com/dracula/iterm/master/Dracula.itermcolors
+```
+
+2. Import the theme:
+- Open iTerm2 Preferences
+- Go to Profiles > Colors
+- Click "Color Presets..." dropdown
+- Select "Import..."
+- Choose the downloaded Dracula.itermcolors file
+- Select "Dracula" from Color Presets
+
+Note: The configuration has been tested with Hack Nerd Font and Dracula theme, but you can use any Nerd Font and color scheme of your choice.
+
 ## Post-Installation Setup
 
 ### Directory Structure
