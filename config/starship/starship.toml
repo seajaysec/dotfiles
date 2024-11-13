@@ -3,16 +3,16 @@
 format = """
 $sudo\
 $username\
-[](fg:color_fg0 bg:color_yellow)\
+[](fg:prev_bg bg:color_yellow)\
 $directory\
-[](fg:color_fg0 bg:color_aqua)\
+[](fg:prev_bg bg:color_aqua)\
 $git_branch\
 $git_status\
 $git_state\
-[](fg:color_fg0 bg:color_blue)\
+[](fg:prev_bg bg:color_blue)\
 $python\
 $package\
-[](fg:color_fg0 bg:color_bg1 fg:color_fg0)\
+[](fg:prev_bg bg:color_bg1 fg:color_fg0)\
 [](fg:color_fg0)\
 $fill\
 [](fg:color_fg0)\
