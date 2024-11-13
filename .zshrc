@@ -94,7 +94,7 @@ path+=($BUN_INSTALL/bin)
 HISTFILE=~/.zsh/history        # History file location
 HISTSIZE=10000000              # Maximum events in internal history
 SAVEHIST=10000000              # Maximum events in history file
-HISTORY_IGNORE="(ls|cd|pwd|exit|cd)*"  # Commands to ignore
+HISTORY_IGNORE="(pwd|exit)*"  # Commands to ignore
 HIST_STAMPS="yyyy-mm-dd"       # Timestamp format
 
 # History Options
