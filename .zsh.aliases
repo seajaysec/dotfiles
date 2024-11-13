@@ -67,3 +67,39 @@ alias fzf='fzf --color=dark'                      # Fuzzy finder with dark theme
 
 # Ensure Command Interoperability
 alias xargs='xargs '                        # Preserve alias expansion in xargs
+
+# =============================================
+# Installation Guide for Required Tools
+# =============================================
+#
+# Install these tools using Homebrew:
+#   brew install \
+#     eza                  # Modern ls replacement \
+#     ripgrep              # Modern grep replacement (rg command) \
+#     fzf                  # Fuzzy finder \
+#     tmux                 # Terminal multiplexer \
+#     grc                  # Generic colourizer \
+#     blueutil            # Bluetooth control utility \
+#     gsed                # GNU sed \
+#     rlwrap              # Readline wrapper \
+#     fd                  # Modern find replacement
+#
+# Python tools:
+#   pip3 install \
+#     virtualenv          # Virtual environment management
+#
+# Additional tools mentioned that need manual setup:
+#   - VS Code: Download from https://code.visualstudio.com
+#   - Docker: Download from https://www.docker.com/products/docker-desktop
+#
+# Optional but recommended:
+#   brew install \
+#     bat                 # Modern cat replacement \
+#     delta               # Better git diff \
+#     tldr               # Simplified man pages
+#
+# Note: Some aliases use macOS-specific commands (pbcopy, pbpaste, osascript)
+# These are built into macOS and don't need installation
+#
+# To install all Homebrew packages at once:
+#   brew install eza ripgrep fzf tmux grc blueutil gsed rlwrap fd bat delta tldr
