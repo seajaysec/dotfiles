@@ -70,140 +70,83 @@ alias xargs='xargs '                        # Preserve alias expansion in xargs
 
 # Git Aliases
 # ---------------------
-alias g='git'
-alias ga='git add'
-alias gaa='git add --all'
-alias gapa='git add --patch'
-alias gb='git branch'
-alias gba='git branch -a'
-alias gbd='git branch -d'
-alias gbD='git branch -D'
-alias gbl='git blame -b -w'
-alias gbs='git bisect'
-alias gbsb='git bisect bad'
-alias gbsg='git bisect good'
-alias gbsr='git bisect reset'
-alias gbss='git bisect start'
+# Organized by workflow stages: Basic Operations, Branching, Commits, 
+# Remote Operations, History & Logs, Changes & Staging, and Advanced Operations
 
-alias gc='git commit -v'
-alias gc!='git commit -v --amend'
-alias gca='git commit -v -a'
-alias gca!='git commit -v -a --amend'
-alias gcam='git commit -a -m'
-alias gce='git commit --allow-empty -m'  # Commit empty with message
-alias gcb='git checkout -b'
-alias gcf='git config --list'
-alias gcl='git clone --recurse-submodules'
-alias gclean='git clean -fd'
-alias gcm='git checkout $(git_main_branch)'
-alias gcmsg='git commit -m'
-alias gco='git checkout'
-alias gcount='git shortlog -sn'
-alias gcp='git cherry-pick'
-alias gcpa='git cherry-pick --abort'
-alias gcpc='git cherry-pick --continue'
+# Basic Git Operations
+alias g='git'                               # Short-form git command
+alias gst='git status'                      # Full status
+alias gss='git status -s'                   # Short status
+alias gsb='git status -sb'                  # Short status with branch info
+alias gcf='git config --list'               # List all git configurations
 
-alias gd='git diff'
-alias gdca='git diff --cached'
-alias gdct='git describe --tags $(git rev-list --tags --max-count=1)'
-alias gds='git diff --staged'
-alias gdt='git diff-tree --no-commit-id --name-only -r'
-alias gdw='git diff --word-diff'
+# Branching and Checkout Operations
+alias gb='git branch'                       # List branches
+alias gba='git branch -a'                   # List all branches (including remote)
+alias gbd='git branch -d'                   # Delete branch (safe)
+alias gbD='git branch -D'                   # Force delete branch
+alias gco='git checkout'                    # Checkout
+alias gcb='git checkout -b'                 # Create and checkout new branch
+alias gsw='git switch'                      # Switch branches (new git command)
+alias gswc='git switch -c'                  # Create and switch to new branch
+alias gswm='git switch $(git_main_branch)'  # Switch to main branch
+alias gswd='git switch develop'             # Switch to develop branch
 
-alias gf='git fetch'
-alias gfa='git fetch --all --prune --jobs=10'
-alias gfo='git fetch origin'
-alias gg='git gui citool'
-alias gga='git gui citool --amend'
+# Commit Operations
+alias gc='git commit -v'                    # Commit with diff
+alias gcm='git checkout $(git_main_branch)' # Checkout main branch
+alias gcmsg='git commit -m'                 # Commit with message
+alias gca='git commit -v -a'                # Commit all tracked files
+alias gcam='git commit -a -m'               # Commit all tracked with message
+alias gc!='git commit -v --amend'           # Amend previous commit
+alias gca!='git commit -v -a --amend'       # Amend previous with all tracked
+alias gce='git commit --allow-empty -m'     # Create empty commit
 
-alias ghh='git help'
+# Remote Operations
+alias gf='git fetch'                        # Fetch changes
+alias gfa='git fetch --all --prune --jobs=10'  # Fetch all remotes and prune
+alias gfo='git fetch origin'                # Fetch from origin
+alias gl='git pull'                         # Pull changes
+alias gp='git push'                         # Push changes
+alias gpf='git push --force-with-lease'     # Safe force push
+alias gpf!='git push --force'               # Force push (use carefully!)
+alias gpoat='git push origin --all && git push origin --tags'  # Push all refs and tags
 
-alias gl='git pull'
-alias glg='git log --stat'
-alias glgg='git log --graph'
-alias glgga='git log --graph --decorate --all'
-alias glgm='git log --graph --max-count=10'
-alias glgp='git log --stat -p'
-alias glo='git log --oneline --decorate'
-alias glog='git log --oneline --decorate --graph'
-alias gloga='git log --oneline --decorate --graph --all'
+# History and Logs
+alias glg='git log --stat'                  # Log with stats
+alias glgg='git log --graph'                # Log with graph
+alias glgga='git log --graph --decorate --all'  # Log graph of all branches
+alias glo='git log --oneline --decorate'    # Compact log
+alias glog='git log --oneline --decorate --graph'  # Compact log with graph
+alias gloga='git log --oneline --decorate --graph --all'  # Compact log of all
 
-alias gm='git merge'
-alias gma='git merge --abort'
-alias gmom='git merge origin/$(git_main_branch)'
-alias gmtl='git mergetool --no-prompt'
-alias gmtlvim='git mergetool --no-prompt --tool=vimdiff'
-alias gmum='git merge upstream/$(git_main_branch)'
+# Changes and Staging
+alias ga='git add'                          # Add files to staging
+alias gaa='git add --all'                   # Add all files
+alias gapa='git add --patch'                # Interactive staging
+alias gd='git diff'                         # Show unstaged changes
+alias gds='git diff --staged'               # Show staged changes
+alias gdw='git diff --word-diff'            # Word-level diff
+alias grs='git restore'                     # Restore files
+alias grst='git restore --staged'           # Unstage files
 
-alias gp='git push'
-alias gpd='git push --dry-run'
-alias gpf='git push --force-with-lease'
-alias gpf!='git push --force'
-alias gpoat='git push origin --all && git push origin --tags'
-alias gpr='git pull --rebase'
-alias gpristine='git reset --hard && git clean -dffx'
-alias gpu='git push upstream'
-alias gpv='git push -v'
+# Stash Operations
+alias gsta='git stash push'                 # Stash changes
+alias gstp='git stash pop'                  # Pop stashed changes
+alias gstl='git stash list'                 # List stashes
+alias gsts='git stash show --text'          # Show stash contents
+alias gstc='git stash clear'                # Clear all stashes
+alias gstd='git stash drop'                 # Drop latest stash
 
-alias gr='git remote'
-alias gra='git remote add'
-alias grb='git rebase'
-alias grba='git rebase --abort'
-alias grbc='git rebase --continue'
-alias grbd='git rebase develop'
-alias grbi='git rebase -i'
-alias grbm='git rebase $(git_main_branch)'
-alias grbs='git rebase --skip'
-alias grev='git revert'
-alias grh='git reset'
-alias grhh='git reset --hard'
-alias grm='git rm'
-alias grmc='git rm --cached'
-alias grmv='git remote rename'
-alias groh='git reset origin/$(git_current_branch) --hard'
-alias grrm='git remote remove'
-alias grs='git restore'
-alias grset='git remote set-url'
-alias grss='git restore --source'
-alias grst='git restore --staged'
-alias grt='cd "$(git rev-parse --show-toplevel || echo .)"'
-alias gru='git reset --'
-alias grup='git remote update'
-alias grv='git remote -v'
-
-alias gsb='git status -sb'
-alias gsd='git svn dcommit'
-alias gsh='git show'
-alias gsi='git submodule init'
-alias gsps='git show --pretty=short --show-signature'
-alias gsr='git svn rebase'
-alias gss='git status -s'
-alias gst='git status'
-alias gsta='git stash push'
-alias gstaa='git stash apply'
-alias gstall='git stash --all'
-alias gstc='git stash clear'
-alias gstd='git stash drop'
-alias gstl='git stash list'
-alias gstp='git stash pop'
-alias gsts='git stash show --text'
-
-alias gsu='git submodule update'
-alias gsw='git switch'
-alias gswc='git switch -c'
-alias gswd='git switch develop'
-alias gswm='git switch $(git_main_branch)'
-
-alias gts='git tag -s'
-alias gtv='git tag | sort -V'
-alias gunignore='git update-index --no-assume-unchanged'
-alias gunwip='git log -n 1 | grep -q -c "\-\-wip\-\-" && git reset HEAD~1'
-alias gup='git pull --rebase'
-alias gupa='git pull --rebase --autostash'
-alias gupav='git pull --rebase --autostash -v'
-alias gupv='git pull --rebase -v'
-alias gwch='git whatchanged -p --abbrev-commit --pretty=medium'
-alias gwip='git add -A; git rm $(git ls-files --deleted) 2> /dev/null; git commit --no-verify --no-gpg-sign -m "--wip-- [skip ci]"'
+# Advanced Operations
+alias gcp='git cherry-pick'                 # Cherry-pick commits
+alias grb='git rebase'                      # Rebase
+alias grbm='git rebase $(git_main_branch)'  # Rebase on main
+alias grbi='git rebase -i'                  # Interactive rebase
+alias gm='git merge'                        # Merge
+alias gmom='git merge origin/$(git_main_branch)'  # Merge origin main
+alias gbl='git blame -b -w'                 # Show file blame
+alias gwip='git add -A; git rm $(git ls-files --deleted) 2> /dev/null; git commit --no-verify --no-gpg-sign -m "--wip-- [skip ci]"'  # Save work in progress
 
 # Helper functions for git aliases
 function git_current_branch() {
