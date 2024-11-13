@@ -261,3 +261,54 @@ subdir() {
             ;;
     esac
 }
+
+# Prerequisites & Setup
+# -------------------
+#
+# To use these functions on macOS, install the following:
+#
+# 1. Command Line Tools:
+#    xcode-select --install
+#
+# 2. Homebrew (https://brew.sh):
+#    /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
+#
+# 3. Required Packages:
+#    brew install \
+#        ripgrep \        # Required for grep* functions
+#        nmap \           # Required for iplist and cert checking
+#        ffmpeg \         # Required for mp4togif
+#        imagemagick \    # Required for mp4togif
+#        openssl \        # Required for certificate functions
+#        python \         # Required for ipy function
+#        ipython         # Required for ipy function
+#
+# 4. Optional but recommended:
+#    brew install \
+#        pyenv \          # Better Python version management
+#        xclip \          # Required for clipboard function on Linux
+#        git             # Required for git operations
+#
+# 5. Python packages:
+#    pip install \
+#        ipython         # Alternative installation method
+#
+# Note: Some functions require specific permissions:
+# - pskill requires sudo access for killing certain processes
+# - gistx requires write access to /opt/gists directory
+# - Some network scanning functions may require root privileges
+#
+# To set up /opt/gists directory:
+#    sudo mkdir -p /opt/gists
+#    sudo chown $USER:staff /opt/gists
+#
+# For VMware users (mountshares function):
+#    Ensure VMware Tools is installed and up to date
+#
+# For Azure CLI functions:
+#    brew install azure-cli
+#    az login
+#
+# Environment Variables:
+# - Set HOMEBREW_NO_AUTO_UPDATE=1 to speed up brew operations (optional)
+# - Ensure PATH includes /usr/local/bin and /opt/homebrew/bin
