@@ -24,16 +24,16 @@ $character"""
 palette = 'gruvbox_dark'
 
 [palettes.gruvbox_dark]
-color_fg0 = '231'
+color_fg0 = '230'
 color_bg1 = '16'
 color_bg3 = '59'
-color_blue = '147'
-color_aqua = '159'
-color_green = '157'
-color_orange = '223'
-color_purple = '218'
-color_red = '217'
-color_yellow = '229'
+color_blue = '30'
+color_aqua = '71'
+color_green = '100'
+color_orange = '166'
+color_purple = '132'
+color_red = '160'
+color_yellow = '172'
 
 [sudo]
 disabled = false
