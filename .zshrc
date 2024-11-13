@@ -293,3 +293,68 @@ REPORTTIME=10
 # Automatically list directory contents on 'cd'
 auto-ls() { ls; }
 chpwd_functions=(${chpwd_functions[@]} "auto-ls")
+
+###############################
+# Installation Guide (Reference)
+###############################
+# This is a reference section for installing required tools on macOS
+# Install using:
+# brew install <formula>
+#
+# Required Homebrew packages:
+# - ag (silver searcher):        Fast code searching
+#   brew install the_silver_searcher
+#
+# - bat:                         Better cat with syntax highlighting
+#   brew install bat
+#
+# - highlight:                   Source code highlighter
+#   brew install highlight
+#
+# - fzf:                         Fuzzy finder
+#   brew install fzf
+#   $(brew --prefix)/opt/fzf/install
+#
+# - zoxide:                      Smarter cd command
+#   brew install zoxide
+#
+# - anaconda:                    Python distribution
+#   brew install --cask anaconda
+#
+# - golang:                      Go programming language
+#   brew install go
+#
+# Oh My Zsh installation:
+# sh -c "$(curl -fsSL https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/tools/install.sh)"
+#
+# Powerlevel10k theme:
+# git clone --depth=1 https://github.com/romkatv/powerlevel10k.git ${ZSH_CUSTOM:-$HOME/.oh-my-zsh/custom}/themes/powerlevel10k
+#
+# Required Oh My Zsh plugins:
+# - F-Sy-H (Fast Syntax Highlighting):
+#   git clone https://github.com/zdharma-continuum/fast-syntax-highlighting.git \
+#     ${ZSH_CUSTOM:-$HOME/.oh-my-zsh/custom}/plugins/F-Sy-H
+#
+# - zsh-autosuggestions:
+#   git clone https://github.com/zsh-users/zsh-autosuggestions \
+#     ${ZSH_CUSTOM:-~/.oh-my-zsh/custom}/plugins/zsh-autosuggestions
+#
+# - you-should-use:
+#   git clone https://github.com/MichaelAquilina/zsh-you-should-use.git \
+#     ${ZSH_CUSTOM:-~/.oh-my-zsh/custom}/plugins/you-should-use
+#
+# Node Version Manager (nvm):
+# curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.39.0/install.sh | bash
+#
+# Bun JavaScript runtime:
+# curl -fsSL https://bun.sh/install | bash
+#
+# Cargo (Rust package manager):
+# curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh
+#
+# Optional but recommended:
+# - iTerm2:                      Better terminal emulator
+#   brew install --cask iterm2
+#
+# Note: Some of these tools might need additional configuration after installation.
+# Refer to their respective documentation for post-installation steps.
