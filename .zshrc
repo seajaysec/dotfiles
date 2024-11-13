@@ -194,9 +194,8 @@ load_dotfiles
     load_dotfiles
 } &!
 
-# Remove the ensure_dotfiles function since we're loading immediately
-# but keeping the command wrappers for potential future updates
-for cmd in g git d docker k kubectl; do
+# Replace with this simpler approach if you still want the wrappers
+for cmd in g d k; do  # Only wrap shorthand commands
     eval "function $cmd() { [[ \$DOTFILES_LOADED -eq 0 ]] && load_dotfiles; command \$cmd \$@ }"
 done
 
