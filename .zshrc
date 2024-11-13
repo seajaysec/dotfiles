@@ -127,7 +127,7 @@ plug "zdharma-continuum/fast-syntax-highlighting"
 plug "zsh-users/zsh-history-substring-search"
 plug "MichaelAquilina/zsh-you-should-use"
 
-
+source ~/dotfiles/completions.zsh
 
 # Load completions
 autoload -Uz compinit
