@@ -21,12 +21,14 @@ lscsv() {
 
 # Network & IP Operations
 # ----------------------
-localip(){
-    ifconfig | grep 'inet ' | grep -v '127.0.0.1' | cut -d: -f2 | awk '{ print $2}' | tail -n 1
-}
-
-localips(){
-    ifconfig | grep 'inet ' | grep -v '127.0.0.1' | cut -d: -f2 | awk '{ print $2}'
+localip() {
+    local all=${1:-0}  # Default to single IP if no arg provided
+    local ips=$(ifconfig | grep 'inet ' | grep -v '127.0.0.1' | cut -d: -f2 | awk '{ print $2}')
+    if [ "$all" = "1" ]; then
+        echo "$ips"
+    else
+        echo "$ips" | tail -n 1
+    fi
 }
 
 cidr2ip() {
@@ -59,8 +61,24 @@ grepeml() {
 }
 
 grepip() {
-    rg -Nao --no-ignore -e '\b((([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])(\.)){3}([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5]))\b' "$@" |
-    command grep -Eo '\b((([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])(\.)){3}([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5]))\b'
+    local version=${1:-"4"}  # Default to IPv4
+    shift 2>/dev/null  # Remove first argument if it exists
+    
+    case $version in
+        "4")
+            rg -Nao --no-ignore -e '\b((([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])(\.)){3}([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5]))\b' "$@" |
+            command grep -Eo '\b((([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])(\.)){3}([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5]))\b'
+            ;;
+        "6")
+            rg -Nao --no-ignore -i '([0-9a-fA-F]{1,4}:){3,7}[0-9a-fA-F]{1,4}' "$@" 2>/dev/null |
+            command grep -Eoi '([0-9a-fA-F]{1,4}:){3,7}[0-9a-fA-F]{1,4}'
+            ;;
+        "both")
+            rg -Nao --no-ignore -e '\b((([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])(\.)){3}([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5]))\b' \
+                             -e '([0-9a-f]{1,4}:){3,7}[0-9a-f]{1,4}' "$@" |
+            command grep -Eo '\b((([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])(\.)){3}([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5]))\b|([0-9a-f]{1,4}:){3,7}[0-9a-f]{1,4}'
+            ;;
+    esac
 }
 
 grepip46() {
@@ -84,18 +102,21 @@ sessionid(){
     grep PHPSESSID $1 | awk -F ' ' '{print $7}'
 }
 
-whodat(){ 
-    openssl s_client -showcerts -connect $1:443 | grep 'CN=' 
-}
-
-whocerts(){
-    echo "1. Running openssl check:" && echo \
-    | openssl s_client -showcerts -servername $1 -connect $1:443 2>/dev/null \
-    | openssl x509 -inform pem -noout -text \
-    &&  echo "2. Running nslookup" \
-    && nslookup -vc -type=ANY $1 \
-    && echo "3. Running nmap" \
-    && nmap -p 443 --script ssl-cert $1
+check_cert() {
+    local domain=$1
+    local detail=${2:-"brief"}  # Default to brief check
+    
+    if [ "$detail" = "brief" ]; then
+        openssl s_client -showcerts -connect $domain:443 2>/dev/null | grep 'CN='
+    else
+        echo "1. Running openssl check:" && echo \
+        | openssl s_client -showcerts -servername $domain -connect $domain:443 2>/dev/null \
+        | openssl x509 -inform pem -noout -text \
+        && echo "2. Running nslookup" \
+        && nslookup -vc -type=ANY $domain \
+        && echo "3. Running nmap" \
+        && nmap -p 443 --script ssl-cert $domain
+    fi
 }
 
 # System Maintenance
@@ -149,8 +170,20 @@ impaste(){
 # Media Conversion
 # --------------
 mp4togif() {
+    if [ -z "$1" ]; then
+        echo "Usage: mp4togif filename (without .mp4 extension)"
+        return 1
+    fi
+    
+    if [ ! -f "$1.mp4" ]; then
+        echo "Error: $1.mp4 not found"
+        return 1
+    fi
+    
+    local output=${2:-"output.gif"}
     ffmpeg -i $1.mp4 -r 10 -f image2pipe -vcodec ppm - | \
-    convert -delay 5 -loop 0 - output.gif
+    convert -delay 5 -loop 0 - "$output" && \
+    echo "Converted $1.mp4 to $output"
 }
 
 # Git Operations
@@ -165,12 +198,17 @@ gistx(){
     ls
 }
 
-subdirexec() {
-    find . -maxdepth 1 -type d \( ! -name . \) \
-    -exec bash -c "cd '{}' && pwd && $1 && echo 'success'" \;
-}
-
-subdirgitadd() {
-    find . -maxdepth 1 -type d \( ! -name . \) \
-    -exec bash -c "cd '{}' && pwd && git add -u && echo 'success'" \;
+subdir() {
+    local action=$1
+    shift
+    case $action in
+        "exec")
+            find . -maxdepth 1 -type d \( ! -name . \) \
+            -exec bash -c "cd '{}' && pwd && $* && echo 'success'" \;
+            ;;
+        "git")
+            find . -maxdepth 1 -type d \( ! -name . \) \
+            -exec bash -c "cd '{}' && pwd && git $* && echo 'success'" \;
+            ;;
+    esac
 }
