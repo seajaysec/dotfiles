@@ -306,25 +306,62 @@ bindkey -M menuselect 'k' vi-up-line-or-history
 bindkey -M menuselect 'l' vi-forward-char
 bindkey -M menuselect 'j' vi-down-line-or-history
 
+# Cursor style options:
+# '\e[0 q' - blinking block
+# '\e[1 q' - blinking block (default)
+# '\e[2 q' - steady block
+# '\e[3 q' - blinking underline
+# '\e[4 q' - steady underline
+# '\e[5 q' - blinking beam
+# '\e[6 q' - steady beam
+
 # Change cursor shape for different vi modes
 function zle-keymap-select {
   if [[ ${KEYMAP} == vicmd ]] ||
      [[ $1 = 'block' ]]; then
-    echo -ne '\e[1 q'
+    # Normal mode cursor options:
+    echo -ne '\e[1 q'  # blinking block
+    # echo -ne '\e[0 q'  # blinking block (alternative)
+    # echo -ne '\e[2 q'  # steady block
+    # echo -ne '\e[3 q'  # blinking underline
+    # echo -ne '\e[4 q'  # steady underline
   elif [[ ${KEYMAP} == main ]] ||
        [[ ${KEYMAP} == viins ]] ||
        [[ ${KEYMAP} = '' ]] ||
        [[ $1 = 'beam' ]]; then
-    echo -ne '\e[5 q'
+    # Insert mode cursor options:
+    echo -ne '\e[5 q'  # blinking beam
+    # echo -ne '\e[6 q'  # steady beam
+    # echo -ne '\e[3 q'  # blinking underline
+    # echo -ne '\e[4 q'  # steady underline
   fi
 }
 zle -N zle-keymap-select
 
-# Init vi mode with beam cursor
-echo -ne '\e[5 q'
+# Initial cursor style options:
+echo -ne '\e[5 q'  # blinking beam
+# echo -ne '\e[6 q'  # steady beam
+# echo -ne '\e[1 q'  # blinking block
+# echo -ne '\e[2 q'  # steady block
+# echo -ne '\e[3 q'  # blinking underline
+# echo -ne '\e[4 q'  # steady underline
 
-# Use beam shape cursor on startup
-precmd() { echo -ne '\e[5 q' }
+# Cursor style for new prompt options:
+precmd() { 
+    echo -ne '\e[5 q'  # blinking beam
+    # echo -ne '\e[6 q'  # steady beam
+    # echo -ne '\e[1 q'  # blinking block
+    # echo -ne '\e[2 q'  # steady block
+    # echo -ne '\e[3 q'  # blinking underline
+    # echo -ne '\e[4 q'  # steady underline
+}
 
-# Use beam shape cursor for each new prompt
-preexec() { echo -ne '\e[5 q' }
+# Cursor style for each command options:
+preexec() { 
+    echo -ne '\e[5 q'  # blinking beam
+    # echo -ne '\e[6 q'  # steady beam
+    # echo -ne '\e[1 q'  # blinking block
+    # echo -ne '\e[2 q'  # steady block
+    # echo -ne '\e[3 q'  # blinking underline
+    # echo -ne '\e[4 q'  # steady underline
+}
