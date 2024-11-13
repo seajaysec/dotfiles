@@ -261,3 +261,32 @@ subdir() {
             ;;
     esac
 }
+
+# Git Helper Functions
+# -------------------
+
+# Get current git branch name
+git_current_branch() {
+    local ref
+    ref=$(git symbolic-ref --quiet HEAD 2> /dev/null)
+    local ret=$?
+    if [[ $ret != 0 ]]; then
+        [[ $ret == 128 ]] && return
+        ref=$(git rev-parse --short HEAD 2> /dev/null) || return
+    fi
+    echo ${ref#refs/heads/}
+}
+
+# Detect main branch name (main, trunk, or master)
+git_main_branch() {
+    if git rev-parse --git-dir >/dev/null 2>&1; then
+        local branch
+        for branch in main trunk; do
+            if command git show-ref -q --verify refs/heads/$branch; then
+                echo $branch
+                return
+            fi
+        done
+        echo master
+    fi
+}

@@ -204,6 +204,9 @@ alias gupv='git pull --rebase -v'
 alias gwch='git whatchanged -p --abbrev-commit --pretty=medium'
 alias gwip='git add -A; git rm $(git ls-files --deleted) 2> /dev/null; git commit --no-verify --no-gpg-sign -m "--wip-- [skip ci]"'
 
+# Add this with the other git aliases
+alias gce='git commit --allow-empty -m'  # Commit empty with message
+
 # Helper functions for git aliases
 function git_current_branch() {
     local ref
