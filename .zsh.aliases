@@ -90,7 +90,6 @@ alias fzf='fzf --color=dark'
 
 # Application Shortcuts
 alias firefox='/Applications/Firefox.app/Contents/MacOS/firefox'
-alias archey='neofetch'
 alias extract='dtrx'
 alias icat="kitty +kitten icat"
 alias torb='xhost si:localuser:toruser && sudo -u toruser -H torbrowser-launcher'
