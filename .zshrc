@@ -1,124 +1,167 @@
 ###############################
-# Early Initialization
+# Early Initialization - P10k
 ###############################
-# Enable Powerlevel10k instant prompt (must stay at top)
+# Enable Powerlevel10k instant prompt. Should stay close to the top.
+# Initialization code that may require console input (password prompts, [y/n] confirmations, etc.)
+# must go above this block; everything else may go below.
 if [[ -r "${XDG_CACHE_HOME:-$HOME/.cache}/p10k-instant-prompt-${(%):-%n}.zsh" ]]; then
   source "${XDG_CACHE_HOME:-$HOME/.cache}/p10k-instant-prompt-${(%):-%n}.zsh"
 fi
 
 ###############################
-# Environment Variables
+# Core Environment Variables
 ###############################
-# Shell
-export ZSH=~/.oh-my-zsh
-export TERM=xterm-256color
-export LANG=en_US.UTF-8
-export ARCHFLAGS="-arch x86_64"
+# Shell basics
+export ZSH=~/.oh-my-zsh          # Oh My Zsh installation path
+export TERM=xterm-256color       # Enable 256 color support
+export LANG=en_US.UTF-8          # Default language setting
+export ARCHFLAGS="-arch x86_64"  # Architecture-specific flags
 
-# Editors
+# Default editors
 export EDITOR=vim
 export VISUAL=vim
 
-# Search and Display
-export GREP_OPTIONS='--color=always'
-export ACK_PAGER_COLOR="{$PAGER:-less -R}"
-export LESS=" -R"
-export FZF_DEFAULT_COMMAND='ag --hidden -g ""'
+# Search and display settings
+export GREP_OPTIONS='--color=always'  # Always colorize grep output
+export ACK_PAGER_COLOR="{$PAGER:-less -R}"  # Colorized ack output
+export LESS='-F -i -J -M -R -W -x4 -X -z-4'  # Improved less behavior:
+                                             # -F: quit if one screen
+                                             # -i: ignore case in searches
+                                             # -J: show status column
+                                             # -M: show detailed prompt
+                                             # -R: handle ANSI colors
+                                             # -W: highlight first new line after forward movement
+                                             # -x4: tabs are 4 characters
+                                             # -X: don't clear screen on exit
+                                             # -z-4: keep 4 lines overlap when scrolling
 
-# Homebrew
-export HOMEBREW_NO_ENV_HINTS=1
+# FZF (Fuzzy Finder) configuration
+export FZF_DEFAULT_COMMAND='ag --hidden -g ""'  # Use silver searcher for FZF
+export FZF_DEFAULT_OPTS="
+  --height 40%                   # Use 40% of screen height
+  --layout=reverse              # List matches from top to bottom
+  --border                      # Add border around the finder
+  --info=inline                 # Show info inline with results
+  --preview='[[ \$(file --mime {}) =~ binary ]] && 
+            echo {} is a binary file || 
+            (bat --style=numbers --color=always {} || cat {}) 2>/dev/null | 
+            head -300'           # Show file preview with syntax highlighting
+  --preview-window='right:hidden:wrap'  # Preview window configuration
+  --bind='f3:execute(bat --style=numbers {} || less -f {}),
+         f2:toggle-preview,
+         ctrl-d:half-page-down,
+         ctrl-u:half-page-up,
+         ctrl-y:execute-silent(echo {+} | pbcopy)'  # Custom key bindings
+"
 
-# Path Configuration (consolidated)
-typeset -U path  # Ensure unique paths
+# Homebrew settings
+export HOMEBREW_NO_ENV_HINTS=1  # Disable Homebrew environment hints
+
+###############################
+# Path Configuration
+###############################
+# Ensure paths are unique with typeset
+typeset -U path
 path=(
-    /usr/local/{sbin,bin}
-    /usr/{bin,sbin}
-    /{bin,sbin}
-    ~/Library/Python/3.8/bin
-    ~/.local/bin
-    ~/.npm-packages/{bin,lib/node_modules/n/bin}
-    /bin/lscript
-    /usr/local/anaconda3/bin
-    $path
+    # System paths
+    /usr/local/{sbin,bin}      # Local system binaries
+    /usr/{bin,sbin}            # System binaries
+    /{bin,sbin}                # Essential system binaries
+    
+    # User-specific paths
+    ~/Library/Python/3.8/bin   # Python user binaries
+    ~/.local/bin               # Local user binaries
+    ~/.npm-packages/{bin,lib/node_modules/n/bin}  # NPM packages
+    
+    # Additional tool paths
+    /bin/lscript               # Custom scripts
+    /usr/local/anaconda3/bin   # Anaconda
+    $path                      # Existing path entries
 )
 export PATH
 
+###############################
+# Language-Specific Settings
+###############################
 # Man pages
 export MANPATH=/usr/local/man:$MANPATH
 
-# Golang
+# Golang configuration
 export GOROOT=/usr/local/go
 export GOPATH=$HOME/go
 path+=($GOPATH/bin $GOROOT/bin)
 
-# Mono
+# Mono framework
 export MONO_GAC_PREFIX="/usr/local"
 
-# Bun
+# Bun JavaScript runtime
 export BUN_INSTALL="$HOME/.bun"
 path+=($BUN_INSTALL/bin)
 
-# Better command history with timestamps and duration
-export HIST_STAMPS="mm/dd/yyyy"
+###############################
+# History Configuration
+###############################
+HISTFILE=~/.zsh/history        # History file location
+HISTSIZE=10000000              # Maximum events in internal history
+SAVEHIST=10000000             # Maximum events in history file
+HISTORY_IGNORE="(ls|cd|pwd|exit|cd)*"  # Commands to ignore
+HIST_STAMPS="yyyy-mm-dd"       # Timestamp format
 
-# Improve less behavior
-export LESS='-F -i -J -M -R -W -x4 -X -z-4'
+# History Options
+setopt APPEND_HISTORY          # Append to history instead of overwriting
+setopt EXTENDED_HISTORY        # Save timestamp and duration
+setopt SHARE_HISTORY          # Share history between sessions
 
-# Improve ripgrep configuration
-export RIPGREP_CONFIG_PATH="$HOME/.ripgreprc"
+# Duplicate Management
+setopt HIST_IGNORE_ALL_DUPS   # Remove older duplicate entries
+setopt HIST_IGNORE_DUPS       # Don't record duplicates
+setopt HIST_IGNORE_SPACE      # Ignore commands starting with space
+setopt HIST_SAVE_NO_DUPS      # Don't save duplicates
+setopt HIST_FIND_NO_DUPS      # Don't show duplicates in search
 
-# More accurate file timestamps in history
-export HIST_STAMPS="yyyy-mm-dd"
+# History Optimization
+setopt HIST_REDUCE_BLANKS     # Remove superfluous blanks
+setopt HIST_VERIFY            # Don't execute immediately upon expansion
+setopt INC_APPEND_HISTORY     # Add commands as they are typed
+setopt NO_HIST_BEEP           # No beep when accessing non-existent history
 
 ###############################
 # Oh-My-Zsh Configuration
 ###############################
 ZSH_THEME="powerlevel10k/powerlevel10k"
 
-# Reduce plugin load for faster startup
+# Essential plugins for daily use
 plugins=(
-    git 
-    history-substring-search 
-    colored-man-pages 
-    F-Sy-H 
-    command-not-found 
-    zsh-autosuggestions 
-    you-should-use
+    git                     # Git integration and aliases
+    history-substring-search # Better history search
+    colored-man-pages       # Colored man pages
+    F-Sy-H                 # Syntax highlighting
+    command-not-found      # Suggest packages for unknown commands
+    zsh-autosuggestions    # Command suggestions
+    you-should-use         # Remind about aliases
 )
 
-# Lazy load slower plugins
+# NVM (Node Version Manager) lazy loading
 lazy_load_nvm() {
     unset -f nvm node npm
     export NVM_DIR="$HOME/.nvm"
     [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"
 }
 
+# Create lazy load triggers for Node-related commands
 for cmd in nvm node npm; do
     eval "${cmd}() { lazy_load_nvm; ${cmd} \$@ }"
 done
 
-# Update settings
+# Update behavior
 zstyle ':omz:update' mode auto
 ZSH_CUSTOM_AUTOUPDATE_QUIET=true
 
-# General settings
-DISABLE_AUTO_TITLE=true
-HYPHEN_INSENSITIVE=true
-ENABLE_CORRECTION=false
-COMPLETION_WAITING_DOTS=true
-
-###############################
-# History Configuration
-###############################
-HISTFILE=~/.zsh/history
-HISTSIZE=10000000
-SAVEHIST=10000000
-HISTORY_IGNORE="(ls|cd|pwd|exit|cd)*"
-HIST_STAMPS="yyyy-mm-dd"
-
-setopt APPEND_HISTORY EXTENDED_HISTORY HIST_FIND_NO_DUPS HIST_IGNORE_ALL_DUPS 
-setopt HIST_IGNORE_DUPS HIST_IGNORE_SPACE HIST_NO_STORE HIST_REDUCE_BLANKS 
-setopt HIST_SAVE_NO_DUPS HIST_VERIFY INC_APPEND_HISTORY NO_HIST_BEEP SHARE_HISTORY
+# General shell behavior
+DISABLE_AUTO_TITLE=true        # Don't auto-set terminal title
+HYPHEN_INSENSITIVE=true       # Treat - and _ interchangeably
+ENABLE_CORRECTION=false       # Disable command correction
+COMPLETION_WAITING_DOTS=true  # Show dots during completion
 
 ###############################
 # Completion Optimization
@@ -222,35 +265,6 @@ conda() {
 
 # Load lessopen last as it's least critical
 export LESSOPEN="| $(which highlight) %s --out-format xterm256 --line-numbers --quiet --force --style moria"
-
-###############################
-# FZF Improvements
-###############################
-# Add after FZF configuration
-export FZF_DEFAULT_OPTS="
-  --height 40% 
-  --layout=reverse 
-  --border 
-  --info=inline
-  --preview='[[ \$(file --mime {}) =~ binary ]] && echo {} is a binary file || (bat --style=numbers --color=always {} || cat {}) 2>/dev/null | head -300'
-  --preview-window='right:hidden:wrap'
-  --bind='f3:execute(bat --style=numbers {} || less -f {}),f2:toggle-preview,ctrl-d:half-page-down,ctrl-u:half-page-up,ctrl-y:execute-silent(echo {+} | pbcopy)'
-"
-
-###############################
-# Completion Improvements
-###############################
-# Add after existing completion configuration
-# Better completion styles
-zstyle ':completion:*:*:*:*:*' menu select
-zstyle ':completion:*' matcher-list 'm:{a-zA-Z}={A-Za-z}' # Case insensitive completion
-zstyle ':completion:*' list-colors "${(s.:.)LS_COLORS}"   # Colored completion
-zstyle ':completion:*' special-dirs true                  # Complete . and .. special directories
-zstyle ':completion:*:*:kill:*:processes' list-colors '=(#b) #([0-9]#) ([0-9a-z-]#)*=01;34=0=01'
-
-# Cache completion for better performance
-zstyle ':completion::complete:*' use-cache 1
-zstyle ':completion::complete:*' cache-path $ZSH_CACHE_DIR
 
 ###############################
 # Performance Improvements
