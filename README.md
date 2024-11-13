@@ -26,21 +26,21 @@ brew install \
     grc                  # Generic colourizer \
     blueutil             # Bluetooth control utility \
     gsed                 # GNU sed \
-    rlwrap              # Readline wrapper \
+    rlwrap               # Readline wrapper \
     fd                   # Modern find replacement \
     bat                  # Modern cat replacement \
     delta                # Better git diff \
     tldr                 # Simplified man pages \
     the_silver_searcher  # Fast code searching \
     highlight            # Source code highlighter \
-    zoxide              # Smarter cd command \
-    nmap                # Network scanning \
-    ffmpeg              # Media conversion \
-    imagemagick         # Image processing \
-    openssl             # SSL/TLS toolkit \
-    python              # Python interpreter \
-    ipython             # Enhanced Python REPL \
-    starship            # Cross-shell prompt
+    zoxide               # Smarter cd command \
+    nmap                 # Network scanning \
+    ffmpeg               # Media conversion \
+    imagemagick          # Image processing \
+    openssl              # SSL/TLS toolkit \
+    python               # Python interpreter \
+    ipython              # Enhanced Python REPL \
+    starship             # Cross-shell prompt
 ```
 
 ### Shell Setup
