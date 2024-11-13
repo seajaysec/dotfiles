@@ -14,8 +14,7 @@ alias lsl='eza -lah --git --grid'
 alias lst='eza --tree --level'
 alias f='cd "$(osascript -e '\''tell application "Finder" to if (count of windows) > 0 then get POSIX path of (target of front window as alias)'\'' 2>/dev/null)"'
 
-# Network Tools & Information
-alias myip='curl ip.appspot.com'                    # Public facing IP Address
+# Network Tools & Information                   # Public facing IP Address
 alias publicip='host myip.opendns.com resolver1.opendns.com | grepip | tail -n 1'
 alias revdig='dig +noall +answer -x'
 alias getJSON='curl -i -H "Accept: application/json" -H "Content-Type: application/json"'
@@ -55,7 +54,6 @@ alias simplyemail='docker run -ti simplysecurity/simplyemail -all -v -verify -e'
 
 # Python & Virtual Environment
 alias de='deactivate'
-alias pip='python3 -m pip'
 alias pipr3='python3 -m pip install -r requirements.txt'
 alias pipr='python -m pip install -r requirements.txt'
 alias psi3='python3 setup.py install'
@@ -64,7 +62,6 @@ alias srcenv='source env_*/bin/activate'
 alias rmenv='sudo rm -rf env_*'
 
 # Text Processing & Clipboard
-alias cgrep="grep --color=always"
 alias grepcve="grep -ioE 'CVE-[0-9]{4}-[0-9]{4,}' | tr '[:lower:]' '[:upper:]' | sort -u"
 alias clipsort="pbpaste | grep -v "^$" | sort -Vu | pbcopy"
 alias commacount="pbpaste | grep -o ',' | wc -l"
