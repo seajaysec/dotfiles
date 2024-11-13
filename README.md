@@ -53,10 +53,57 @@ brew install \
 This will set up:
 - Zap plugin manager
 - Core zsh plugins:
-  - Fast Syntax Highlighting
-  - Autosuggestions
-  - History Substring Search
-  - You Should Use (alias reminder)
+  - Fast Syntax Highlighting - Real-time syntax highlighting for enhanced readability and error detection
+  - Autosuggestions - Fish-like suggestions based on command history
+  - History Substring Search - Type part of a command and use up/down arrows to search
+  - You Should Use - Gentle reminders about available aliases
+  - Autoswitch Virtualenv - Automatically activates/deactivates Python virtual environments as you navigate directories
+
+### Vi Mode Features
+
+This configuration includes a powerful Vi mode setup that transforms your shell into a Vi-like environment:
+
+#### Mode Indicators
+The cursor shape changes to indicate your current mode:
+- Normal Mode: Blinking block cursor
+- Insert Mode: Blinking beam cursor (like a standard terminal)
+
+#### Common Vi Navigation Shortcuts
+Normal Mode (press ESC to enter):
+- `h`, `j`, `k`, `l` - Left, down, up, right
+- `w` - Jump to next word
+- `b` - Jump to previous word
+- `0` - Jump to start of line
+- `$` - Jump to end of line
+- `f{char}` - Jump to next occurrence of {char}
+- `F{char}` - Jump to previous occurrence of {char}
+- `gg` - Jump to beginning of history
+- `G` - Jump to end of history
+
+#### Text Manipulation
+- `dd` - Delete current line
+- `dw` - Delete word
+- `d$` - Delete to end of line
+- `cc` - Change entire line
+- `cw` - Change word
+- `ci"` - Change inside quotes
+- `yy` - Yank (copy) line
+- `p` - Paste after cursor
+- `P` - Paste before cursor
+
+#### Search and History
+- `/` - Search forward
+- `?` - Search backward
+- `n` - Next search result
+- `N` - Previous search result
+- `ctrl-p` - Previous command (while in insert mode)
+- `ctrl-n` - Next command (while in insert mode)
+
+#### Menu Navigation
+When in completion menus:
+- `h`, `j`, `k`, `l` - Navigate completion options
+- `Enter` - Select completion
+- `Esc` - Exit completion menu
 
 2. Copy configuration files:
 ```bash
@@ -154,11 +201,13 @@ mkdir -p ~/dotfiles/config/starship
 
 ## Features
 
+- Vi mode with visual mode indicators and enhanced navigation
 - Fast, modern shell setup with minimal dependencies
 - Starship prompt for beautiful, informative terminal prompt
 - Smart command history with substring search
 - Syntax highlighting and autosuggestions
 - Advanced tab completions
+- Automatic Python virtualenv switching
 - Git integration
 - Docker and Kubernetes aliases
 - Efficient directory navigation with zoxide
