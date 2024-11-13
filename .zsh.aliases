@@ -67,3 +67,30 @@ alias fzf='fzf --color=dark'                      # Fuzzy finder with dark theme
 
 # Ensure Command Interoperability
 alias xargs='xargs '                        # Preserve alias expansion in xargs
+
+# Add these modern tool alternatives
+alias cat='bat --style=plain'                # Modern cat replacement
+alias grep='rg'                              # Modern grep replacement
+alias find='fd'                              # Modern find replacement
+alias ps='procs'                             # Modern ps replacement
+alias du='dust'                              # Modern du replacement
+alias df='duf'                               # Modern df replacement
+alias top='btop'                             # Modern top replacement
+
+# Git efficiency improvements
+alias gst='git status -sb'                   # Shorter status output
+alias glo='git log --oneline --graph'        # Compact log view
+alias gba='git branch -a'                    # Show all branches
+alias gcane='git commit --amend --no-edit'   # Amend without editing
+alias gcpt='git commit --allow-empty -m'
+
+# Docker improvements
+alias dcp='docker compose'                   # Shorter docker compose
+alias dcup='docker compose up -d'            # Start containers
+alias dcdown='docker compose down'           # Stop containers
+alias dclogs='docker compose logs -f'        # Follow logs
+
+# Development workflow
+alias nvim='lvim'                            # Use LunarVim if installed
+alias code.='code .'                         # Open VSCode in current directory
+alias serve='python3 -m http.server 8000'    # Quick HTTP server
