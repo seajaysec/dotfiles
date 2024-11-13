@@ -262,7 +262,7 @@ subdir() {
     esac
 }
 
-# Git Helper Functions
+# Git Alias Helper Functions
 # -------------------
 
 # Get current git branch name
