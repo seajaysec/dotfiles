@@ -1,271 +1,241 @@
-alph_sort(){
-  for f in *; do
-  if [ -f "$f" ]; then
-    mkdir -p "${f:0:1}"
-    mv "$f" "${f:0:1}"
-  fi
-done
-}
-
-az_all_spns(){
-  az ad sp list --output=table --query='[].{Name:displayName,Enabled:accountEnabled,\
-  uyURL:homepage,Publisher:publisherName,MetadataURL:samlMetadataUrl}'
-}
-
-az_all_users(){
-  az ad user list --output=table --query='[].{Created:createdDateTime,UPN:userPrincipalName,Name:displayName,\
-  Title:jobTitle,Department:department,Email:mail,UserId:mailNickname,Phone:telephoneNumber,\
-  Mobile:mobile,Enabled:accountEnabled}'
-}
-
-az_dump_apps(){
-  az ad app list --output=table --query='[].{Name:displayName,URL:homepage}'
-}
-
-az_dump_group_members(){
-  az ad group member list --output=json \
-  --query='[].{Created:createdDateTime,UPN:userPrincipalName,Name:displayName,\
-  Title:jobTitle,Department:department,Email:mail,UserId:mailNickname,Phone:telephoneNumber,\
-  Mobile:mobile,Enabled:accountEnabled}' --group='$1'
-}
-
-az_dump_groups(){
-  az ad group list --output=json --query='[].{Group:displayName,Description:description}'
-}
-
-az_examine_app(){
-  az ad app list --output=json --identifier-uri='$1'
-}
-
-az_one_spn(){
-  az ad sp list --output=table --display-name='$1'
-}
-
-az_user_upn(){
-  az ad user list --output=json \
-  --query='[].{Created:createdDateTime,UPN:userPrincipalName,Name:displayName,\
-  Title:jobTitle,Department:department,Email:mail,UserId:mailNickname,Phone:telephoneNumber,\
-  Mobile:mobile,Enabled:accountEnabled}' --upn='$1'
-}
-
-bcbc(){
-## Fix for brew doctor warnings if using pyenv
-if which pyenv >/dev/null 2>&1; then
-  brew='env PATH=${PATH//$(pyenv root)\/shims:/} brew'
-fi
-
-## Fix potential tap issues
-brew tap --repair
-
-  ## Brew Diagnotic
-echo "${yellow}==>${reset} Running Brew Diagnotic..."
-brew doctor
-brew missing 2>&1
-echo -e "${green}==>${reset} Brew Diagnotic Finished."
-
-  ## Link all unlinked kegs
-# brew list -1 | while read line; do brew unlink $line; brew link $line; done
-}
-
+# File System Operations
+# ---------------------
 cd() { builtin cd "$@"; ls; }
 
+mcd() {
+    mkdir -p "$1" && cd "$1";
+}
+
 cdf() {
-	target=`osascript -e 'tell application "Finder" to if (count of Finder windows) > 0 then get POSIX path of (target of front Finder window as text)'`
-	if [ "$target" != "" ]; then
-		cd "$target"; pwd
-	else
-		echo 'No Finder window found' >&2
-	fi
-}
-
-cidr2ip() {
-  cdrr=$(nmap -sL -n "$1" 2>/dev/null | grepip | sort -Vu)
-  echo $cdrr
-  cdrc=$(echo $cdrr | wc -l)
-  echo '\n' $cdrc 'IPs'
-}
-
-cisa() {
-  cisa_csv=$(curl -s https://www.cisa.gov/sites/default/files/csv/known_exploited_vulnerabilities.csv)
-  cisa_cve=$(echo $cisa_csv | tail -n +2 | cut -d ',' -f 1 | sort -Vu | sed -e 's/^/"/;s/$/",/' | tr '\n' ' ' | sed 's/.\{2\}$//')
-  echo "CVE Count: "
-  echo -n $cisa_csv | wc -l
-  echo -n $cisa_cve | pbcopy
-  echo "\nCVE list in clipboard"
-}
-
-clipboard(){ 
-if command -v xclip 1>/dev/null; then
-    if [[ -p /dev/stdin ]] ; then
-        xclip -i -selection clipboard
+    target=`osascript -e 'tell application "Finder" to if (count of Finder windows) > 0 then get POSIX path of (target of front Finder window as text)'`
+    if [ "$target" != "" ]; then
+        cd "$target"; pwd
     else
-        xclip -o -selection clipboard
+        echo 'No Finder window found' >&2
     fi
-else
-    echo "Remember to install xclip"
-fi
 }
 
-csrf(){
-	curl -s -c $1 "$2" | awk -F 'value' '/user_token/ {print $2}' | cut -d "'" -f 2
-}
-
-frmt(){
-  awk '{ if ($1 ~ /^[0-9]+\.[0-9]+\.[0-9]+\.[0-9]+$/) printf("    '\''%s'\'',\n", $1); else printf("    '\''%s'\'',\n", $1); }'
-
-}
-
-gistx(){
-  cd /opt/gists
-  rm -rf .git
-  git init
-  git remote add origin `clipboard`
-  git pull origin master
-  echo '\nDONEZO\n'
-  ls
-}
-
-# Function to match email addresses using ripgrep, then filter to only show the emails with grep, case-insensitive and error-suppressed
-grepeml() {
-  rg -Nao --no-ignore -i "\b[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}\b" "$@" 2>/dev/null |
-  command grep -Eoi "\b[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}\b"
-}
-
-# Function to match IPv4 addresses using ripgrep, then filter to only show the IPs with grep
-grepip() {
-  rg -Nao --no-ignore -e '\b((([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])(\.)){3}([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5]))\b' "$@" |
-  command grep -Eo '\b((([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])(\.)){3}([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5]))\b'
-}
-
-# Function to match both IPv4 and IPv6 addresses using ripgrep, then filter to only show the IPs with grep
-grepip46() {
-  rg -Nao --no-ignore -e '\b((([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])(\.)){3}([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5]))\b' \
-                       -e '([0-9a-f]{1,4}:){3,7}[0-9a-f]{1,4}' "$@" |
-  command grep -Eo '\b((([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])(\.)){3}([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5]))\b|([0-9a-f]{1,4}:){3,7}[0-9a-f]{1,4}'
-}
-
-# Function to match IPv6 addresses using ripgrep, then filter to only show the IPv6 addresses with grep, case-insensitive and error-suppressed
-grepipv6() {
-  rg -Nao --no-ignore -i '([0-9a-fA-F]{1,4}:){3,7}[0-9a-fA-F]{1,4}' "$@" 2>/dev/null |
-  command grep -Eoi '([0-9a-fA-F]{1,4}:){3,7}[0-9a-fA-F]{1,4}'
-}
-
-impaste(){
-  # Generate a unique temporary filename
-  tempfile=$(mktemp -t clipboard.XXXXXXXXXX.png)
-
-  # Save the clipboard image to the temporary file
-  osascript -e 'set theImage to the clipboard as «class PNGf»' \
-    -e "set theFile to open for access POSIX file \"$tempfile\" with write permission" \
-    -e 'write theImage to theFile' \
-    -e 'close access theFile'
-
-  # Output the image data to stdout
-  cat "$tempfile"
-
-  # Delete the temporary file
-  rm "$tempfile"
-}
-
-ipy() {
-  local PY_BIN
-  local IPYTHON
-  local PYV
-  # This quick way will work if ipython is in the virtualenv
-  PY_BIN="$(python -c 'import sys; print(sys.executable)')"
-  IPYTHON="$(dirname "$PY_BIN")/ipython"
-  if [[ -x "$IPYTHON" ]]; then
-    "$IPYTHON"
-  else
-    # Ask the current python what version it is
-    PYV="$(python -c 'import sys; print(".".join(str(i) for i in sys.version_info[:2]))')"
-    echo "Looking for iPython for Python $PYV"
-    # In a new shell (where pyenv should load if equipped) try to find that version
-    PY_BIN="$($SHELL -i -c "python$PYV -c 'import sys; print(sys.executable)'")"
-    "$(dirname "$PY_BIN")/ipython"
-  fi
-}
-
-localip(){
-  ifconfig | grep 'inet ' | grep -v '127.0.0.1'\
-  | cut -d: -f2 | awk '{ print $2}' | tail -n 1
-}
-
-localips(){
-  ifconfig | grep 'inet ' | grep -v '127.0.0.1' | cut -d: -f2 | awk '{ print $2}'
-}
-
-lr2sr(){
-  lr1=$(pbpaste | cut -d '.' -f 1-4 | cut -d '-' -f 1)
-  lr2=$(pbpaste | cut -d '.' -f 7)
-  echo $lr1-$lr2
+alph_sort(){
+    for f in *; do
+        if [ -f "$f" ]; then
+            mkdir -p "${f:0:1}"
+            mv "$f" "${f:0:1}"
+        fi
+    done
 }
 
 lscsv() {
     ls -lT | awk '/^-/ && $1=$1' OFS=","
 }
 
-mcd() {
-    mkdir -p "$1" && cd "$1";
+# Network & IP Operations
+# ----------------------
+localip(){
+    ifconfig | grep 'inet ' | grep -v '127.0.0.1' | cut -d: -f2 | awk '{ print $2}' | tail -n 1
 }
 
-# mkenv(){
-# cwd_tmp=`sudo echo 'env_'"${PWD##*/}"`
-# sudo python -m virtualenv $cwd_tmp
-# }
-# mk3nv(){
-# cwd_tmp=`sudo echo 'env_'"${PWD##*/}"`
-# sudo python3 -m venv $cwd_tmp
-# }
-
-md5list () {
-  while read -r line || [ -n "$line" ]
-  do
-    echo -n $line | md5
-  done
+localips(){
+    ifconfig | grep 'inet ' | grep -v '127.0.0.1' | cut -d: -f2 | awk '{ print $2}'
 }
 
-mountshares(){
-  vmware-hgfsclient | while read folder; do
-    echo "[i] Mounting ${folder}   (/mnt/hgfs/${folder})"
-    mkdir -p "/mnt/hgfs/${folder}"
-    umount -f "/mnt/hgfs/${folder}" 2>/dev/null
-    vmhgfs-fuse -o allow_other -o auto_unmount ".host:/${folder}" "/mnt/hgfs/${folder}"
-    done
-    sleep 2s
+cidr2ip() {
+    cdrr=$(nmap -sL -n "$1" 2>/dev/null | grepip | sort -Vu)
+    echo $cdrr
+    cdrc=$(echo $cdrr | wc -l)
+    echo '\n' $cdrc 'IPs'
 }
 
-mp4togif() {
-  ffmpeg -i $1.mp4 -r 10 -f image2pipe -vcodec ppm - | \
-  convert -delay 5 -loop 0 - output.gif
+# Combining unroll and unroll_nosort into a single function with an optional flag
+unroll() {
+    pbpaste | tr ', ' '\n' | sed '/^[[:space:]]*$/d' > ./.tmp_ip_list.txt
+    local sort_flag=${1:-"sort"}
+    if [ "$sort_flag" = "sort" ]; then
+        cdrr=$(nmap -sL -n -T5 --open -iL ./.tmp_ip_list.txt 2>/dev/null | grepip | sort -Vu)
+    else
+        cdrr=$(nmap -sL -n -T5 --open -iL ./.tmp_ip_list.txt 2>/dev/null | grepip)
+    fi
+    echo $cdrr
+    echo $cdrr | pbcopy
+    cdrc=$(echo $cdrr | wc -l)
+    echo '\n' $cdrc 'IPs'
+    rm ./.tmp_ip_list.txt
 }
 
-msf(){
-  service postgresql start
-  msfdb init
-  tmp_ip=`localip`
-  sed -i '$ d' /root/.msf5/msfconsole.rc
-  echo -e "set lhost" $tmp_ip >> /root/.msf5/msfconsole.rc
-  msfconsole -r /root/.msf5/msfconsole.rc
+# Azure CLI Functions
+# ------------------
+az_all_spns(){
+    az ad sp list --output=table --query='[].{Name:displayName,Enabled:accountEnabled,\
+    uyURL:homepage,Publisher:publisherName,MetadataURL:samlMetadataUrl}'
 }
 
-pskill(){
-  ps -ef | rg -i $1 | rg -v 'rg' | sed 's/  \+/ /g' | cut -d ' ' -f 2 | xargs kill -9
+az_all_users(){
+    az ad user list --output=table --query='[].{Created:createdDateTime,UPN:userPrincipalName,Name:displayName,\
+    Title:jobTitle,Department:department,Email:mail,UserId:mailNickname,Phone:telephoneNumber,\
+    Mobile:mobile,Enabled:accountEnabled}'
 }
 
-reinstall_apt(){
-  apt-get install dselect
-  dpkg --set-selections < pkglist.textapt-get dselect-upgrade
+az_dump_apps(){
+    az ad app list --output=table --query='[].{Name:displayName,URL:homepage}'
 }
 
-restart-vm-tools(){
-  killall -q -w vmtoolsd
-  vmware-user-suid-wrapper vmtoolsd -n vmusr 2>/dev/null
-  vmtoolsd -b /var/run/vmroot 2>/dev/null
+az_dump_group_members(){
+    az ad group member list --output=json \
+    --query='[].{Created:createdDateTime,UPN:userPrincipalName,Name:displayName,\
+    Title:jobTitle,Department:department,Email:mail,UserId:mailNickname,Phone:telephoneNumber,\
+    Mobile:mobile,Enabled:accountEnabled}' --group='$1'
+}
+
+az_dump_groups(){
+    az ad group list --output=json --query='[].{Group:displayName,Description:description}'
+}
+
+az_examine_app(){
+    az ad app list --output=json --identifier-uri='$1'
+}
+
+az_one_spn(){
+    az ad sp list --output=table --display-name='$1'
+}
+
+az_user_upn(){
+    az ad user list --output=json \
+    --query='[].{Created:createdDateTime,UPN:userPrincipalName,Name:displayName,\
+    Title:jobTitle,Department:department,Email:mail,UserId:mailNickname,Phone:telephoneNumber,\
+    Mobile:mobile,Enabled:accountEnabled}' --upn='$1'
+}
+
+# Pattern Matching Functions
+# ------------------------
+grepeml() {
+    rg -Nao --no-ignore -i "\b[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}\b" "$@" 2>/dev/null |
+    command grep -Eoi "\b[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}\b"
+}
+
+grepip() {
+    rg -Nao --no-ignore -e '\b((([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])(\.)){3}([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5]))\b' "$@" |
+    command grep -Eo '\b((([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])(\.)){3}([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5]))\b'
+}
+
+grepip46() {
+    rg -Nao --no-ignore -e '\b((([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])(\.)){3}([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5]))\b' \
+                         -e '([0-9a-f]{1,4}:){3,7}[0-9a-f]{1,4}' "$@" |
+    command grep -Eo '\b((([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])(\.)){3}([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5]))\b|([0-9a-f]{1,4}:){3,7}[0-9a-f]{1,4}'
+}
+
+grepipv6() {
+    rg -Nao --no-ignore -i '([0-9a-fA-F]{1,4}:){3,7}[0-9a-fA-F]{1,4}' "$@" 2>/dev/null |
+    command grep -Eoi '([0-9a-fA-F]{1,4}:){3,7}[0-9a-fA-F]{1,4}'
+}
+
+# Security & Certificate Functions
+# ------------------------------
+csrf(){
+    curl -s -c $1 "$2" | awk -F 'value' '/user_token/ {print $2}' | cut -d "'" -f 2
 }
 
 sessionid(){
-	grep PHPSESSID $1 | awk -F ' ' '{print $7}'
+    grep PHPSESSID $1 | awk -F ' ' '{print $7}'
+}
+
+whodat(){ 
+    openssl s_client -showcerts -connect $1:443 | grep 'CN=' 
+}
+
+whocerts(){
+    echo "1. Running openssl check:" && echo \
+    | openssl s_client -showcerts -servername $1 -connect $1:443 2>/dev/null \
+    | openssl x509 -inform pem -noout -text \
+    &&  echo "2. Running nslookup" \
+    && nslookup -vc -type=ANY $1 \
+    && echo "3. Running nmap" \
+    && nmap -p 443 --script ssl-cert $1
+}
+
+cisa() {
+    cisa_csv=$(curl -s https://www.cisa.gov/sites/default/files/csv/known_exploited_vulnerabilities.csv)
+    cisa_cve=$(echo $cisa_csv | tail -n +2 | cut -d ',' -f 1 | sort -Vu | sed -e 's/^/"/;s/$/",/' | tr '\n' ' ' | sed 's/.\{2\}$//')
+    echo "CVE Count: "
+    echo -n $cisa_csv | wc -l
+    echo -n $cisa_cve | pbcopy
+    echo "\nCVE list in clipboard"
+}
+
+# System Maintenance
+# ----------------
+bcbc(){
+    if which pyenv >/dev/null 2>&1; then
+        brew='env PATH=${PATH//$(pyenv root)\/shims:/} brew'
+    fi
+    brew tap --repair
+    echo "${yellow}==>${reset} Running Brew Diagnostic..."
+    brew doctor
+    brew missing 2>&1
+    echo -e "${green}==>${reset} Brew Diagnostic Finished."
+}
+
+pskill(){
+    ps -ef | rg -i $1 | rg -v 'rg' | sed 's/  \+/ /g' | cut -d ' ' -f 2 | xargs kill -9
+}
+
+# Development Tools
+# ---------------
+ipy() {
+    local PY_BIN
+    local IPYTHON
+    local PYV
+    PY_BIN="$(python -c 'import sys; print(sys.executable)')"
+    IPYTHON="$(dirname "$PY_BIN")/ipython"
+    if [[ -x "$IPYTHON" ]]; then
+        "$IPYTHON"
+    else
+        PYV="$(python -c 'import sys; print(".".join(str(i) for i in sys.version_info[:2]))')"
+        echo "Looking for iPython for Python $PYV"
+        PY_BIN="$($SHELL -i -c "python$PYV -c 'import sys; print(sys.executable)'")"
+        "$(dirname "$PY_BIN")/ipython"
+    fi
+}
+
+# Clipboard Operations
+# ------------------
+clipboard(){ 
+    if command -v xclip 1>/dev/null; then
+        if [[ -p /dev/stdin ]] ; then
+            xclip -i -selection clipboard
+        else
+            xclip -o -selection clipboard
+        fi
+    else
+        echo "Remember to install xclip"
+    fi
+}
+
+impaste(){
+    tempfile=$(mktemp -t clipboard.XXXXXXXXXX.png)
+    osascript -e 'set theImage to the clipboard as «class PNGf»' \
+        -e "set theFile to open for access POSIX file \"$tempfile\" with write permission" \
+        -e 'write theImage to theFile' \
+        -e 'close access theFile'
+    cat "$tempfile"
+    rm "$tempfile"
+}
+
+# Media Conversion
+# --------------
+mp4togif() {
+    ffmpeg -i $1.mp4 -r 10 -f image2pipe -vcodec ppm - | \
+    convert -delay 5 -loop 0 - output.gif
+}
+
+# Git Operations
+# ------------
+gistx(){
+    cd /opt/gists
+    rm -rf .git
+    git init
+    git remote add origin `clipboard`
+    git pull origin master
+    echo '\nDONEZO\n'
+    ls
 }
 
 subdirexec() {
@@ -276,43 +246,4 @@ subdirexec() {
 subdirgitadd() {
     find . -maxdepth 1 -type d \( ! -name . \) \
     -exec bash -c "cd '{}' && pwd && git add -u && echo 'success'" \;
-}
-
-unroll() {
-  pbpaste | tr ', ' '\n' | sort -Vu | sed '/^[[:space:]]*$/d' > ./.tmp_ip_list.txt
-  cdrr=$(nmap -sL -n -T5 --open -iL ./.tmp_ip_list.txt 2>/dev/null | grepip | sort -Vu)
-  echo $cdrr
-  echo $cdrr | pbcopy
-  cdrc=$(echo $cdrr | wc -l)
-  echo '\n' $cdrc 'IPs'
-  rm ./.tmp_ip_list.txt
-}
-
-unroll_nosort() {
-  pbpaste | tr ', ' '\n' | sed '/^[[:space:]]*$/d' > ./.tmp_ip_list.txt
-  cdrr=$(nmap -sL -n -T5 --open -iL ./.tmp_ip_list.txt 2>/dev/null | grepip)
-  echo $cdrr
-  echo $cdrr | pbcopy
-  cdrc=$(echo $cdrr | wc -l)
-  echo '\n' $cdrc 'IPs'
-  rm ./.tmp_ip_list.txt
-}
-
-webmap(){
-  docker stop webmap
-  docker rm webmap
-  docker pull rev3rse/webmap
-  curl -sL http://bit.ly/webmapsetup | bash
-}
-
-whodat(){ openssl s_client -showcerts -connect $1:443 | grep 'CN=' }
-
-whocerts(){
-  echo "1. Running openssl check:" && echo \
-  | openssl s_client -showcerts -servername $1 -connect $1:443 2>/dev/null \
-  | openssl x509 -inform pem -noout -text \
-  &&  echo "2. Running nslookup" \
-  && nslookup -vc -type=ANY $1 \
-  && echo "3. Running nmap" \
-  && nmap -p 443 --script ssl-cert $1
 }
