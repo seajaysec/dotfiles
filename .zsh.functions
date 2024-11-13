@@ -1,11 +1,18 @@
 # File System Operations
 # ---------------------
+
+# cd: Override default cd to list directory contents after changing directories
+# Usage: cd /path/to/dir
 cd() { builtin cd "$@"; ls; }
 
+# mcd: Make directory and change into it
+# Usage: mcd new_directory
 mcd() {
     mkdir -p "$1" && cd "$1";
 }
 
+# alph_sort: Organize files into subdirectories based on their first letter
+# Usage: cd messy_directory && alph_sort
 alph_sort(){
     for f in *; do
         if [ -f "$f" ]; then
@@ -15,12 +22,18 @@ alph_sort(){
     done
 }
 
+# lscsv: List directory contents in CSV format
+# Usage: lscsv > directory_contents.csv
 lscsv() {
     ls -lT | awk '/^-/ && $1=$1' OFS=","
 }
 
 # Network & IP Operations
 # ----------------------
+
+# localip: Get local IP address(es)
+# Usage: localip      # returns primary IP
+# Usage: localip 1    # returns all IPs
 localip() {
     local all=${1:-0}  # Default to single IP if no arg provided
     local ips=$(ifconfig | grep 'inet ' | grep -v '127.0.0.1' | cut -d: -f2 | awk '{ print $2}')
@@ -31,6 +44,8 @@ localip() {
     fi
 }
 
+# cidr2ip: Convert CIDR notation to list of IPs
+# Usage: cidr2ip 192.168.1.0/24
 cidr2ip() {
     cdrr=$(nmap -sL -n "$1" 2>/dev/null | grepip | sort -Vu)
     echo $cdrr
@@ -38,6 +53,9 @@ cidr2ip() {
     echo '\n' $cdrc 'IPs'
 }
 
+# unroll: Convert comma-separated IPs/CIDRs from clipboard to list
+# Usage: echo "192.168.1.1, 10.0.0.0/24" | pbcopy && unroll
+# Usage: unroll nosort    # preserve original order
 unroll() {
     pbpaste | tr ', ' '\n' | sed '/^[[:space:]]*$/d' > ./.tmp_ip_list.txt
     local sort_flag=${1:-"sort"}
@@ -55,11 +73,19 @@ unroll() {
 
 # Pattern Matching Functions
 # ------------------------
+
+# grepeml: Extract email addresses from files or input
+# Usage: cat file.txt | grepeml
+# Usage: grepeml file1.txt file2.txt
 grepeml() {
     rg -Nao --no-ignore -i "\b[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}\b" "$@" 2>/dev/null |
     command grep -Eoi "\b[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}\b"
 }
 
+# grepip: Extract IP addresses with version selection
+# Usage: cat file.txt | grepip 4     # IPv4 only
+# Usage: grepip 6 file.txt           # IPv6 only
+# Usage: grepip both file.txt        # Both IPv4 and IPv6
 grepip() {
     local version=${1:-"4"}  # Default to IPv4
     shift 2>/dev/null  # Remove first argument if it exists
@@ -81,27 +107,24 @@ grepip() {
     esac
 }
 
-grepip46() {
-    rg -Nao --no-ignore -e '\b((([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])(\.)){3}([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5]))\b' \
-                         -e '([0-9a-f]{1,4}:){3,7}[0-9a-f]{1,4}' "$@" |
-    command grep -Eo '\b((([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])(\.)){3}([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5]))\b|([0-9a-f]{1,4}:){3,7}[0-9a-f]{1,4}'
-}
-
-grepipv6() {
-    rg -Nao --no-ignore -i '([0-9a-fA-F]{1,4}:){3,7}[0-9a-fA-F]{1,4}' "$@" 2>/dev/null |
-    command grep -Eoi '([0-9a-fA-F]{1,4}:){3,7}[0-9a-fA-F]{1,4}'
-}
-
 # Security & Certificate Functions
 # ------------------------------
+
+# csrf: Extract CSRF token from cookie file
+# Usage: csrf cookie.txt http://example.com/form
 csrf(){
     curl -s -c $1 "$2" | awk -F 'value' '/user_token/ {print $2}' | cut -d "'" -f 2
 }
 
+# sessionid: Extract PHP session ID from file
+# Usage: sessionid session_file.txt
 sessionid(){
     grep PHPSESSID $1 | awk -F ' ' '{print $7}'
 }
 
+# whocerts: Check SSL certificate information
+# Usage: whocerts example.com          # Brief check
+# Usage: whocerts example.com full     # Detailed check
 whocerts() {
     local domain=$1
     local detail=${2:-"brief"}  # Default to brief check
@@ -121,6 +144,9 @@ whocerts() {
 
 # System Maintenance
 # ----------------
+
+# bcbc: Brew cleanup and diagnostic
+# Usage: bcbc
 bcbc(){
     if which pyenv >/dev/null 2>&1; then
         brew='env PATH=${PATH//$(pyenv root)\/shims:/} brew'
@@ -132,12 +158,17 @@ bcbc(){
     echo -e "${green}==>${reset} Brew Diagnostic Finished."
 }
 
+# pskill: Kill processes matching pattern
+# Usage: pskill firefox    # Kills all processes with 'firefox' in name
 pskill(){
     ps -ef | rg -i $1 | rg -v 'rg' | sed 's/  \+/ /g' | cut -d ' ' -f 2 | xargs kill -9
 }
 
 # Development Tools
 # ---------------
+
+# ipy: Smart iPython launcher that respects virtual environments
+# Usage: ipy
 ipy() {
     local PY_BIN
     local IPYTHON
@@ -157,6 +188,8 @@ ipy() {
 # Clipboard Operations
 # ------------------
 
+# impaste: Save clipboard image to temporary file and output contents
+# Usage: impaste > screenshot.png
 impaste(){
     tempfile=$(mktemp -t clipboard.XXXXXXXXXX.png)
     osascript -e 'set theImage to the clipboard as «class PNGf»' \
@@ -169,6 +202,10 @@ impaste(){
 
 # Media Conversion
 # --------------
+
+# mp4togif: Convert MP4 video to GIF
+# Usage: mp4togif input         # Creates output.gif
+# Usage: mp4togif input custom  # Creates custom.gif
 mp4togif() {
     if [ -z "$1" ]; then
         echo "Usage: mp4togif filename (without .mp4 extension)"
@@ -188,6 +225,9 @@ mp4togif() {
 
 # Git Operations
 # ------------
+
+# gistx: Clone gist from clipboard URL to /opt/gists
+# Usage: <copy gist URL> && gistx
 gistx(){
     cd /opt/gists
     rm -rf .git
@@ -198,6 +238,9 @@ gistx(){
     ls
 }
 
+# subdir: Execute command in all subdirectories
+# Usage: subdir exec "npm install"    # Run npm install in all subdirs
+# Usage: subdir git "status"          # Run git status in all subdirs
 subdir() {
     local action=$1
     shift
