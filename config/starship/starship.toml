@@ -12,7 +12,7 @@ $git_state\
 [](fg:prev_bg bg:color_blue)\
 $python\
 $package\
-[](fg:prev_bg bg:color_bg1)\
+[](fg:prev_bg bg:color_bg1 fg:color_fg0)\
 [](fg:color_fg0)\
 $fill\
 [](fg:color_bg1)\
