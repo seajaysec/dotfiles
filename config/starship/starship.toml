@@ -3,20 +3,19 @@
 format = """
 $sudo\
 $username\
-$hostname\
-[](fg:prev_bg bg:color_yellow)\
+[](fg:prev_bg bg:color_yellow)\
 $directory\
-[](fg:prev_bg bg:color_aqua)\
+[](fg:prev_bg bg:color_aqua)\
 $git_branch\
 $git_status\
 $git_state\
-[](fg:prev_bg bg:color_blue)\
+[](fg:prev_bg bg:color_blue)\
 $python\
 $package\
-[](fg:prev_bg bg:color_bg1)\
-[](fg:prev_bg)\
+[](fg:prev_bg bg:color_bg1)\
+[](fg:prev_bg)\
 $fill\
-[](fg:color_bg1)\
+[](fg:color_bg1)\
 $cmd_duration\
 $status\
 $line_break\
@@ -91,25 +90,3 @@ format = "[](bg:prev_bg fg:color_red)[$status $symbol]($style)"
 [fill]
 symbol = '─'
 style = 'fg:prev_fg'
-
-[hostname]
-ssh_only = false
-format = '[ @$hostname ](fg:color_fg0 bg:color_orange)[$ssh_symbol](fg:color_fg0 bg:color_orange)'
-trim_at = "-"
-disabled = false
-
-[custom.localip]
-when = true
-command = "ipconfig getifaddr en0 || ipconfig getifaddr en1"
-format = "[ $output](fg:color_fg0 bg:color_orange)"
-
-[custom.vpn]
-when = "ifconfig utun0 2>/dev/null || ifconfig tun0 2>/dev/null"
-command = """
-if ifconfig utun0 >/dev/null 2>&1; then
-    ipconfig getifaddr utun0
-elif ifconfig tun0 >/dev/null 2>&1; then
-    ipconfig getifaddr tun0
-fi
-"""
-format = "[ VPN:$output](fg:color_fg0 bg:color_orange)"
