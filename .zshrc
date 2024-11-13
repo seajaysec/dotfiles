@@ -180,27 +180,33 @@ fi
 source $ZSH/oh-my-zsh.sh
 source ~/secrets.sh
 
+# Global flag to track if dotfiles are loaded
+DOTFILES_LOADED=0
+
 # Async load aliases and functions with timeout
 {
     sleep 0.1  # Small delay to prioritize shell availability
     source ~/dotfiles/.zsh.aliases
     source ~/dotfiles/.zsh.functions
+    DOTFILES_LOADED=1
 } &!
 
 # Ensure aliases/functions are available if needed immediately
 function ensure_dotfiles() {
-    # If the background job hasn't completed, source immediately
-    if [[ ! -f ~/dotfiles/.zsh.aliases.zwc ]]; then
+    if [[ $DOTFILES_LOADED -eq 0 ]]; then
         source ~/dotfiles/.zsh.aliases
         source ~/dotfiles/.zsh.functions
+        DOTFILES_LOADED=1
     fi
-    # Remove this function after first use
-    unfunction ensure_dotfiles
+    # Only remove the function if files are actually loaded
+    if [[ $DOTFILES_LOADED -eq 1 ]]; then
+        unfunction ensure_dotfiles
+    fi
 }
 
 # Create wrapper for common commands that might need aliases/functions
 for cmd in g git d docker k kubectl; do
-    eval "function $cmd() { ensure_dotfiles; $cmd \$@ }"
+    eval "function $cmd() { ensure_dotfiles; command $cmd \$@ }"
 done
 
 ###############################
