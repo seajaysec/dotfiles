@@ -169,6 +169,7 @@ format = '[ $symbol( $version) ]($style)'
 [python]
 symbol = ""
 style = "fg:color_fg0 bg:color_orange"
+pyenv_version_name = true
 format = '[ $symbol( $version) ]($style)'
 
 [docker_context]
