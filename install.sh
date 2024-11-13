@@ -1,7 +1,11 @@
 #!/bin/bash
 
 # Install zap plugin manager
-zsh <(curl -s https://raw.githubusercontent.com/zap-zsh/zap/master/install.sh) --branch release-v1
+mkdir -p "$HOME/.local/share/zap"
+git clone https://github.com/zap-zsh/zap.git "$HOME/.local/share/zap"
+
+# Create plugins directory
+mkdir -p ~/.local/share/zsh/plugins
 
 # Install core plugins
 git clone https://github.com/zsh-users/zsh-autosuggestions ~/.local/share/zsh/plugins/zsh-autosuggestions
