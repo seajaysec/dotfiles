@@ -12,7 +12,7 @@ alias fix_stty='stty sane'                  # Restore terminal settings when scr
 alias ls='eza -a'
 alias lsl='eza -lah --git --grid'
 alias lst='eza --tree --level'
-alias f='cd "$(osascript -e "tell application \\"Finder\\" to if (count of windows) > 0 then get POSIX path of (target of front window as alias)")"'
+alias f='cd "$(osascript -e '\''tell application "Finder" to if (count of windows) > 0 then get POSIX path of (target of front window as alias)'\'' 2>/dev/null)"'
 
 # Network Tools & Information
 alias myip='curl ip.appspot.com'                    # Public facing IP Address
