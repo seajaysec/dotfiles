@@ -66,6 +66,7 @@ path=(
     # Additional tool paths
     /bin/lscript               # Custom scripts
     /usr/local/anaconda3/bin   # Anaconda
+    ~/.cargo/bin               # Rust
     $path                      # Existing path entries
 )
 export PATH
