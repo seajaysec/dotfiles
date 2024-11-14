@@ -230,6 +230,8 @@ bindkey "^[[F" end-of-line
 # Lazy load conda
 conda() {
     unfunction conda
+    # Add OpenSSL to path
+    export PATH="/usr/local/opt/openssl@1.1/bin:/usr/local/anaconda3/bin:$PATH"
     # Add conda to path
     export PATH="/usr/local/anaconda3/bin:$PATH"
     __conda_setup="$('/usr/local/anaconda3/bin/conda' 'shell.zsh' 'hook' 2> /dev/null)"
