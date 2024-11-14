@@ -28,20 +28,20 @@ export LESS='-F -i -J -M -R -W -x4 -X -z-4'  # Improved less behavior:
 # FZF (Fuzzy Finder) configuration
 export FZF_DEFAULT_COMMAND='ag --hidden -g ""'  # Use silver searcher for FZF
 export FZF_DEFAULT_OPTS="
-  --height 40%                   # Use 40% of screen height
-  --layout=reverse              # List matches from top to bottom
-  --border                      # Add border around the finder
-  --info=inline                 # Show info inline with results
+  --height 40%
+  --layout=reverse
+  --border
+  --info=inline
   --preview='[[ \$(file --mime {}) =~ binary ]] && 
             echo {} is a binary file || 
             (bat --style=numbers --color=always {} || cat {}) 2>/dev/null | 
-            head -300'           # Show file preview with syntax highlighting
-  --preview-window='right:hidden:wrap'  # Preview window configuration
-  --bind='f3:execute(bat --style=numbers {} || less -f {}),
-         f2:toggle-preview,
-         ctrl-d:half-page-down,
-         ctrl-u:half-page-up,
-         ctrl-y:execute-silent(echo {+} | pbcopy)'  # Custom key bindings
+            head -300'
+  --preview-window='right:hidden:wrap'
+  --bind='f3:execute(bat --style=numbers {} || less -f {})'
+  --bind='ctrl-p:toggle-preview'
+  --bind='ctrl-d:half-page-down'
+  --bind='ctrl-u:half-page-up'
+  --bind='ctrl-y:execute-silent(echo {+} | pbcopy)'
 "
 
 # Homebrew settings
