@@ -242,23 +242,40 @@ conda() {
     conda "$@"
 }
 
-# Lazy load less intensive tools
-{
-    # FZF
-    source <(fzf --zsh)
+# # Lazy load less intensive tools
+# {
+#     # FZF
+#     source <(fzf --zsh)
     
-    # iTerm2
-    test -e "${HOME}/.iterm2_shell_integration.zsh" && source "${HOME}/.iterm2_shell_integration.zsh"
+#     # iTerm2
+#     test -e "${HOME}/.iterm2_shell_integration.zsh" && source "${HOME}/.iterm2_shell_integration.zsh"
     
-    # Bun completions
-    [ -s "$HOME/.bun/_bun" ] && source "$HOME/.bun/_bun"
+#     # Bun completions
+#     [ -s "$HOME/.bun/_bun" ] && source "$HOME/.bun/_bun"
     
-    # Cargo
-    [ -f "$HOME/.cargo/env" ] && source "$HOME/.cargo/env"
+#     # Cargo
+#     [ -f "$HOME/.cargo/env" ] && source "$HOME/.cargo/env"
     
-    # Zoxide
-    eval "$(zoxide init zsh)"
-} &!
+#     # Zoxide
+#     eval "$(zoxide init zsh)"
+# } &!
+
+
+# FZF
+source <(fzf --zsh)
+
+# iTerm2
+test -e "${HOME}/.iterm2_shell_integration.zsh" && source "${HOME}/.iterm2_shell_integration.zsh"
+
+# Bun completions
+[ -s "$HOME/.bun/_bun" ] && source "$HOME/.bun/_bun"
+
+# Cargo
+[ -f "$HOME/.cargo/env" ] && source "$HOME/.cargo/env"
+
+# Zoxide
+eval "$(zoxide init zsh)"
+
 
 # Load lessopen last as it's least critical
 export LESSOPEN="| $(which highlight) %s --out-format xterm256 --line-numbers --quiet --force --style moria"
