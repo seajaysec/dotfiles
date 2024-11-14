@@ -48,10 +48,10 @@ export FZF_DEFAULT_OPTS="
 export HOMEBREW_NO_ENV_HINTS=1  # Disable Homebrew environment hints
 
 # Add these near the top of your environment variables section
-export LDFLAGS="-L/usr/local/opt/openssl@1.1/lib"
-export CPPFLAGS="-I/usr/local/opt/openssl@1.1/include"
-export PKG_CONFIG_PATH="/usr/local/opt/openssl@1.1/lib/pkgconfig"
-export PYTHON_BUILD_HOMEBREW_OPENSSL_FORMULA="openssl@1.1"
+export LDFLAGS="-L/opt/homebrew/opt/openssl@3/lib"
+export CPPFLAGS="-I/opt/homebrew/opt/openssl@3/include"
+export PKG_CONFIG_PATH="/opt/homebrew/opt/openssl@3/lib/pkgconfig"
+export PYTHON_BUILD_HOMEBREW_OPENSSL_FORMULA="openssl@3"
 
 ###############################
 # Path Configuration
@@ -59,9 +59,9 @@ export PYTHON_BUILD_HOMEBREW_OPENSSL_FORMULA="openssl@1.1"
 # Ensure paths are unique with typeset
 typeset -U path
 path=(
-    /usr/local/opt/openssl@1.1/bin   # Make sure this is first
+    /opt/homebrew/opt/openssl@3/bin   # Make sure this is first
     # System paths
-    /usr/local/opt/openssl@1.1/bin   # Brew OpenSSL
+    /opt/homebrew/opt/openssl@3/bin   # Brew OpenSSL
     /usr/local/{sbin,bin}      # Local system binaries
     /usr/{bin,sbin}            # System binaries
     /{bin,sbin}                # Essential system binaries
