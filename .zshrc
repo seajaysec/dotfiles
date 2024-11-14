@@ -54,6 +54,7 @@ export HOMEBREW_NO_ENV_HINTS=1  # Disable Homebrew environment hints
 typeset -U path
 path=(
     # System paths
+    /usr/local/opt/openssl@1.1/bin   # Brew OpenSSL
     /usr/local/{sbin,bin}      # Local system binaries
     /usr/{bin,sbin}            # System binaries
     /{bin,sbin}                # Essential system binaries
