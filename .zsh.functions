@@ -290,3 +290,16 @@ git_main_branch() {
         echo master
     fi
 }
+
+# Sets environment variables specifically for building and installing Python packages 
+# that rely on Homebrew-installed libraries (e.g., ssdeep). This function is intended 
+# to resolve build and architecture issues on macOS with ARM64 (Apple Silicon) systems. 
+# Use this function only when encountering build errors due to missing or mismatched 
+# library paths or architectures. Activating these settings globally may interfere with 
+# other compilation tasks.
+ssdeep_env() {
+    export ARCHFLAGS="-arch arm64"
+    export CFLAGS="-I/opt/homebrew/include"
+    export LDFLAGS="-L/opt/homebrew/lib"
+    echo "Environment set for ssdeep builds"
+}
