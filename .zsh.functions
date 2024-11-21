@@ -3,8 +3,6 @@
 
 # Automate unmounting, sorting, and remounting using fatsort
 fatsort_volume() {
-  # Automate unmounting, sorting, and remounting using fatsort
-
   if [ -z "$1" ]; then
     echo "Usage: fatsort_volume <VolumeName>"
     return 1
