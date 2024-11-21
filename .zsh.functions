@@ -291,6 +291,40 @@ git_main_branch() {
     fi
 }
 
+# Go to finder window's directory and remove duplicates
+function remove_dups() {
+    # Navigate to the current Finder window's directory
+    cd "$(osascript -e 'tell application "Finder" to if (count of windows) > 0 then get POSIX path of (target of front window as alias)' 2>/dev/null)"
+
+    # Declare an associative array to keep track of file hashes
+    typeset -A hashfiles
+
+    # Find all files recursively and process them
+    while IFS= read -r -d '' file; do
+        # Calculate the MD5 hash of the file (fast hash method)
+        hash=$(md5 -q "$file")
+
+        if [[ -n "${hashfiles[$hash]}" ]]; then
+            # Duplicate detected
+            echo "Duplicate detected: $file and ${hashfiles[$hash]}"
+
+            # Check if the filename ends with ' 2', ' 3', etc.
+            if [[ "$file" =~ ' [0-9]+$' ]]; then
+                # Delete the duplicate file
+                rm "$file"
+                echo "Deleted duplicate file: $file"
+            else
+                echo "Duplicate file not deleted (does not match pattern): $file"
+            fi
+        else
+            # Store the hash and file path
+            hashfiles[$hash]="$file"
+        fi
+    done < <(find . -type f -print0)
+
+    echo "Duplicate check completed."
+}
+
 # Sets environment variables specifically for building and installing Python packages 
 # that rely on Homebrew-installed libraries (e.g., ssdeep). This function is intended 
 # to resolve build and architecture issues on macOS with ARM64 (Apple Silicon) systems. 
