@@ -1,10 +1,6 @@
 # File System Operations
 # ---------------------
 
-# cd: Override default cd to list directory contents after changing directories
-# Usage: cd /path/to/dir
-cd() { builtin cd "$@"; ls; }
-
 # mcd: Make directory and change into it
 # Usage: mcd new_directory
 mcd() {

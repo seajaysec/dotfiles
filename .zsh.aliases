@@ -13,6 +13,7 @@ alias fix_stty='stty sane'                  # Reset terminal settings when they 
 alias ls='eza -a'                           # Modern ls replacement with all files
 alias lsl='eza -lah --git --grid'          # Detailed list with git status and grid layout
 alias lst='eza --tree --level'              # Tree view with specified depth
+alias cd='z'
 alias f='cd "$(osascript -e '\''tell application "Finder" to if (count of windows) > 0 then get POSIX path of (target of front window as alias)'\'' 2>/dev/null)"'  # Jump to current Finder location
 
 # Network Tools & Information
