@@ -47,13 +47,21 @@ export FZF_DEFAULT_OPTS="
 # Homebrew settings
 export HOMEBREW_NO_ENV_HINTS=1  # Disable Homebrew environment hints
 
+# Add these near the top of your environment variables section
+export LDFLAGS="-L/opt/homebrew/opt/openssl@3/lib"
+export CPPFLAGS="-I/opt/homebrew/opt/openssl@3/include"
+export PKG_CONFIG_PATH="/opt/homebrew/opt/openssl@3/lib/pkgconfig"
+export PYTHON_BUILD_HOMEBREW_OPENSSL_FORMULA="openssl@3"
+
 ###############################
 # Path Configuration
 ###############################
 # Ensure paths are unique with typeset
 typeset -U path
 path=(
+    /opt/homebrew/opt/openssl@3/bin   # Make sure this is first
     # System paths
+    /opt/homebrew/opt/openssl@3/bin   # Brew OpenSSL
     /usr/local/{sbin,bin}      # Local system binaries
     /usr/{bin,sbin}            # System binaries
     /{bin,sbin}                # Essential system binaries
@@ -229,6 +237,8 @@ bindkey "^[[F" end-of-line
 # Lazy load conda
 conda() {
     unfunction conda
+    # Add OpenSSL to path
+    export PATH="/usr/local/opt/openssl@1.1/bin:/usr/local/anaconda3/bin:$PATH"
     # Add conda to path
     export PATH="/usr/local/anaconda3/bin:$PATH"
     __conda_setup="$('/usr/local/anaconda3/bin/conda' 'shell.zsh' 'hook' 2> /dev/null)"

@@ -1,6 +1,71 @@
 # File System Operations
 # ---------------------
 
+<<<<<<< HEAD
+||||||| 9edb70b
+# cd: Override default cd to list directory contents after changing directories
+# Usage: cd /path/to/dir
+cd() { builtin cd "$@"; ls; }
+
+=======
+# Automate unmounting, sorting, and remounting using fatsort
+fatsort_volume() {
+  if [ -z "$1" ]; then
+    echo "Usage: fatsort_volume <VolumeName>"
+    return 1
+  fi
+
+  # Get the target volume (e.g., /Volumes/Untitled)
+  volume_name="$1"
+
+  # Find fatsort binary location
+  if ! fatsort_path=$(command -v fatsort); then
+    echo "Error: fatsort command not found. Please ensure it's installed and in your PATH."
+    return 1
+  fi
+
+  # Check if volume is mounted and get device info
+  device_node=$(diskutil info "$volume_name" | awk -F': *' '/Device Node/ {print $2}')
+  if [ -z "$device_node" ]; then
+    echo "Error: Volume '$volume_name' is not found or not mounted."
+    return 1
+  fi
+  echo "Located device: $device_node"
+
+  # Unmount the volume
+  echo "Unmounting $volume_name..."
+  if ! diskutil unmount "$volume_name"; then
+    echo "Failed to unmount $volume_name."
+    return 1
+  fi
+
+  # Run fatsort with sudo on the unmounted device
+  echo "Running fatsort on $device_node..."
+  if ! sudo "$fatsort_path" -q -n -f -c "$device_node"; then
+    echo "fatsort failed on $device_node."
+    return 1
+  fi
+
+  # Prompt to remount the volume
+  echo "fatsort completed. Would you like to remount the volume? (y/n)"
+  read -r response
+
+  case "$response" in
+    [yY]|[yY][eE][sS])
+      echo "Remounting $device_node..."
+      if ! diskutil mount "$device_node"; then
+        echo "Failed to remount $device_node."
+        return 1
+      fi
+      echo "$volume_name remounted."
+      ;;
+    *)
+      echo "Leaving $volume_name unmounted."
+      ;;
+  esac
+}
+
+>>>>>>> 0ea182aa41a3e960d34d4bae425102d69244bada
 # mcd: Make directory and change into it
 # Usage: mcd new_directory
 mcd() {
@@ -285,4 +350,51 @@ git_main_branch() {
         done
         echo master
     fi
+}
+
+# Go to finder window's directory and remove duplicates
+function remove_dups() {
+    # Navigate to the current Finder window's directory
+    cd "$(osascript -e 'tell application "Finder" to if (count of windows) > 0 then get POSIX path of (target of front window as alias)' 2>/dev/null)"
+
+    # Declare an associative array to keep track of file hashes
+    typeset -A hashfiles
+
+    # Find all files recursively and process them
+    while IFS= read -r -d '' file; do
+        # Calculate the MD5 hash of the file (fast hash method)
+        hash=$(md5 -q "$file")
+
+        if [[ -n "${hashfiles[$hash]}" ]]; then
+            # Duplicate detected
+            echo "Duplicate detected: $file and ${hashfiles[$hash]}"
+
+            # Check if the filename ends with ' 2', ' 3', etc.
+            if [[ "$file" =~ ' [0-9]+$' ]]; then
+                # Delete the duplicate file
+                rm "$file"
+                echo "Deleted duplicate file: $file"
+            else
+                echo "Duplicate file not deleted (does not match pattern): $file"
+            fi
+        else
+            # Store the hash and file path
+            hashfiles[$hash]="$file"
+        fi
+    done < <(find . -type f -print0)
+
+    echo "Duplicate check completed."
+}
+
+# Sets environment variables specifically for building and installing Python packages 
+# that rely on Homebrew-installed libraries (e.g., ssdeep). This function is intended 
+# to resolve build and architecture issues on macOS with ARM64 (Apple Silicon) systems. 
+# Use this function only when encountering build errors due to missing or mismatched 
+# library paths or architectures. Activating these settings globally may interfere with 
+# other compilation tasks.
+ssdeep_env() {
+    export ARCHFLAGS="-arch arm64"
+    export CFLAGS="-I/opt/homebrew/include"
+    export LDFLAGS="-L/opt/homebrew/lib"
+    echo "Environment set for ssdeep builds"
 }
