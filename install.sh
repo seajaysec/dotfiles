@@ -108,15 +108,30 @@ $(brew --prefix)/opt/fzf/install --all
 mkdir -p ~/.zsh
 touch ~/.zsh/history
 
-# Set zsh as default shell if it isn't already
-if [[ $SHELL != *"zsh"* ]]; then
-    echo "🐚 Setting zsh as default shell..."
-    command -v zsh | sudo tee -a /etc/shells
-    chsh -s $(command -v zsh)
+# Install and configure zsh
+echo "🐚 Setting up zsh..."
+if ! command -v zsh >/dev/null 2>&1; then
+    echo "Installing zsh..."
+    brew install zsh
 fi
 
-echo "✨ Installation complete! Please restart your terminal or run:"
-echo "source ~/.zshrc"
+# Add Homebrew's zsh to allowed shells if not already present
+BREW_ZSH="$(brew --prefix)/bin/zsh"
+if ! grep -q "$BREW_ZSH" /etc/shells; then
+    echo "Adding Homebrew's zsh to allowed shells..."
+    echo "$BREW_ZSH" | sudo tee -a /etc/shells
+fi
+
+# Set zsh as default shell if it isn't already
+if [[ $SHELL != *"zsh"* ]]; then
+    echo "🐚 Setting Homebrew's zsh as default shell..."
+    chsh -s "$BREW_ZSH"
+fi
+
+echo "✨ Installation complete!"
+echo "Please log out and log back in to ensure all changes take effect."
+echo "If you don't want to log out, you can start a new zsh session by running:"
+echo "exec $BREW_ZSH"
 
 # Print maintenance instructions
 echo "

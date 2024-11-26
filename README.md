@@ -45,7 +45,12 @@ brew install \
 
 ### Shell Setup
 
-1. Run the installation script:
+1. Install Zsh if not already installed:
+```bash
+brew install zsh
+```
+
+2. Run the installation script:
 ```bash
 ./install.sh
 ```
