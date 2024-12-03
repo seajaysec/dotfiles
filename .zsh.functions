@@ -1,13 +1,6 @@
 # File System Operations
 # ---------------------
 
-<<<<<<< HEAD
-||||||| 9edb70b
-# cd: Override default cd to list directory contents after changing directories
-# Usage: cd /path/to/dir
-cd() { builtin cd "$@"; ls; }
-
-=======
 # Automate unmounting, sorting, and remounting using fatsort
 fatsort_volume() {
   if [ -z "$1" ]; then
@@ -65,7 +58,6 @@ fatsort_volume() {
   esac
 }
 
->>>>>>> 0ea182aa41a3e960d34d4bae425102d69244bada
 # mcd: Make directory and change into it
 # Usage: mcd new_directory
 mcd() {
