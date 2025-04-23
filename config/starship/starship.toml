@@ -22,6 +22,7 @@ $line_break\
 $character"""
 
 palette = 'gruvbox_dark'
+command_timeout = 12500
 
 [palettes.gruvbox_dark]
 color_fg0 = '230'

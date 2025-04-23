@@ -390,3 +390,11 @@ ssdeep_env() {
     export LDFLAGS="-L/opt/homebrew/lib"
     echo "Environment set for ssdeep builds"
 }
+
+# The following snippet causes mcd to be completed like mkdir
+compdefas () {
+  if (($+_comps[$1])); then
+    compdef $_comps[$1] ${^@[2,-1]}=$1
+  fi
+}
+compdefas mkdir mcd
