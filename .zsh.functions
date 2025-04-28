@@ -217,6 +217,33 @@ bcbc(){
     echo -e "${green}==>${reset} Brew Diagnostic Finished."
 }
 
+# This will promote your work to main (with a merge commit), push it, and clean up the branch everywhere.
+finish-branch() {
+  # 1. detect current branch
+  local branch=$(git symbolic-ref --short HEAD)  
+  if [[ -z "$branch" ]]; then
+    echo "Not in a git repo or detached HEAD"; return 1
+  fi
+  if [[ "$branch" == "main" ]]; then
+    echo "You’re already on main — nothing to finish."; return 1
+  fi
+
+  # 2. switch to main
+  git checkout main || return
+
+  # 3. merge with a commit
+  git merge --no-ff "$branch" -m "Merging $branch" || return
+
+  # 4. push main
+  git push origin main || return
+
+  # 5. delete remote branch
+  git push origin --delete "$branch" || return
+
+  # 6. delete local branch
+  git branch -d "$branch"
+}
+
 # pskill: Kill processes matching pattern
 # Usage: pskill firefox    # Kills all processes with 'firefox' in name
 pskill(){
