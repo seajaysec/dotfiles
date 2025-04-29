@@ -219,7 +219,7 @@ bcbc(){
 
 # This will promote your work to main (with a merge commit), push it, and clean up the branch everywhere.
 finish-branch() {
-  # 1. detect current branch
+  echo "1. detect current branch"
   local branch=$(git symbolic-ref --short HEAD)  
   if [[ -z "$branch" ]]; then
     echo "Not in a git repo or detached HEAD"; return 1
@@ -228,19 +228,19 @@ finish-branch() {
     echo "You’re already on main — nothing to finish."; return 1
   fi
 
-  # 2. switch to main
+  echo "switch to main"
   git checkout main || return
 
-  # 3. merge with a commit
+  echo "merge with a commit"
   git merge --no-ff "$branch" -m "Merging $branch" || return
 
-  # 4. push main
+  echo "push main"
   git push origin main || return
 
-  # 5. delete remote branch
+  echo "delete remote branch"
   git push origin --delete "$branch" || return
 
-  # 6. delete local branch
+  echo " delete local branch"
   git branch -d "$branch"
 }
 
