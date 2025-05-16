@@ -1,6 +1,7 @@
 ###############################
 # Core Environment Variables
 ###############################
+setopt extended_glob
 export ZSH=~/.oh-my-zsh
 export TERM=xterm-256color
 export LANG=en_US.UTF-8
@@ -11,6 +12,7 @@ export VISUAL=vim
 export ACK_PAGER_COLOR="{$PAGER:-bat --paging=always}"
 export PAGER='bat --paging=always'
 export MANPAGER="sh -c 'col -bx | bat -l man --paging=always'"
+export PATH="/opt/homebrew/bin:$PATH"
 unset LESSOPEN
 
 ###############################
@@ -243,3 +245,4 @@ precmd() { echo -ne '\e[5 q'; }
 preexec() { echo -ne '\e[5 q'; }
 
 eval $(thefuck --alias)
+export PATH="/opt/homebrew/bin:$PATH"
