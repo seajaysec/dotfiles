@@ -49,8 +49,6 @@ brew install \
 
 # Install recommended applications
 echo "📱 Installing recommended applications..."
-brew install --cask iterm2
-brew install --cask anaconda
 
 # Create required directories
 echo "📁 Creating directory structure..."
@@ -58,17 +56,12 @@ sudo mkdir -p /opt/gists
 sudo chown $USER:staff /opt/gists
 mkdir -p ~/dotfiles/config/starship
 
-# Install zap plugin manager
-echo "🔌 Installing zap plugin manager..."
-mkdir -p "$HOME/.local/share/zap"
-git clone https://github.com/zap-zsh/zap.git "$HOME/.local/share/zap"
-
 # Create plugins directory and install plugins
 echo "🔧 Installing zsh plugins..."
 mkdir -p ~/.local/share/zsh/plugins
-git clone https://github.com/zsh-users/zsh-autosuggestions ~/.local/share/zsh/plugins/zsh-autosuggestions
-git clone https://github.com/zdharma-continuum/fast-syntax-highlighting ~/.local/share/zsh/plugins/fast-syntax-highlighting
-git clone https://github.com/zsh-users/zsh-history-substring-search ~/.local/share/zsh/plugins/zsh-history-substring-search
+# git clone https://github.com/zsh-users/zsh-autosuggestions ~/.local/share/zsh/plugins/zsh-autosuggestions
+# git clone https://github.com/zdharma-continuum/fast-syntax-highlighting ~/.local/share/zsh/plugins/fast-syntax-highlighting
+# git clone https://github.com/zsh-users/zsh-history-substring-search ~/.local/share/zsh/plugins/zsh-history-substring-search
 
 # Install development tools
 echo "🛠️ Installing development tools..."
@@ -87,7 +80,6 @@ curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y
 
 # Install Python packages
 echo "🐍 Installing Python packages..."
-pip3 install virtualenv ipython
 
 # Copy configuration files
 echo "📝 Copying configuration files..."
