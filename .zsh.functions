@@ -288,8 +288,9 @@ impaste(){
 
 # Media Conversion
 # --------------
-
-md2docx() {
+# m2d: Convert Markdown file to DOCX
+# Usage: m2d input.md    # Creates input.docx
+m2d() {
     if [[ $# -eq 0 ]]; then
         echo "Usage: md2docx <markdown-file>"
         return 1
