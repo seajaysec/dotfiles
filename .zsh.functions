@@ -289,6 +289,23 @@ impaste(){
 # Media Conversion
 # --------------
 
+md2docx() {
+    if [[ $# -eq 0 ]]; then
+        echo "Usage: md2docx <markdown-file>"
+        return 1
+    fi
+    
+    local input="$1"
+    
+    if [[ ! -f "$input" ]]; then
+        echo "Error: File '$input' not found"
+        return 1
+    fi
+    
+    local output="${input%.md}.docx"
+    pandoc "$input" -f markdown -t docx -o "$output" && echo "Created: $output"
+}
+
 # mp4togif: Convert MP4 video to GIF
 # Usage: mp4togif input         # Creates output.gif
 # Usage: mp4togif input custom  # Creates custom.gif
