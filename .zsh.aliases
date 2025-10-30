@@ -148,3 +148,4 @@ alias gm='git merge'                        # Merge
 alias gmom='git merge origin/$(git_main_branch)'  # Merge origin main
 alias gbl='git blame -b -w'                 # Show file blame
 alias gwip='git add -A; git rm $(git ls-files --deleted) 2> /dev/null; git commit --no-verify --no-gpg-sign -m "--wip-- [skip ci]"'  # Save work in progress
+alias consh='container run --remove --interactive --tty --entrypoint=/bin/bash --volume /Users/chris.j.farrell/Movies:/mnt --name FHN74TYJXL-uPwf9R --workdir /mnt'

@@ -9,11 +9,14 @@ export ARCHFLAGS="-arch x86_64"
 export GROFF_NO_SGR=1
 export EDITOR=vim
 export VISUAL=vim
-export ACK_PAGER_COLOR="{$PAGER:-bat --paging=always}"
-export PAGER='bat --paging=always'
-export MANPAGER="sh -c 'col -bx | bat -l man --paging=always'"
+export ACK_PAGER_COLOR="{$PAGER:-bat --style=plain --paging=always}"
+export PAGER='bat --style=plain --paging=always'
+export MANPAGER="sh -c 'col -bx | bat --style=plain -l man --paging=always'"
 export PATH="/opt/homebrew/bin:$PATH"
 unset LESSOPEN
+"^A" beginning-of-line
+"^E" end-of-line
+
 
 ###############################
 # FZF (Fuzzy Finder) configuration
@@ -26,10 +29,10 @@ export FZF_DEFAULT_OPTS="
   --info=inline
   --preview='[[ \$(file --mime {}) =~ binary ]] && 
             echo {} is a binary file || 
-            (bat --style=numbers --color=always {} || cat {}) 2>/dev/null | 
+            (bat --style=plain --color=always {} || cat {}) 2>/dev/null | 
             head -300'
   --preview-window='right:hidden:wrap'
-  --bind='f3:execute(bat --style=numbers {} || bat {})'
+  --bind='f3:execute(bat --style=plain {} || bat {})'
   --bind='ctrl-p:toggle-preview'
   --bind='ctrl-d:half-page-down'
   --bind='ctrl-u:half-page-up'
