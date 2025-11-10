@@ -50,8 +50,13 @@ if ! command -v bat >/dev/null 2>&1 && command -v batcat >/dev/null 2>&1; then
 fi
 
 echo "==> Installing starship..."
+if ! command -v starship >/div/null 2>&1; then
+  if apt-cache show starship >/dev/null 2>&1; then
+    sudo apt install -y starship || true
+  fi
+fi
 if ! command -v starship >/dev/null 2>&1; then
-  curl -fsSL https://starship.rs/install.sh | bash -s -- -y
+  curl -fsSL https://starship.rs/install.sh | sh -s -- -y
 fi
 
 echo "==> Installing bun (optional)..."
