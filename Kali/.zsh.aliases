@@ -1,0 +1,152 @@
+# System Commands Enhancement
+alias cp='cp -iv'
+alias mv='mv -iv'
+alias mkdir='mkdir -pv'
+alias less='less -m -N -g -i -J --line-numbers --underline-special'
+alias more='less'
+alias sudo='sudo '
+alias mysudo='sudo -E env "PATH=$PATH"'
+alias history='history 0'
+alias fix_stty='stty sane'
+
+# File Navigation & Listing (prefer eza → exa → ls)
+if command -v eza >/dev/null 2>&1; then
+  alias ls='eza -a'
+  alias lsl='eza -lah --git --grid'
+  alias lst='eza --tree --level'
+elif command -v exa >/dev/null 2>&1; then
+  alias ls='exa -a'
+  alias lsl='exa -lah --git --grid'
+  alias lst='exa --tree --level'
+else
+  alias ls='ls -alF --color=auto'
+  alias lsl='ls -lah --color=auto'
+  alias lst='ls -lR --color=auto'
+fi
+
+# Jump directories with zoxide
+alias cd='z'
+
+# Finder jump (mac-only); fallback on Linux: go HOME
+if command -v osascript >/dev/null 2>&1; then
+  alias f='cd "$(osascript -e '\''tell application "Finder" to if (count of windows) > 0 then get POSIX path of (target of front window as alias)'\'' 2>/dev/null)"'
+else
+  f() { cd "$HOME"; }
+fi
+
+# Network Tools & Information
+alias publicip='host myip.opendns.com resolver1.opendns.com | grepip | tail -n 1'
+alias revdig='dig +noall +answer -x'
+alias getJSON='curl -i -H "Accept: application/json" -H "Content-Type: application/json"'
+alias getXML='curl -H "Accept: application/xml" -H "Content-Type: application/xml" -X GET'
+alias myips="ifconfig | rg 'inet ' -B 4 | rg -v 'options|ether|inet6|media|status' | sed 's/netmask/:/g' | cut -d ':' -f 1"
+alias ncat='rlwrap ncat'
+alias nc='rlwrap nc'
+
+# Network Monitoring & Security
+alias lsock='sudo /usr/sbin/lsof -i -P'
+alias lsockT='sudo /usr/sbin/lsof -nP | grep TCP'
+alias lsockU='sudo /usr/sbin/lsof -nP | grep UDP'
+alias nmapr='grc nmap --randomize-hosts --script-args http.useragent="Mozilla/5.0 (Windows NT 10.0; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/39.0.2171.71 Safari/537.36 Edge/12.0i" --script-timeout 10m'
+
+# System Maintenance
+alias flushDNS='sudo resolvectl flush-caches || sudo systemd-resolve --flush-caches || true'
+alias audiofix='systemctl --user restart pipewire pipewire-pulse wireplumber 2>/dev/null || pulseaudio -k'
+alias btfix='sudo rfkill block bluetooth && sleep 1 && sudo rfkill unblock bluetooth || sudo systemctl restart bluetooth'
+alias bubu='tldr --update && sudo apt update -y && sudo apt upgrade -y'
+
+# Development & Git
+alias gaf='git add -f'
+alias gcx='builtin cd ~/gits && git clone --recurse-submodules -j8 `pbpaste` && cd ./*(/om[1])'
+
+# Docker Management
+alias dockstop='docker stop $(docker ps -a -q)'
+alias dockrm='docker rm $(docker ps -a -q)'
+
+# Python & Virtual Environment
+alias de='deactivate'
+alias pipr3='python3 -m pip install -r requirements.txt'
+alias srcenv='source env_*/bin/activate'
+alias rmenv='sudo rm -rf env_*'
+
+# Text Processing & Clipboard
+alias grepcve="grep -ioE 'CVE-[0-9]{4}-[0-9]{4,}' | tr '[:lower:]' '[:upper:]' | sort -u"
+alias clipsort="pbpaste | grep -v '^$' | sort -Vu | pbcopy"
+alias srt='grep -v "^$" | gsed "s/^[[:space:]]*//g" | sort -Vu | LC_COLLATE=C sort --ignore-case'
+alias uniqip='pbpaste | grepip | sort -Vu | pbcopy'
+
+# Terminal & Session Management
+alias tm='tmux attach -t ${tmux_session:-work} || tmux new -s ${tmux_session:-work}'
+alias cmux='$HOME/.tmux/plugins/tmux-logging/scripts/save_complete_history.sh && code ~/tmuxlogs/`ls ~/tmuxlogs/ -tr | tail -1`'
+
+# File Search & Navigation
+alias fff='find / -type f -iname $1 2>/dev/null'
+alias ftf='fzf-tmux'
+alias fzf='fzf --color=dark'
+
+# Ensure Command Interoperability
+alias xargs='xargs '
+
+# Git Aliases
+alias g='git'
+alias gst='git status'
+alias gss='git status -s'
+alias gsb='git status -sb'
+alias gcf='git config --list'
+alias gb='git branch'
+alias gba='git branch -a'
+alias gbd='git branch -d'
+alias gbD='git branch -D'
+alias gco='git checkout'
+alias gcb='git checkout -b'
+alias gsw='git switch'
+alias gswc='git switch -c'
+alias gswm='git switch $(git_main_branch)'
+alias gswd='git switch develop'
+alias gc='git commit -v'
+alias gcm='git checkout $(git_main_branch)'
+alias gcmsg='git commit -m'
+alias gca='git commit -v -a'
+alias gcam='git commit -a -m'
+alias gc!='git commit -v --amend'
+alias gca!='git commit -v -a --amend'
+alias gce='git commit --allow-empty -m'
+alias gf='git fetch'
+alias gfa='git fetch --all --prune --jobs=10'
+alias gfo='git fetch origin'
+alias gl='git pull'
+alias gp='git push'
+alias gpf='git push --force-with-lease'
+alias gpf!='git push --force'
+alias gpoat='git push origin --all && git push origin --tags'
+alias glg='git log --stat'
+alias glgg='git log --graph'
+alias glgga='git log --graph --decorate --all'
+alias glo='git log --oneline --decorate'
+alias glog='git log --oneline --decorate --graph'
+alias gloga='git log --oneline --decorate --graph --all'
+alias ga='git add'
+alias gaa='git add --all'
+alias gapa='git add --patch'
+alias gd='git diff'
+alias gds='git diff --staged'
+alias gdw='git diff --word-diff'
+alias grs='git restore'
+alias grst='git restore --staged'
+alias gsta='git stash push'
+alias gstp='git stash pop'
+alias gstl='git stash list'
+alias gsts='git stash show --text'
+alias gstc='git stash clear'
+alias gstd='git stash drop'
+alias gcp='git cherry-pick'
+alias grb='git rebase'
+alias grbm='git rebase $(git_main_branch)'
+alias grbi='git rebase -i'
+alias gm='git merge'
+alias gmom='git merge origin/$(git_main_branch)'
+alias gbl='git blame -b -w'
+alias gwip='git add -A; git rm $(git ls-files --deleted) 2> /dev/null; git commit --no-verify --no-gpg-sign -m "--wip-- [skip ci]"'
+alias consh='container run --remove --interactive --tty --entrypoint=/bin/bash --volume /Users/chris.j.farrell/Movies:/mnt --name FHN74TYJXL-uPwf9R --workdir /mnt'
+
+

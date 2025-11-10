@@ -1,0 +1,342 @@
+# File System Operations
+# ---------------------
+
+# Automate unmounting, sorting, and remounting using fatsort (Linux variant expects device node)
+fatsort_volume() {
+  if [ -z "$1" ]; then
+    echo "Usage: fatsort_volume <DeviceNode or MountPoint e.g., /dev/sdb1 or /media/USB>"
+    return 1
+  fi
+
+  local target="$1"
+  if ! fatsort_path=$(command -v fatsort); then
+    echo "Error: fatsort command not found. Please ensure it's installed and in your PATH."
+    return 1
+  fi
+
+  if [[ -b "$target" ]]; then
+    device_node="$target"
+  else
+    device_node=$(lsblk -no PKNAME "$(df "$target" | awk 'NR==2 {print $1}')" 2>/dev/null)
+    device_node="/dev/${device_node:-$target}"
+  fi
+
+  echo "Target device: $device_node"
+  echo "Unmounting $target..."
+  if ! sudo umount "$target" 2>/dev/null && ! sudo umount "$device_node" 2>/dev/null; then
+    echo "Failed to unmount $target."
+    return 1
+  fi
+
+  echo "Running fatsort on $device_node..."
+  if ! sudo "$fatsort_path" -q -n -f -c "$device_node"; then
+    echo "fatsort failed on $device_node."
+    return 1
+  fi
+
+  echo "fatsort completed."
+}
+
+# mcd: Make directory and change into it
+mcd() { mkdir -p "$1" && cd "$1"; }
+
+# alph_sort: Organize files into subdirectories based on their first letter
+alph_sort(){
+  for f in *; do
+    if [ -f "$f" ]; then
+      mkdir -p "${f:0:1}"
+      mv "$f" "${f:0:1}"
+    fi
+  done
+}
+
+# lscsv: List directory contents in CSV format
+lscsv() { ls -lT 2>/dev/null | awk '/^-/ && $1=$1' OFS=","; }
+
+# Network & IP Operations
+# ----------------------
+
+# localip: Get local IP address(es) with labels
+localip() {
+  local ips=($(ip -4 addr show | awk '/inet /{print $2}' | cut -d/ -f1))
+  local primary_ip=${ips[-1]}
+  for ip in "${ips[@]}"; do
+    if [ "$ip" = "$primary_ip" ]; then
+      echo "Primary IP: $ip"
+    else
+      echo "Secondary IP: $ip"
+    fi
+  done
+}
+
+# iplist: Convert CIDR notation or comma-separated IPs/CIDRs to list of IPs
+iplist() {
+  local input="$1"
+  local sort_flag="sort"
+
+  if [ -z "$input" ]; then
+    pbpaste | tr ', ' '\n' | sed '/^[[:space:]]*$/d' > ./.tmp_ip_list.txt
+  else
+    echo "$input" | tr ', ' '\n' | sed '/^[[:space:]]*$/d' > ./.tmp_ip_list.txt
+    if [ "$input" = "nosort" ]; then
+      sort_flag="nosort"
+    fi
+  fi
+
+  if [ "$sort_flag" = "sort" ]; then
+    cdrr=$(nmap -sL -n -T5 --open -iL ./.tmp_ip_list.txt 2>/dev/null | grepip | sort -Vu)
+  else
+    cdrr=$(nmap -sL -n -T5 --open -iL ./.tmp_ip_list.txt 2>/dev/null | grepip)
+  fi
+
+  echo "$cdrr"
+  echo "$cdrr" | pbcopy
+  cdrc=$(echo "$cdrr" | wc -l)
+  echo '\n' "$cdrc" 'IPs'
+  rm ./.tmp_ip_list.txt
+}
+
+# Pattern Matching Functions
+# ------------------------
+
+# grepeml: Extract email addresses from files or input
+grepeml() {
+  rg -Nao --no-ignore -i "\b[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}\b" "$@" 2>/dev/null |
+  command grep -Eoi "\b[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}\b"
+}
+
+# grepip: Extract IP addresses with version selection
+grepip() {
+  local version=${1:-"4"}
+  shift 2>/dev/null
+  case $version in
+    "4")
+      rg -Nao --no-ignore -e '\b((([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])(\.)){3}([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5]))\b' "$@" |
+      command grep -Eo '\b((([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])(\.)){3}([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5]))\b'
+      ;;
+    "6")
+      rg -Nao --no-ignore -i '([0-9a-fA-F]{1,4}:){3,7}[0-9a-fA-F]{1,4}' "$@" 2>/dev/null |
+      command grep -Eoi '([0-9a-fA-F]{1,4}:){3,7}[0-9a-fA-F]{1,4}'
+      ;;
+    "all")
+      rg -Nao --no-ignore -e '\b((([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])(\.)){3}([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5]))\b' \
+                       -e '([0-9a-f]{1,4}:){3,7}[0-9a-f]{1,4}' "$@" |
+      command grep -Eo '\b((([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])(\.)){3}([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5]))\b|([0-9a-f]{1,4}:){3,7}[0-9a-f]{1,4}'
+      ;;
+  esac
+}
+
+# Security & Certificate Functions
+# ------------------------------
+
+csrf(){ curl -s -c $1 "$2" | awk -F 'value' '/user_token/ {print $2}' | cut -d "'" -f 2; }
+sessionid(){ grep PHPSESSID $1 | awk -F ' ' '{print $7}'; }
+
+whocerts() {
+  local domain=$1
+  local detail=${2:-"brief"}
+  if [ "$detail" = "brief" ]; then
+    openssl s_client -showcerts -connect $domain:443 2>/dev/null | grep 'CN='
+  else
+    echo "1. Running openssl check:" && echo \
+    | openssl s_client -showcerts -connect -servername $domain -connect $domain:443 2>/dev/null \
+    | openssl x509 -inform pem -noout -text \
+    && echo "2. Running nslookup" \
+    && nslookup -vc -type=ANY $domain \
+    && echo "3. Running nmap" \
+    && nmap -p 443 --script ssl-cert $domain
+  fi
+}
+
+# System Maintenance
+# ----------------
+bcbc(){
+  echo "==> Running APT Diagnostic..."
+  sudo apt update
+  sudo apt -y upgrade
+  echo "==> Autoremove..."
+  sudo apt -y autoremove
+  echo "==> Finished."
+}
+
+# Promote branch to main with merge commit, push, clean remote/local
+finish-branch() {
+  echo "1. detect current branch"
+  local branch=$(git symbolic-ref --short HEAD)
+  if [[ -z "$branch" ]]; then
+    echo "Not in a git repo or detached HEAD"; return 1
+  fi
+  if [[ "$branch" == "main" ]]; then
+    echo "You’re already on main — nothing to finish."; return 1
+  fi
+  echo "switch to main"
+  git checkout main || return
+  echo "merge with a commit"
+  git merge --no-ff "$branch" -m "Merging $branch" || return
+  echo "push main"
+  git push origin main || return
+  echo "delete remote branch"
+  git push origin --delete "$branch" || return
+  echo " delete local branch"
+  git branch -d "$branch"
+}
+
+# pskill: Kill processes matching pattern
+pskill(){ ps -ef | rg -i $1 | rg -v 'rg' | sed 's/  \+/ /g' | cut -d ' ' -f 2 | xargs kill -9; }
+
+# ipy: Smart iPython launcher that respects virtual environments
+ipy() {
+  local PY_BIN
+  local IPYTHON
+  local PYV
+  PY_BIN="$(python -c 'import sys; print(sys.executable)')"
+  IPYTHON="$(dirname "$PY_BIN")/ipython"
+  if [[ -x "$IPYTHON" ]]; then
+    "$IPYTHON"
+  else
+    PYV="$(python -c 'import sys; print(".".join(str(i) for i in sys.version_info[:2]))')"
+    echo "Looking for iPython for Python $PYV"
+    PY_BIN="$($SHELL -i -c "python$PYV -c 'import sys; print(sys.executable)'")"
+    "$(dirname "$PY_BIN")/ipython"
+  fi
+}
+
+# Clipboard Operations
+# ------------------
+# impaste: Save clipboard image to temporary file and output contents (Linux)
+impaste(){
+  tempfile=$(mktemp -t clipboard.XXXXXXXXXX.png)
+  if command -v wl-paste >/dev/null 2>&1 && wl-paste --list-types | grep -qi 'image/png'; then
+    wl-paste -t image/png > "$tempfile"
+  elif command -v xclip >/dev/null 2>&1; then
+    xclip -selection clipboard -t image/png -o > "$tempfile" 2>/dev/null || true
+  elif command -v xsel >/dev/null 2>&1; then
+    echo "xsel does not support image type extraction from clipboard"
+    return 1
+  else
+    echo "No clipboard tool (wl-paste/xclip) available for images"
+    return 1
+  fi
+  cat "$tempfile"
+  rm "$tempfile"
+}
+
+# Media Conversion
+m2d() {
+  if [[ $# -eq 0 ]]; then
+    echo "Usage: md2docx <markdown-file>"
+    return 1
+  fi
+  local input="$1"
+  if [[ ! -f "$input" ]]; then
+    echo "Error: File '$input' not found"
+    return 1
+  fi
+  local output="${input%.md}.docx"
+  pandoc "$input" -f markdown -t docx -o "$output" && echo "Created: $output"
+}
+
+mp4togif() {
+  if [ -z "$1" ]; then
+    echo "Usage: mp4togif filename (without .mp4 extension)"
+    return 1
+  fi
+  if [ ! -f "$1.mp4" ]; then
+    echo "Error: $1.mp4 not found"
+    return 1
+  fi
+  local output=${2:-"output.gif"}
+  ffmpeg -i $1.mp4 -r 10 -f image2pipe -vcodec ppm - | \
+  convert -delay 5 -loop 0 - "$output" && \
+  echo "Converted $1.mp4 to $output"
+}
+
+# Git Operations
+gistx(){
+  cd /opt/gists
+  rm -rf .git
+  git init
+  git remote add origin "$(pbpaste)"
+  git pull origin master
+  echo '\nDONEZO\n'
+  ls
+}
+
+# subdir: Execute command in all subdirectories
+subdir() {
+  local action=$1
+  shift
+  case $action in
+    "exec")
+      find . -maxdepth 1 -type d \( ! -name . \) \
+      -exec bash -c "cd '{}' && pwd && $* && echo 'success'" \;
+      ;;
+    "git")
+      find . -maxdepth 1 -type d \( ! -name . \) \
+      -exec bash -c "cd '{}' && pwd && git $* && echo 'success'" \;
+      ;;
+  esac
+}
+
+# Git Alias Helper Functions
+git_current_branch() {
+  local ref
+  ref=$(git symbolic-ref --quiet HEAD 2> /dev/null)
+  local ret=$?
+  if [[ $ret != 0 ]]; then
+    [[ $ret == 128 ]] && return
+    ref=$(git rev-parse --short HEAD 2> /dev/null) || return
+  fi
+  echo ${ref#refs/heads/}
+}
+
+git_main_branch() {
+  if git rev-parse --git-dir >/dev/null 2>&1; then
+    local branch
+    for branch in main trunk; do
+      if command git show-ref -q --verify refs/heads/$branch; then
+        echo $branch
+        return
+      fi
+    done
+    echo master
+  fi
+}
+
+# remove_dups: Finder-only on mac; on Linux run in current dir, no Finder integration
+remove_dups() {
+  typeset -A hashfiles
+  while IFS= read -r -d '' file; do
+    hash=$(md5sum "$file" | awk '{print $1}')
+    if [[ -n "${hashfiles[$hash]}" ]]; then
+      echo "Duplicate detected: $file and ${hashfiles[$hash]}"
+      if [[ "$file" =~ ' [0-9]+$' ]]; then
+        rm "$file"
+        echo "Deleted duplicate file: $file"
+      else
+        echo "Duplicate file not deleted (does not match pattern): $file"
+      fi
+    else
+      hashfiles[$hash]="$file"
+    fi
+  done < <(find . -type f -print0)
+  echo "Duplicate check completed."
+}
+
+# ssdeep_env: set flags for Apple Silicon cross-builds (harmless on Linux)
+ssdeep_env() {
+  export ARCHFLAGS="-arch arm64"
+  export CFLAGS="-I/usr/include"
+  export LDFLAGS="-L/usr/lib"
+  echo "Environment set for ssdeep builds"
+}
+
+# The following snippet causes mcd to be completed like mkdir
+compdefas () {
+  if (($+_comps[$1])); then
+    compdef $_comps[$1] ${^@[2,-1]}=$1
+  fi
+}
+compdefas mkdir mcd
+
+
