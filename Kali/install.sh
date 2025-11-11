@@ -50,7 +50,7 @@ if ! command -v bat >/dev/null 2>&1 && command -v batcat >/dev/null 2>&1; then
 fi
 
 echo "==> Installing starship..."
-if ! command -v starship >/div/null 2>&1; then
+if ! command -v starship >/dev/null 2>&1; then
   if apt-cache show starship >/dev/null 2>&1; then
     sudo apt install -y starship || true
   fi
@@ -61,7 +61,7 @@ fi
 
 echo "==> Installing bun (optional)..."
 if [ ! -d "$HOME/.bun" ]; then
-  curl -fsSL https://bun.sh/install | bash -s -- -y || true
+  BUN_INSTALL="$HOME/.bun" bash -c 'curl -fsSL https://bun.sh/install | bash' || true
 fi
 
 echo "==> Installing pyenv..."
