@@ -39,7 +39,7 @@ path=(
   ~/.local/bin
   ~/.cargo/bin
 )
-export PATH="${path[*]}"
+export PATH
 
 ###############################
 # FZF (Fuzzy Finder) configuration
@@ -84,7 +84,7 @@ fi
 export PYENV_ROOT="$HOME/.pyenv"
 if [ -d "$PYENV_ROOT" ]; then
   path=("$PYENV_ROOT/bin" $path)
-  export PATH="${path[*]}"
+  export PATH
   eval "$(pyenv init --path)" 2>/dev/null
   eval "$(pyenv init -)" 2>/dev/null
 fi
@@ -162,10 +162,18 @@ bindkey "^[[F" end-of-line
 ###############################
 # Async Load External Tools
 ###############################
-command -v fzf >/dev/null 2>&1 && source <(fzf --zsh)
+# Load fzf integration if the actual binary exists (ignore aliases/functions)
+(( $+commands[fzf] )) && source <(${commands[fzf]} --zsh)
 [ -s "$HOME/.bun/_bun" ] && source "$HOME/.bun/_bun"
 [ -f "$HOME/.cargo/env" ] && source "$HOME/.cargo/env"
 command -v zoxide >/dev/null 2>&1 && eval "$(zoxide init zsh)"
+
+###############################
+# PATH failsafe (recover from accidental space-joined PATH)
+###############################
+if [[ "$PATH" == *" "* ]]; then
+  export PATH="/usr/local/bin:/usr/local/sbin:/usr/bin:/usr/sbin:/bin:/sbin:$HOME/.local/bin:$HOME/.cargo/bin"
+fi
 
 ###############################
 # Better Terminal Experience

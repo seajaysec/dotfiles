@@ -82,7 +82,6 @@ alias cmux='$HOME/.tmux/plugins/tmux-logging/scripts/save_complete_history.sh &&
 # File Search & Navigation
 alias fff='find / -type f -iname $1 2>/dev/null'
 alias ftf='fzf-tmux'
-alias fzf='fzf --color=dark'
 
 # Ensure Command Interoperability
 alias xargs='xargs '
