@@ -144,9 +144,6 @@ plug() {
       || source "$plugin_dir/${1:t}.sh" 2>/dev/null
 }
 [ -f "$HOME/.local/share/zap/zap.zsh" ] && source "$HOME/.local/share/zap/zap.zsh"
-echo 'export PYENV_ROOT="$HOME/.pyenv"'
-echo 'command -v pyenv >/dev/null || export PATH="$PYENV_ROOT/bin:$PATH"'
-echo 'eval "$(pyenv init -)"'
 
 plug "zsh-users/zsh-autosuggestions"
 plug "zdharma-continuum/fast-syntax-highlighting"
@@ -249,3 +246,10 @@ preexec() { echo -ne '\e[5 q'; }
 
 eval $(thefuck --alias)
 export PATH="/opt/homebrew/bin:$PATH"
+
+
+export CHECK_ROOT="/Users/chris.j.farrell/gits/check"
+export CHECK_PYTHON="/Users/chris.j.farrell/.virtualenvs/check-wivc/bin/python3"
+if [ -f "$CHECK_ROOT/check_function.zsh" ]; then
+  source "$CHECK_ROOT/check_function.zsh"
+fi

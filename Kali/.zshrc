@@ -89,6 +89,7 @@ if [ -d "$PYENV_ROOT" ]; then
   eval "$(pyenv init -)" 2>/dev/null
 fi
 
+
 ###############################
 # Plugin Management (zap)
 ###############################
@@ -246,5 +247,3 @@ if [[ $- == *i* ]] && command -v tmux >/dev/null 2>&1; then
     fi
   fi
 fi
-
-
