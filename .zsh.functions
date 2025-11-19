@@ -99,6 +99,11 @@ localip() {
     done
 }
 
+pb2csv() {
+  pbpaste | tr -d '\r' | uniq | awk '{printf "%s,", $0}' | sed 's/,$//' | pbcopy
+}
+
+
 # iplist: Convert CIDR notation or comma-separated IPs/CIDRs to list of IPs
 # Usage: iplist 192.168.1.0/24
 # Usage: echo "192.168.1.1, 10.0.0.0/24" | pbcopy && iplist
