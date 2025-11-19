@@ -8,6 +8,7 @@ alias sudo='sudo '                          # Ensure sudo works with aliases by 
 alias mysudo='sudo -E env "PATH=$PATH"'     # Preserve environment variables when using sudo
 alias history='history 0'                   # Show full history without line numbers
 alias fix_stty='stty sane'                  # Reset terminal settings when they get messed up
+alias pbc='pbpaste | rg -v '' | rg -v '' | pbcopy' # Clean clipboard content by removing specific characters
 
 # File Navigation & Listing (using modern eza instead of ls)
 alias ls='eza -a'                           # Modern ls replacement with all files
