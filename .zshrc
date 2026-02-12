@@ -14,8 +14,8 @@ export PAGER='bat --style=plain --paging=always'
 export MANPAGER="sh -c 'col -bx | bat --style=plain -l man --paging=always'"
 export PATH="/opt/homebrew/bin:$PATH"
 unset LESSOPEN
-"^A" beginning-of-line
-"^E" end-of-line
+bindkey "^A" beginning-of-line
+bindkey "^E" end-of-line
 
 
 ###############################
@@ -69,12 +69,19 @@ path=(
 )
 export PATH="${path[*]}"
 
-# Pyenv additions
+# Pyenv additions (optimized - no subshells, no rehash at startup)
 export PYENV_ROOT="$HOME/.pyenv"
-path=("$PYENV_ROOT/bin" $path)
-export PATH="${path[*]}"
-eval "$(pyenv init --path)"
-eval "$(pyenv init -)"
+export PATH="$PYENV_ROOT/shims:$PYENV_ROOT/bin:$PATH"
+export PYENV_SHELL=zsh
+source '/opt/homebrew/Cellar/pyenv/2.6.22/completions/pyenv.zsh'
+pyenv() {
+  local command=${1:-}
+  [ "$#" -gt 0 ] && shift
+  case "$command" in
+    activate|deactivate|rehash|shell) eval "$(pyenv "sh-$command" "$@")" ;;
+    *) command pyenv "$command" "$@" ;;
+  esac
+}
 
 ###############################
 # Language-Specific Settings
@@ -126,27 +133,12 @@ setopt INC_APPEND_HISTORY
 setopt NO_HIST_BEEP
 
 ###############################
-# Plugin Management
+# Plugin Management (via zap)
 ###############################
-plug() {
-    if [[ ! -f "$HOME/.local/share/zap/zap.zsh" ]]; then
-        echo "Installing zap..."
-        mkdir -p "$HOME/.local/share/zap"
-        git clone https://github.com/zap-zsh/zap.git "$HOME/.local/share/zap"
-        source "$HOME/.local/share/zap/zap.zsh"
-    fi
-    local plugin_dir="$HOME/.local/share/zsh/plugins/${1:t}"
-    if [[ ! -d "$plugin_dir" ]]; then
-        git clone "https://github.com/${1}" "$plugin_dir"
-    fi
-    source "$plugin_dir/${1:t}.plugin.zsh" 2>/dev/null \
-      || source "$plugin_dir/${1:t}.zsh" 2>/dev/null \
-      || source "$plugin_dir/${1:t}.sh" 2>/dev/null
-}
 [ -f "$HOME/.local/share/zap/zap.zsh" ] && source "$HOME/.local/share/zap/zap.zsh"
 
-plug "zsh-users/zsh-autosuggestions"
 plug "zdharma-continuum/fast-syntax-highlighting"
+plug "zsh-users/zsh-autosuggestions"
 plug "zsh-users/zsh-history-substring-search"
 plug "MichaelAquilina/zsh-you-should-use"
 plug "MichaelAquilina/zsh-autoswitch-virtualenv"
@@ -174,17 +166,8 @@ unset ZSH_THEME
 ###############################
 source ~/secrets.sh
 
-DOTFILES_LOADED=0
-load_dotfiles() {
-    source ~/dotfiles/.zsh.aliases
-    source ~/dotfiles/.zsh.functions
-    DOTFILES_LOADED=1
-}
-load_dotfiles
-{ sleep 0.1; load_dotfiles; } &!
-for cmd in g d k; do
-    eval "function $cmd() { [[ \$DOTFILES_LOADED -eq 0 ]] && load_dotfiles; command \$cmd \$@ }"
-done
+source ~/dotfiles/.zsh.aliases
+source ~/dotfiles/.zsh.functions
 
 ###############################
 # Key Bindings
@@ -243,10 +226,6 @@ zle -N zle-keymap-select
 echo -ne '\e[5 q'
 precmd() { echo -ne '\e[5 q'; }
 preexec() { echo -ne '\e[5 q'; }
-
-eval $(thefuck --alias)
-export PATH="/opt/homebrew/bin:$PATH"
-
 
 export CHECK_ROOT="/Users/chris.j.farrell/gits/check"
 export CHECK_PYTHON="/Users/chris.j.farrell/.virtualenvs/check-wivc/bin/python3"
