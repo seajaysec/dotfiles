@@ -84,14 +84,6 @@ pyenv() {
 }
 
 ###############################
-# Language-Specific Settings
-###############################
-MANPATH=$(manpath | tr ':' '\n' \
-          | grep -v '/Library/TeX/texbin/man' \
-          | paste -sd: -)
-export MANPATH
-
-###############################
 # Golang configuration
 ###############################
 export GOROOT=/usr/local/go
