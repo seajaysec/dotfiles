@@ -84,6 +84,40 @@ lscsv() {
 # Network & IP Operations
 # ----------------------
 
+# Dual-ping function: ping via VPN and regular interface
+dualping() {
+    local target="${1:-8.8.8.8}"
+    local count="${2:-4}"
+    
+    # Check if VPN is connected by looking for utun8 with an IP (single awk per iface vs grep|awk)
+    local vpn_ip=$(ifconfig utun8 2>/dev/null | awk '/inet /{print $2; exit}')
+    if [[ -n $vpn_ip ]]; then
+        local regular_ip=$(ifconfig en0 2>/dev/null | awk '/inet /{print $2; exit}')
+        
+        echo "🔒 VPN detected (utun8: $vpn_ip)"
+        echo "🌐 Regular interface (en0: $regular_ip)"
+        echo ""
+        echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+        echo "📡 🔒 Pinging $target via VPN (utun8):"
+        echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+        ping -c $count -b utun8 $target
+        
+        echo ""
+        echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+        echo "📡 🌐 Pinging $target via Regular (en0):"
+        echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+        ping -c $count -b en0 $target
+    else
+        echo "❌ VPN not connected (utun8 not active)"
+        echo "📡 Pinging $target via Regular interface only:"
+        echo ""
+        ping -c $count $target
+    fi
+}
+
+# Short alias
+alias dp='dualping'
+
 # localip: Get local IP address(es) with labels
 # Usage: localip      # returns all IPs with labels
 localip() {
@@ -100,7 +134,7 @@ localip() {
 }
 
 pb2csv() {
-  pbpaste | tr -d '\r' | uniq | awk '{printf "%s,", $0}' | sed 's/,$//' | pbcopy
+  pbpaste | tr -d '\r' | grep -v '^[[:space:]]*$' | uniq | awk '{printf "%s%s", (NR>1 ? "," : ""), $0}' | pbcopy && pbpaste
 }
 
 
@@ -187,23 +221,23 @@ sessionid(){
 }
 
 # whocerts: Check SSL certificate information
-# Usage: whocerts example.com          # Brief check
-# Usage: whocerts example.com full     # Detailed check
+# Usage: whocerts example.com
 whocerts() {
     local domain=$1
-    local detail=${2:-"brief"}  # Default to brief check
     
-    if [ "$detail" = "brief" ]; then
-        openssl s_client -showcerts -connect $domain:443 2>/dev/null | grep 'CN='
-    else
-        echo "1. Running openssl check:" && echo \
-        | openssl s_client -showcerts -connect -servername $domain -connect $domain:443 2>/dev/null \
-        | openssl x509 -inform pem -noout -text \
-        && echo "2. Running nslookup" \
-        && nslookup -vc -type=ANY $domain \
-        && echo "3. Running nmap" \
-        && nmap -p 443 --script ssl-cert $domain
+    if [ -z "$domain" ]; then
+        echo "Usage: whocerts <domain>"
+        return 1
     fi
+    
+    echo "1. Running openssl check:"
+    timeout 15 openssl s_client -showcerts -connect $domain:443 -servername $domain </dev/null 2>/dev/null | openssl x509 -inform pem -noout -text
+    echo ""
+    echo "2. Running nslookup"
+    timeout 10 nslookup -vc -type=ANY $domain || true
+    echo ""
+    echo "3. Running nmap"
+    timeout 30 nmap -p 443 --script ssl-cert $domain || true
 }
 
 # System Maintenance

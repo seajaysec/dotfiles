@@ -29,8 +29,8 @@ alias nc='rlwrap nc'                        # Netcat with readline support (shor
 
 # Network Monitoring & Security
 alias lsock='sudo /usr/sbin/lsof -i -P'             # List all open network files
-alias lsockT='sudo /usr/sbin/lsof -nP | grep TCP'   # List only TCP connections
-alias lsockU='sudo /usr/sbin/lsof -nP | grep UDP'   # List only UDP connections
+alias lsockT='sudo /usr/sbin/lsof -nP | rg -F TCP'   # List only TCP connections
+alias lsockU='sudo /usr/sbin/lsof -nP | rg -F UDP'   # List only UDP connections
 alias nmapr='grc nmap --randomize-hosts --script-args http.useragent="Mozilla/5.0 (Windows NT 10.0; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/39.0.2171.71 Safari/537.36 Edge/12.0i" --script-timeout 10m'  # Nmap with randomized hosts and browser UA
 
 # System Maintenance
@@ -55,7 +55,7 @@ alias rmenv='sudo rm -rf env_*'             # Remove virtual environment directo
 
 # Text Processing & Clipboard
 alias grepcve="grep -ioE 'CVE-[0-9]{4}-[0-9]{4,}' | tr '[:lower:]' '[:upper:]' | sort -u"  # Extract and normalize CVE IDs
-alias clipsort='pbpaste | grep -v "^$" | sort -Vu | pbcopy'  # Sort clipboard contents
+alias clipsort='pbpaste | rg -v "^$" | sort -Vu | pbcopy'  # Sort clipboard contents
 alias srt='grep -v "^$" | gsed "s/^[[:space:]]*//g" | sort -Vu | LC_COLLATE=C sort --ignore-case'  # Sort and clean text
 alias uniqip='pbpaste | grepip | sort -Vu | pbcopy'  # Extract, sort, and deduplicate IPs from clipboard
 
