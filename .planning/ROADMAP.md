@@ -2,7 +2,7 @@
 
 ## Overview
 
-This roadmap takes a cruft-laden, slow-starting zsh environment and transforms it into a fast, correct, maintainable shell configuration — without losing a single alias, function, or keybinding. The journey starts by eliminating the primary startup hang (1.47s Cursor agent eval), then restructures the file architecture (.zshenv/.zprofile/.zshrc separation), fixes keybinding and hook ordering bugs, resolves remaining code-level bugs, strips dead code, modernizes deployment to symlinks, and closes with a full functionality preservation audit. Phases 3–5 can run in parallel after the architecture is stable.
+This roadmap takes a cruft-laden, slow-starting zsh environment and transforms it into a fast, correct, maintainable shell configuration — without losing a single alias, function, or keybinding. The journey starts by eliminating the primary startup hang (1.47s Cursor agent eval), then restructures the file architecture (.zshenv/.zprofile/.zshrc separation), **reviews `.zsh.aliases` and `.zsh.functions` for interactive efficiency** (not only startup), fixes keybinding and hook ordering bugs, resolves remaining code-level bugs, strips dead code, researches **public dotfiles and similar stacks** for adoptable patterns, modernizes deployment to symlinks, verifies zero functionality loss, and **closes by reconciling with the public remote, refreshing docs, and documenting a repeatable non-secret sync workflow** for your other machines. Phases 3–5 can run in parallel after the architecture is stable.
 
 ## Phases
 - [x] **Phase 1: Critical Startup Fixes** - Eliminate hang, double-loads, and redundant PATH construction
@@ -12,6 +12,8 @@ This roadmap takes a cruft-laden, slow-starting zsh environment and transforms i
 - [ ] **Phase 5: Dead Code Removal** - Strip oh-my-zsh vestiges, unused files, and stale git artifacts
 - [ ] **Phase 6: Deployment & Install** - Replace cp-based install with symlink deployment
 - [ ] **Phase 7: Functionality Preservation Verification** - Verify zero functionality loss across all integrations
+- [ ] **Phase 8: External Patterns & Public Dotfiles Research** - Survey similar use cases and repos; synthesize adopt / reject / defer
+- [ ] **Phase 9: Public Remote Reconciliation & Multi-Machine Sync** - Integrate upstream, refresh README, establish ongoing non-secret publication
 
 ## Phase Details
 
@@ -34,20 +36,22 @@ Plans:
 ---
 
 ### Phase 2: Architecture Restructuring
-**Goal**: Establish correct .zshenv / .zprofile / .zshrc file separation with proper sourcing order, merge completions, fix load ordering
+**Goal**: Establish correct .zshenv / .zprofile / .zshrc file separation with proper sourcing order, merge completions, fix load ordering, and **pass an efficiency inventory + targeted edits on `.zsh.aliases` / `.zsh.functions`** (KEY daily-use files — same phase as completion architecture so completion + alias/function efficiency stay one coherent story)
 **Depends on**: Phase 1
-**Requirements**: ARCH-01, ARCH-02, ARCH-03, ARCH-04, ARCH-05, ARCH-06, ARCH-07, FIX-08, FIX-09
+**Requirements**: ARCH-01, ARCH-02, ARCH-03, ARCH-04, ARCH-05, ARCH-06, ARCH-07, FIX-08, FIX-09, EFF-01, EFF-02, EFF-03
 **Success Criteria** (what must be TRUE):
   1. .zshenv contains only `typeset -U`, EDITOR, VISUAL (≤ 5 lines of config)
   2. .zprofile contains brew shellenv and a single `path=(...)` array construction
   3. .zshrc follows the 10-step sourcing order from research (options → history → plugins → completions → aliases → functions → keybindings → tools → pyenv → local)
   4. `fast-syntax-highlighting` is the last Zap plugin loaded; Docker fpath added before `compinit`
   5. No separate `completions.zsh` file — all completion config in .zshrc with a single `compinit` call
+  6. `02-DISCUSSION-LOG.md` documents alias/function efficiency inventory; at least three concrete edits or three documented no-change decisions across `.zsh.aliases` and `.zsh.functions`
 
 Plans:
 - [ ] 02-01: Create .zshenv and .zprofile with correct minimal contents
 - [ ] 02-02: Restructure .zshrc sourcing order and merge completions.zsh
 - [ ] 02-03: Fix plugin/completion load ordering and add ~/.zshrc.local support
+- [ ] 02-04: Aliases & functions efficiency pass (inventory + targeted pipeline / fork reductions)
 
 ---
 
@@ -131,22 +135,55 @@ Plans:
 - [ ] 07-01: Audit all aliases, functions, and git workflow preservation
 - [ ] 07-02: Verify tool integrations, PATH correctness, and untouched configs
 
+---
+
+### Phase 8: External Patterns & Public Dotfiles Research
+**Goal**: Research online write-ups and **public dotfiles** from users with similar stacks (macOS, security-heavy tooling, Zap/Starship/fzf, large alias/function sets). Produce a synthesis document with **adopt / reject / defer** items and optional small PRs if a pattern is clearly safe (larger changes get new roadmap bullets).
+**Depends on**: Phase 2, Phase 5 (clean tree + architecture known before borrowing patterns)
+**Requirements**: EXT-01, EXT-02, EXT-03
+**Success Criteria** (what must be TRUE):
+  1. At least five external references (repos or articles) summarized with stack overlap noted
+  2. `.planning/research/EXTERNAL-PATTERNS.md` exists with adopt / reject / defer table
+  3. At least two items are either merged into this repo in Phase 8 **or** explicitly scheduled on ROADMAP / backlog with owner “next milestone”
+
+Plans:
+- [ ] 08-01: Survey public dotfiles & articles; write EXTERNAL-PATTERNS.md and backlog entries
+
+---
+
+### Phase 9: Public Remote Reconciliation & Multi-Machine Sync
+**Goal**: Compare **local vs public `origin`** (or your canonical public remote), **integrate anything newer on the remote** than the last sync here, refresh **README** (install, stack, privacy boundary), and document a **repeatable workflow** so non-secret improvements always flow to the public repo for use on other computers.
+**Depends on**: Phase 7 (verification complete before declaring “production” sync story)
+**Requirements**: PUB-01, PUB-02, PUB-03, PUB-04
+**Success Criteria** (what must be TRUE):
+  1. `git fetch` performed; divergence vs upstream documented; merges or cherry-picks applied with clean `git status`
+  2. README reflects current layout (thin home `.zshrc`, dotfiles repo paths, Phase 6 install when done) and **what must never be committed** (secrets, machine-only paths)
+  3. Written “sync playbook” (markdown in repo or `.planning/`) covers: branch to push, review before push, and using this repo on a fresh machine
+  4. `.gitignore` / docs cross-check: no secret file patterns accidentally tracked
+
+Plans:
+- [ ] 09-01: Fetch, diff, integrate upstream; resolve conflicts
+- [ ] 09-02: README + privacy / multi-machine section
+- [ ] 09-03: Non-secret sync playbook (optional helper script if it reduces friction)
+
 ## Parallel Execution Note
 
-Phases 3, 4, and 5 can execute in parallel after Phase 2 completes — they modify independent areas (keybindings/hooks, alias/option bugs, dead code). Phase 6 waits for all three to finish.
+Phases 3, 4, and 5 can execute in parallel after Phase 2 completes — they modify independent areas (keybindings/hooks, alias/option bugs, dead code). Phase 6 waits for all three to finish. **Phase 8** starts after **Phase 2 and Phase 5** complete (it may overlap Phase 6 if you want research while install work is in flight — but requirements assume a clean post–dead-code tree). **Phase 9** runs after Phase 7.
 
 ## Progress
 
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
-| 1. Critical Startup Fixes | 0/3 | Not started | - |
-| 2. Architecture Restructuring | 0/3 | Not started | - |
+| 1. Critical Startup Fixes | 3/3 | Complete | 2026-04-21 |
+| 2. Architecture Restructuring | 0/4 | Not started | - |
 | 3. Keybinding & Hook Correctness | 0/2 | Not started | - |
 | 4. Bug Fixes | 0/2 | Not started | - |
 | 5. Dead Code Removal | 0/2 | Not started | - |
 | 6. Deployment & Install | 0/1 | Not started | - |
 | 7. Functionality Preservation Verification | 0/2 | Not started | - |
+| 8. External Patterns & Public Dotfiles Research | 0/1 | Not started | - |
+| 9. Public Remote Reconciliation & Multi-Machine Sync | 0/3 | Not started | - |
 
 ---
 *Roadmap created: 2026-04-21*
-*Last updated: 2026-04-21*
+*Last updated: 2026-04-21 — Phases 8–9, Phase 2 plan 02-04, EFF requirements*

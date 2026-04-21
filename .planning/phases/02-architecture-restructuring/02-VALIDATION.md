@@ -41,6 +41,8 @@ created: 2026-04-21
 | 02-01-2 | 02-01 | 1 | ARCH-02 | T2 | brew shellenv guarded | shell | `zsh -n .zprofile` | ✅ | ⬜ |
 | 02-02-1 | 02-02 | 2 | ARCH-04, ARCH-05 | T3 | single compinit | shell | `grep -c compinit .zshrc` = 1 | ✅ | ⬜ |
 | 02-03-1 | 02-03 | 3 | FIX-08, FIX-09 | T4 | fpath order | shell | `grep -n plug .zshrc` order check | ✅ | ⬜ |
+| 02-04-1 | 02-04 | 4 | EFF-01 | T1 | Inventory logged | manual | `grep -c '## Aliases inventory' 02-DISCUSSION-LOG.md` ≥ 1 | ✅ | ⬜ |
+| 02-04-2 | 02-04 | 4 | EFF-02, EFF-03 | T2 | Syntax + semantics | shell | `zsh -n .zsh.aliases`; `zsh -fc 'source ~/.zshrc'` smoke optional | ✅ | ⬜ |
 
 ---
 
@@ -61,7 +63,7 @@ Existing infrastructure covers requirements — no new test framework. Wave 0 = 
 
 ## Validation Sign-Off
 
-- [x] All tasks have shell verify commands or manual table above
+- [x] All tasks have shell verify commands or manual table above (including plan 02-04)
 - [x] Sampling: zsh -n between edits
 - [x] No watch-mode flags
 - [ ] `nyquist_compliant: true` set after execute-phase passes

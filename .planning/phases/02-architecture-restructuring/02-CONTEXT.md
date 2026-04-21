@@ -7,7 +7,7 @@
 <domain>
 ## Phase Boundary
 
-Establish the macOS zsh startup split described in `.planning/ROADMAP.md`: minimal `~/.zshenv`, login-only `~/.zprofile` (Homebrew `path` + `brew shellenv`), and interactive `~/dotfiles/.zshrc` with the documented sourcing order. Merge `completions.zsh` into `.zshrc`, ensure a single `compinit`, move Docker `fpath` before `compinit`, load `fast-syntax-highlighting` as the last Zap plugin, and add optional `~/.zshrc.local`. Preserve Phase 1 outcomes: thin home `~/.zshrc` sourcing dotfiles, `${(j.:.)path}` PATH exports, early PATH bootstrap when `mkdir` is missing, and cargo/bun only from interactive config.
+Establish the macOS zsh startup split described in `.planning/ROADMAP.md`: minimal `~/.zshenv`, login-only `~/.zprofile` (Homebrew `path` + `brew shellenv`), and interactive `~/dotfiles/.zshrc` with the documented sourcing order. Merge `completions.zsh` into `.zshrc`, ensure a single `compinit`, move Docker `fpath` before `compinit`, load `fast-syntax-highlighting` as the last Zap plugin, and add optional `~/.zshrc.local`. **In the same phase**, treat **`~/dotfiles/.zsh.aliases`** and **`~/dotfiles/.zsh.functions`** as first-class efficiency scope (plan **02-04**): inventory pipeline-heavy aliases and fork-heavy functions, apply targeted improvements or document explicit no-ops, without changing semantics of security/daily workflows. Preserve Phase 1 outcomes: thin home `~/.zshrc` sourcing dotfiles, `${(j.:.)path}` PATH exports, early PATH bootstrap when `mkdir` is missing, and cargo/bun only from interactive config.
 
 </domain>
 
@@ -50,7 +50,7 @@ All file moves and ordering details are at implementer discretion within ROADMAP
 <canonical_refs>
 ## Canonical References
 
-- `.planning/ROADMAP.md` — Phase 2 goal, success criteria, plan stubs 02-01 … 02-03
+- `.planning/ROADMAP.md` — Phase 2 goal, success criteria, plan stubs 02-01 … 02-04
 - `.planning/REQUIREMENTS.md` — ARCH-01 … ARCH-07, FIX-08, FIX-09
 - `.planning/phases/01-critical-startup-fixes/01-CONTEXT.md` — decisions that constrain Phase 2
 - `.planning/codebase/STRUCTURE.md`, `.planning/codebase/ARCHITECTURE.md` — file roles and startup notes

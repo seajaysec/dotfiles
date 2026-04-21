@@ -2,7 +2,7 @@
 
 ## What This Is
 
-A comprehensive review and modernization of a macOS terminal environment (zsh, tmux, aliases, functions, install tooling) that has accumulated years of cruft, conflicting configurations, and structural issues causing startup hangs. The goal is a fast, clean, correct shell that preserves every piece of existing functionality while eliminating dead weight, fixing bugs, and establishing a maintainable architecture.
+A comprehensive review and modernization of a macOS terminal environment (zsh, tmux, aliases, functions, install tooling) that has accumulated years of cruft, conflicting configurations, and structural issues causing startup hangs. The goal is a fast, clean, correct shell that preserves every piece of existing functionality while eliminating dead weight, fixing bugs, and establishing a maintainable architecture — including **interactive efficiency** in `.zsh.aliases` and `.zsh.functions`, **learning from public dotfiles**, and a **documented path to keep non-secret configs synced** to your public repo for other machines.
 
 ## Core Value
 

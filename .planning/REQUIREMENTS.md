@@ -69,6 +69,27 @@ Requirements for this overhaul. Each maps to roadmap phases.
 - [ ] **ARCH-06**: Starship init as last tool initialization in .zshrc
 - [ ] **ARCH-07**: Support `~/.zshrc.local` for machine-specific overrides (replaces secrets.sh pattern)
 
+### Shell efficiency (aliases & functions)
+
+Interactive efficiency in **`~/dotfiles/.zsh.aliases`** and **`~/dotfiles/.zsh.functions`** — not only startup time. Satisfied by Phase 2 plan **02-04** together with completion merge (**ARCH-04** / **02-02**).
+
+- [ ] **EFF-01**: Documented inventory of pipeline-heavy aliases and subprocess-heavy functions (fork counts, `grep` vs `rg`, parse-time risks)
+- [ ] **EFF-02**: At least three concrete efficiency edits **or** three documented no-change decisions with rationale (portability, BSD vs GNU, correctness)
+- [ ] **EFF-03**: `zsh -n` / smoke checks pass for both files after edits; zero behavior regression vs Phase 7 checklist
+
+### External research (public dotfiles)
+
+- [ ] **EXT-01**: At least five external references (repos or articles) with noted overlap to this stack
+- [ ] **EXT-02**: `.planning/research/EXTERNAL-PATTERNS.md` contains adopt / reject / defer table with rationale
+- [ ] **EXT-03**: At least two recommendations applied in-repo during Phase 8 **or** explicitly deferred with ROADMAP/backlog pointer
+
+### Publication & multi-machine sync
+
+- [ ] **PUB-01**: `git fetch` against public remote; local vs upstream divergence documented; non-conflicting updates integrated
+- [ ] **PUB-02**: README updated for current install/layout and **non-secret** publication boundary
+- [ ] **PUB-03**: Sync playbook documented (how to push improvements, review before push, use on another machine)
+- [ ] **PUB-04**: `.gitignore` and docs reviewed so secret / machine-only paths are not trackable by mistake
+
 ### Deployment & Install
 
 - [ ] **INST-01**: install.sh uses symlinks (`ln -sf`) for .zshrc, .zshenv, .zprofile
@@ -168,6 +189,16 @@ Deferred to future work. Not in current roadmap.
 | ARCH-05 | Phase 2: Architecture Restructuring | Not started |
 | ARCH-06 | Phase 2: Architecture Restructuring | Not started |
 | ARCH-07 | Phase 2: Architecture Restructuring | Not started |
+| EFF-01 | Phase 2: Architecture Restructuring | Not started |
+| EFF-02 | Phase 2: Architecture Restructuring | Not started |
+| EFF-03 | Phase 2: Architecture Restructuring | Not started |
+| EXT-01 | Phase 8: External Patterns & Public Dotfiles Research | Not started |
+| EXT-02 | Phase 8: External Patterns & Public Dotfiles Research | Not started |
+| EXT-03 | Phase 8: External Patterns & Public Dotfiles Research | Not started |
+| PUB-01 | Phase 9: Public Remote Reconciliation & Multi-Machine Sync | Not started |
+| PUB-02 | Phase 9: Public Remote Reconciliation & Multi-Machine Sync | Not started |
+| PUB-03 | Phase 9: Public Remote Reconciliation & Multi-Machine Sync | Not started |
+| PUB-04 | Phase 9: Public Remote Reconciliation & Multi-Machine Sync | Not started |
 | INST-01 | Phase 6: Deployment & Install | Not started |
 | INST-02 | Phase 6: Deployment & Install | Not started |
 | INST-03 | Phase 6: Deployment & Install | Not started |
@@ -187,11 +218,11 @@ Deferred to future work. Not in current roadmap.
 | PRES-12 | Phase 7: Functionality Preservation | Not started |
 
 **Coverage:**
-- v1 requirements: 61 total (across 8 categories)
-- Mapped to phases: 61
+- v1 requirements: 71 total (across 11 categories)
+- Mapped to phases: 71
 - Unmapped: 0
 - Coverage: 100%
 
 ---
 *Requirements defined: 2026-04-21*
-*Last updated: 2026-04-21 — traceability populated during roadmap creation*
+*Last updated: 2026-04-21 — EFF/EXT/PUB added; Phases 8–9*
