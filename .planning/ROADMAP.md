@@ -5,7 +5,7 @@
 This roadmap takes a cruft-laden, slow-starting zsh environment and transforms it into a fast, correct, maintainable shell configuration — without losing a single alias, function, or keybinding. The journey starts by eliminating the primary startup hang (1.47s Cursor agent eval), then restructures the file architecture (.zshenv/.zprofile/.zshrc separation), fixes keybinding and hook ordering bugs, resolves remaining code-level bugs, strips dead code, modernizes deployment to symlinks, and closes with a full functionality preservation audit. Phases 3–5 can run in parallel after the architecture is stable.
 
 ## Phases
-- [ ] **Phase 1: Critical Startup Fixes** - Eliminate hang, double-loads, and redundant PATH construction
+- [x] **Phase 1: Critical Startup Fixes** - Eliminate hang, double-loads, and redundant PATH construction
 - [ ] **Phase 2: Architecture Restructuring** - Establish .zshenv/.zprofile/.zshrc separation with correct sourcing order
 - [ ] **Phase 3: Keybinding & Hook Correctness** - Fix vi-mode ordering and Starship hook conflicts
 - [ ] **Phase 4: Bug Fixes** - Fix aliases, options, and completion path bugs
