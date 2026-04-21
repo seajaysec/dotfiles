@@ -97,3 +97,16 @@ baseline_export_path_count=5
 ## zcompdump cleanup (plan 01-03 task 2)
 
 Removed stale completion dump files `~/.zcompdump.FHN74TYJXL.*` (numbered variants). Kept primary `~/.zcompdump` referenced by `.zshrc` `compinit` guard.
+
+## Deployed ~/.zshrc (plan 01-03)
+
+Replaced duplicated home `~/.zshrc` with a thin wrapper that only `source`s `~/dotfiles/.zshrc` so interactive shells load the tracked config (backup: `~/.zshrc.bak.2026-04-21-gsd-phase1`).
+
+## Startup benchmark (plan 01-03 final)
+
+0.068
+0.055
+0.056
+median=0.056
+
+Duplicate PATH segments check (interactive zsh, `uniq -d` over `PATH`): **0** when using full inherited `PATH` from the host environment (`/usr/bin/tr` etc. on the command line).

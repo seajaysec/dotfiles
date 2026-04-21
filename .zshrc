@@ -223,3 +223,8 @@ export CHECK_PYTHON="/Users/chris.j.farrell/.virtualenvs/check-wivc/bin/python3"
 if [ -f "$CHECK_ROOT/check_function.zsh" ]; then
   source "$CHECK_ROOT/check_function.zsh"
 fi
+
+# PERF-05: collapse duplicate PATH segments after integrations (preserve order)
+typeset -U _dedupe_path_segments
+_dedupe_path_segments=(${(s.:.)PATH})
+export PATH=${(j.:.)_dedupe_path_segments}
