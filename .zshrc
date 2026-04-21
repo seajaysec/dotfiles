@@ -1,6 +1,12 @@
 ###############################
 # Core Environment Variables
 ###############################
+# If the parent process left PATH empty or unusable (Cursor, GUI tools, `env -i`),
+# bootstrap standard system locations before any command substitution or plugins run.
+if ! command -v mkdir >/dev/null 2>&1; then
+  export PATH="/usr/bin:/bin:/usr/sbin:/sbin:/opt/homebrew/bin:/usr/local/bin${PATH:+:$PATH}"
+fi
+
 setopt extended_glob
 export ZSH=~/.oh-my-zsh
 export TERM=xterm-256color
@@ -66,7 +72,7 @@ path=(
     /bin/lscript
     ~/.cargo/bin
 )
-export PATH="${path[*]}"
+export PATH="${(j.:.)path}"
 
 # Pyenv additions (optimized - no subshells, no rehash at startup)
 export PYENV_ROOT="$HOME/.pyenv"
@@ -99,7 +105,7 @@ export MONO_GAC_PREFIX="/usr/local"
 ###############################
 export BUN_INSTALL="$HOME/.bun"
 path+=($GOPATH/bin $GOROOT/bin $BUN_INSTALL/bin)
-export PATH="${path[*]}"
+export PATH="${(j.:.)path}"
 
 ###############################
 # History Configuration

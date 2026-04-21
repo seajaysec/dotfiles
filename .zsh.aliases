@@ -55,7 +55,7 @@ alias rmenv='sudo rm -rf env_*'             # Remove virtual environment directo
 
 # Text Processing & Clipboard
 alias grepcve="grep -ioE 'CVE-[0-9]{4}-[0-9]{4,}' | tr '[:lower:]' '[:upper:]' | sort -u"  # Extract and normalize CVE IDs
-alias clipsort="pbpaste | grep -v "^$" | sort -Vu | pbcopy"  # Sort clipboard contents
+alias clipsort='pbpaste | grep -v "^$" | sort -Vu | pbcopy'  # Sort clipboard contents
 alias srt='grep -v "^$" | gsed "s/^[[:space:]]*//g" | sort -Vu | LC_COLLATE=C sort --ignore-case'  # Sort and clean text
 alias uniqip='pbpaste | grepip | sort -Vu | pbcopy'  # Extract, sort, and deduplicate IPs from clipboard
 
