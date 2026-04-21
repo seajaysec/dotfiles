@@ -1,33 +1,29 @@
 ---
-status: partial
+status: complete
 phase: 01-critical-startup-fixes
 source:
   - 01-01-SUMMARY.md
   - 01-02-SUMMARY.md
   - 01-03-SUMMARY.md
 started: 2026-04-21T12:00:00Z
-updated: 2026-04-21T18:40:00Z
+updated: 2026-04-21T20:00:00Z
 ---
 
 ## Current Test
 
-number: 1
-name: New interactive shell (Cursor / minimal parent PATH)
+number: —
+name: —
 expected: |
-  Open a new terminal tab or window. There should be no "command not found" for
-  mkdir, uname, date, stat, grep, fzf, zoxide, or starship. The prompt should load.
-awaiting: user response
+  All planned checks for this UAT slice are done.
+awaiting: none
 
 ## Tests
 
-### 1. New shell after PATH hotfix
+### 1. New interactive shell (Cursor / minimal parent PATH)
 expected: |
-  No `command not found` for core utilities; `clipsort` alias loads without `no matches found`.
-result: issue
-reported: |
-  User: new shell fails with mkdir/uname/date/stat/grep/awk/fzf/zoxide/starship not found;
-  python3 not on PATH for autoswitch-virtualenv.
-severity: major
+  No `command not found` for core utilities; prompt and tools load normally.
+result: pass
+reported: "y (after PATH join + bootstrap + clipsort hotfix)"
 
 ### 2. Automated smoke (minimal parent environment)
 expected: |
@@ -36,15 +32,15 @@ result: pass
 
 ### 3. Regression — full `.zsh.aliases` restored
 expected: |
-  Git history shows 153-line `.zsh.aliases` (not truncated); only `clipsort` quoting changed.
+  Full `.zsh.aliases` (153 lines); only `clipsort` quoting changed from pre-hotfix baseline.
 result: pass
 
 ## Summary
 
 total: 3
-passed: 2
-issues: 1
-pending: 1
+passed: 3
+issues: 0
+pending: 0
 skipped: 0
 blocked: 0
 
