@@ -27,9 +27,9 @@ This roadmap takes a cruft-laden, slow-starting zsh environment and transforms i
   5. No MANPATH subshell pipeline at source time
 
 Plans:
-- [ ] 01-01: Remove Cursor agent shell integration and verify no hang
-- [ ] 01-02: Deduplicate double-loaded resources (cargo env, bun completions, PATH)
-- [ ] 01-03: Remove MANPATH pipeline, clean up stale .zcompdump files, and benchmark
+- [x] 01-01: Remove Cursor agent shell integration and verify no hang
+- [x] 01-02: Deduplicate double-loaded resources (cargo env, bun completions, PATH)
+- [x] 01-03: Remove MANPATH pipeline, clean up stale .zcompdump files, and benchmark
 
 ---
 

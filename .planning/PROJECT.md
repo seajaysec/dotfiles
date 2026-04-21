@@ -85,8 +85,7 @@ These capabilities exist in the current codebase and must be preserved:
 - This is a brownfield dotfiles repo accumulated over years
 - User is a security professional / developer who uses the terminal heavily
 - Zero tolerance for lost functionality — every alias, function, and keybinding must survive
-- The deployed `~/.zshrc` has diverged from the repo version due to cp-based install
-- The deployed version includes Cursor agent shell integration (`eval "$(~/.local/bin/agent shell-integration zsh)"`) which takes 1.47s and uses `exec` to replace the shell process — primary hang suspect
+- **Phase 1 (2026-04-21):** `~/.zshrc` is a thin wrapper that `source`s `~/dotfiles/.zshrc` (backup of the old monolithic file on disk). Cursor agent shell-integration was removed from the prior home `.zshrc`.
 - `.zshenv` and `.zprofile` exist outside the repo and are not tracked
 - `.p10k.zsh` is a ~1600-line Powerlevel10k config that's completely unused (Starship replaced it)
 - The Kali/ directory has been deleted but not committed
@@ -130,7 +129,7 @@ These capabilities exist in the current codebase and must be preserved:
 | Decision | Rationale | Outcome |
 |----------|-----------|---------|
 | Keep Zap + Starship | Modern, fast, already migrated. Validated by benchmarks | — Pending |
-| Remove Cursor agent shell-integration from .zshrc | 1.47s + exec replacement = hang risk. Handle via Cursor-native mechanism or skill | — Pending |
+| Remove Cursor agent shell-integration from .zshrc | 1.47s + exec replacement = hang risk. Handle via Cursor-native mechanism or skill | Done in Phase 1 |
 | Switch install.sh from cp to symlinks for .zshrc | Prevents deployed/repo divergence. Aliases/functions already sourced from repo | — Pending |
 | Establish .zshenv/.zprofile/.zshrc separation | .zshenv = minimal (PATH only), .zprofile = login-only (brew shellenv), .zshrc = interactive | — Pending |
 | Vi-mode first, then emacs convenience bindings in viins | Prevents bindkey -v from wiping bindings. Standard practice for hybrid vi/emacs | — Pending |
@@ -154,4 +153,4 @@ This document evolves at phase transitions and milestone boundaries.
 4. Update Context with current state
 
 ---
-*Last updated: 2026-04-21 after initialization*
+*Last updated: 2026-04-21 — Phase 1 execution complete; `~/.zshrc` now sources `~/dotfiles/.zshrc`.*
