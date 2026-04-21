@@ -88,3 +88,8 @@ Removed `eval "$(~/.local/bin/agent shell-integration zsh)"` from deployed `~/.z
 Removed `source` lines for `$HOME/.cargo/env` and `$HOME/.bun/_bun` from `~/.zshenv`. Interactive shells load both once from `~/dotfiles/.zshrc` (see `source` guards there).
 
 baseline_export_path_count=5
+
+## plan 01-02 task 3 verification
+
+- `zsh -i -c 'command -v cargo >/dev/null && command -v bun >/dev/null && echo OK'` exits 0; stdout includes terminal integration prefixes from iTerm2 / zle cursor styling before the final `OK`.
+- `time zsh -i -c exit` real **0.220s** after PATH refactor — strictly less than plan 01-01 worst sample **1.084s**.
