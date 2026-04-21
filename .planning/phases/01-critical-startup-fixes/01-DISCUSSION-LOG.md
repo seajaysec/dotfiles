@@ -93,3 +93,7 @@ baseline_export_path_count=5
 
 - `zsh -i -c 'command -v cargo >/dev/null && command -v bun >/dev/null && echo OK'` exits 0; stdout includes terminal integration prefixes from iTerm2 / zle cursor styling before the final `OK`.
 - `time zsh -i -c exit` real **0.220s** after PATH refactor — strictly less than plan 01-01 worst sample **1.084s**.
+
+## zcompdump cleanup (plan 01-03 task 2)
+
+Removed stale completion dump files `~/.zcompdump.FHN74TYJXL.*` (numbered variants). Kept primary `~/.zcompdump` referenced by `.zshrc` `compinit` guard.
