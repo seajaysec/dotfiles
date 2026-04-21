@@ -133,13 +133,31 @@ setopt NO_HIST_BEEP
 ###############################
 [ -f "$HOME/.local/share/zap/zap.zsh" ] && source "$HOME/.local/share/zap/zap.zsh"
 
-plug "zdharma-continuum/fast-syntax-highlighting"
+# Zap plugins — fast-syntax-highlighting must load last (FIX-08 / 02-03)
 plug "zsh-users/zsh-autosuggestions"
 plug "zsh-users/zsh-history-substring-search"
 plug "MichaelAquilina/zsh-you-should-use"
 plug "MichaelAquilina/zsh-autoswitch-virtualenv"
+plug "zdharma-continuum/fast-syntax-highlighting"
 
-source ~/dotfiles/completions.zsh
+# Docker completions on fpath before compinit (FIX-09 / 02-03)
+DOCKER_COMP="$(brew --prefix docker-completion 2>/dev/null)/share/zsh/site-functions"
+if [[ -d "$DOCKER_COMP" ]]; then
+  fpath+=("$DOCKER_COMP")
+fi
+
+# Completion: merged from former completions.zsh (ARCH-04 / 02-02)
+mkdir -p "${HOME}/.cache/zsh"
+fpath+=~/.zfunc
+_comp_options+=(globdots)
+zstyle ':completion::complete:*' use-cache 1
+zstyle ':completion::complete:*' cache-path "${HOME}/.cache/zsh"
+zstyle ':completion:*:matches' group 'yes'
+zstyle ':completion:*:options' description 'yes'
+zstyle ':completion:*:options' auto-description '%d'
+zstyle ':completion:*:default' list-prompt '%S%M matches%s'
+zstyle ':completion:*' group-name ''
+
 autoload -Uz compinit
 if [ "$(date +'%j')" != "$(stat -f '%Sm' -t '%j' ~/.zcompdump)" ]; then
   compinit
@@ -200,8 +218,6 @@ HIST_STAMPS="mm/dd/yyyy"
 REPORTTIME=10
 auto-ls() { ls; }
 chpwd_functions=(${chpwd_functions[@]} "auto-ls")
-export STARSHIP_CONFIG=~/dotfiles/config/starship/starship.toml
-eval "$(starship init zsh)"
 
 ###############################
 # Vi Mode Configuration
@@ -230,7 +246,14 @@ if [ -f "$CHECK_ROOT/check_function.zsh" ]; then
   source "$CHECK_ROOT/check_function.zsh"
 fi
 
+# Starship last among interactive tool evals (ARCH-06 / 02-03)
+export STARSHIP_CONFIG=~/dotfiles/config/starship/starship.toml
+eval "$(starship init zsh)"
+
 # PERF-05: collapse duplicate PATH segments after integrations (preserve order)
 typeset -U _dedupe_path_segments
 _dedupe_path_segments=(${(s.:.)PATH})
 export PATH=${(j.:.)_dedupe_path_segments}
+
+# Machine-specific overrides (ARCH-07 / 02-03); migrate secrets from ~/secrets.sh over time
+[[ -f "$HOME/.zshrc.local" ]] && source "$HOME/.zshrc.local"

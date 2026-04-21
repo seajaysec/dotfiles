@@ -84,7 +84,8 @@ echo "🐍 Installing Python packages..."
 # Copy configuration files
 echo "📝 Copying configuration files..."
 cp .zshrc ~/.zshrc
-cp completions.zsh ~/dotfiles/
+cp .zshenv ~/dotfiles/ 2>/dev/null || true
+cp .zprofile ~/dotfiles/ 2>/dev/null || true
 cp config/starship/starship.toml ~/dotfiles/config/starship/
 cp .zsh.functions ~/dotfiles/
 cp .zsh.aliases ~/dotfiles/
