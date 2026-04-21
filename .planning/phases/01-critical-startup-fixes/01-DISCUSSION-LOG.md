@@ -76,3 +76,9 @@ None recorded.
 ## PERF-02 (plan 01-01 task 1)
 
 Removed `eval "$(~/.local/bin/agent shell-integration zsh)"` from deployed `~/.zshrc` (home directory; not the same file as `~/dotfiles/.zshrc`). Tracked `~/dotfiles/.zshrc` had no agent shell-integration line.
+
+## Startup benchmark (plan 01-01)
+
+1.084
+0.224
+0.231
