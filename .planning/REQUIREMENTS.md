@@ -1,0 +1,136 @@
+# Requirements: Dotfiles Overhaul
+
+**Defined:** 2026-04-21
+**Core Value:** Every function, alias, and keybinding the user relies on must continue to work exactly as expected — zero functionality loss — while making the shell start instantly and the configs easy to maintain.
+
+## v1 Requirements
+
+Requirements for this overhaul. Each maps to roadmap phases.
+
+### Startup Performance
+
+- [ ] **PERF-01**: Shell startup completes in under 200ms (measured via `time zsh -i -c exit`)
+- [ ] **PERF-02**: Remove Cursor agent shell-integration eval from .zshrc (1.47s + exec hang risk)
+- [ ] **PERF-03**: Eliminate double-loading of cargo env (.zshenv + .zshrc)
+- [ ] **PERF-04**: Eliminate double-loading of bun completions (.zshenv + .zshrc)
+- [ ] **PERF-05**: Eliminate redundant PATH construction (currently rebuilt 5+ times with export)
+- [ ] **PERF-06**: Remove MANPATH subshell pipeline — use MANPATH array or static exclusion
+- [ ] **PERF-07**: Clean up stale .zcompdump files (4 on disk)
+
+### Keybinding Correctness
+
+- [ ] **KEYS-01**: `bindkey -v` set before all other keybindings (not after, wiping them)
+- [ ] **KEYS-02**: Emacs convenience bindings (ctrl-a, ctrl-e, word movement, arrow keys) work in vi insert mode via `-M viins`
+- [ ] **KEYS-03**: History-substring-search arrow bindings work in vi insert mode
+- [ ] **KEYS-04**: Vi-mode menu-select bindings (hjkl) work in completion menu
+- [ ] **KEYS-05**: `KEYTIMEOUT` set to safe value (10 instead of 1) to avoid breaking multi-key sequences
+
+### Hook & Prompt Correctness
+
+- [ ] **HOOK-01**: Starship's precmd hook not overwritten — remove bare `precmd()` definition
+- [ ] **HOOK-02**: Starship's preexec hook not overwritten — remove bare `preexec()` definition
+- [ ] **HOOK-03**: Starship's `zle-keymap-select` widget not overwritten — remove custom widget or let Starship wrap it
+- [ ] **HOOK-04**: Vi-mode cursor shape changes work correctly (beam in insert, block in normal)
+- [ ] **HOOK-05**: `chpwd_functions` auto-ls hook preserved using `add-zsh-hook` pattern
+
+### Bug Fixes
+
+- [ ] **FIX-01**: `ARCHFLAGS` set to `-arch arm64` (not x86_64) on Apple Silicon
+- [ ] **FIX-02**: `fff` alias converted to function (aliases don't accept `$1`)
+- [ ] **FIX-03**: `audiofix` alias converted to function (backtick eval at parse time → `$()`)
+- [ ] **FIX-04**: `clipsort` alias quoting fixed (nested double quotes broken)
+- [ ] **FIX-05**: `rmenv` alias made safe (remove unnecessary `sudo`, add confirmation)
+- [ ] **FIX-06**: `HIST_STAMPS` set once (currently set twice with different values)
+- [ ] **FIX-07**: `SHARE_HISTORY` and `INC_APPEND_HISTORY` conflict resolved (remove INC_APPEND_HISTORY — SHARE_HISTORY implies it)
+- [ ] **FIX-08**: `fast-syntax-highlighting` moved to load LAST (currently loaded first)
+- [ ] **FIX-09**: Docker completions fpath addition moved before compinit
+- [ ] **FIX-10**: `$ZSH_CACHE_DIR` reference removed from completions (undefined oh-my-zsh variable)
+- [ ] **FIX-11**: pyenv completions path not hardcoded to specific Cellar version
+
+### Dead Code Removal
+
+- [ ] **DEAD-01**: Remove `export ZSH=~/.oh-my-zsh` and corresponding `unset ZSH`
+- [ ] **DEAD-02**: Remove `unset ZSH_THEME` (oh-my-zsh vestige)
+- [ ] **DEAD-03**: Remove `DISABLE_AUTO_UPDATE=true` (oh-my-zsh variable)
+- [ ] **DEAD-04**: Remove `source ~/secrets.sh` (file is empty, 0 bytes)
+- [ ] **DEAD-05**: Remove `export MONO_GAC_PREFIX="/usr/local"` (unused)
+- [ ] **DEAD-06**: Delete `.p10k.zsh` from repo (1600 lines, completely unused)
+- [ ] **DEAD-07**: Delete `.fzf.zsh` from repo if present (replaced by `source <(fzf --zsh)`)
+- [ ] **DEAD-08**: Commit Kali/ directory deletion (already deleted, not committed)
+- [ ] **DEAD-09**: Remove `__git_files` performance hack (oh-my-zsh workaround, not needed with Zap)
+
+### Architecture & Structure
+
+- [ ] **ARCH-01**: Establish .zshenv with minimal contents (typeset -U, EDITOR, VISUAL only)
+- [ ] **ARCH-02**: Establish .zprofile with PATH array construction and brew shellenv
+- [ ] **ARCH-03**: .zshrc contains only interactive config with correct sourcing order
+- [ ] **ARCH-04**: Merge completions.zsh into .zshrc (eliminate split file with conflicting zstyles)
+- [ ] **ARCH-05**: Single compinit call with all fpath additions before it
+- [ ] **ARCH-06**: Starship init as last tool initialization in .zshrc
+- [ ] **ARCH-07**: Support `~/.zshrc.local` for machine-specific overrides (replaces secrets.sh pattern)
+
+### Deployment & Install
+
+- [ ] **INST-01**: install.sh uses symlinks (`ln -sf`) for .zshrc, .zshenv, .zprofile
+- [ ] **INST-02**: install.sh is idempotent (safe to re-run)
+- [ ] **INST-03**: install.sh backs up existing files before symlinking
+- [ ] **INST-04**: .zshenv and .zprofile tracked in repo (currently untracked)
+- [ ] **INST-05**: Repo .zshrc is the deployed .zshrc (no divergence possible)
+
+### Functionality Preservation
+
+- [ ] **PRES-01**: All aliases from .zsh.aliases preserved (with bug-fixed versions where applicable)
+- [ ] **PRES-02**: All functions from .zsh.functions preserved
+- [ ] **PRES-03**: All git aliases preserved
+- [ ] **PRES-04**: Security/pentesting functions preserved (grepip, iplist, whocerts, cve40438, etc.)
+- [ ] **PRES-05**: tmux config untouched (.tmux.conf and .tmux.conf.local)
+- [ ] **PRES-06**: Starship config untouched (starship.toml)
+- [ ] **PRES-07**: SwiftBar plugins untouched
+- [ ] **PRES-08**: Brewfile and brewup.sh untouched
+- [ ] **PRES-09**: iTerm2 shell integration preserved
+- [ ] **PRES-10**: fzf configuration preserved (defaults, preview, keybindings)
+- [ ] **PRES-11**: zoxide aliased as cd preserved
+- [ ] **PRES-12**: Homebrew, pyenv, Go, Rust, Bun, Node all on PATH correctly
+
+## v2 Requirements
+
+Deferred to future work. Not in current roadmap.
+
+### Optimization
+
+- **OPT-01**: Evaluate evalcache for tool init if startup exceeds 200ms after v1 fixes
+- **OPT-02**: Consider zcompile for .zshrc and sourced files
+- **OPT-03**: Audit Brewfile for unused packages
+
+### Enhancements
+
+- **ENH-01**: Add Zap plugin pre-installation to install.sh (avoid network dependency on first startup)
+- **ENH-02**: Add tmux plugin installation to install.sh (tpm + plugins)
+- **ENH-03**: Add hostname-based conditional config for multi-machine support
+- **ENH-04**: Add shell startup benchmark function (profile startup time on demand)
+
+## Out of Scope
+
+| Feature | Reason |
+|---------|--------|
+| Switching plugin manager (from Zap) | Zap is correct, validated by research |
+| Switching prompt (from Starship) | Starship is correct, 54ms init |
+| Rewriting tmux config | gpakosz base framework, .tmux.conf.local is fine |
+| Cross-platform support | macOS-only, no need for Linux/WSL |
+| New functionality | This is cleanup/fix, not features |
+| oh-my-zsh compatibility | Fully migrated to Zap, no reason to maintain compat |
+
+## Traceability
+
+| Requirement | Phase | Status |
+|-------------|-------|--------|
+| *(Populated during roadmap creation)* | | |
+
+**Coverage:**
+- v1 requirements: 48 total
+- Mapped to phases: 0
+- Unmapped: 48
+
+---
+*Requirements defined: 2026-04-21*
+*Last updated: 2026-04-21 after initial definition*
