@@ -12,7 +12,6 @@ export VISUAL=vim
 export ACK_PAGER_COLOR="{$PAGER:-bat --style=plain --paging=always}"
 export PAGER='bat --style=plain --paging=always'
 export MANPAGER="sh -c 'col -bx | bat --style=plain -l man --paging=always'"
-export PATH="/opt/homebrew/bin:$PATH"
 unset LESSOPEN
 bindkey "^A" beginning-of-line
 bindkey "^E" end-of-line
@@ -73,7 +72,8 @@ export PATH="${path[*]}"
 export PYENV_ROOT="$HOME/.pyenv"
 export PATH="$PYENV_ROOT/shims:$PYENV_ROOT/bin:$PATH"
 export PYENV_SHELL=zsh
-source '/opt/homebrew/Cellar/pyenv/2.6.22/completions/pyenv.zsh'
+# Source pyenv completions (use symlinked path, not versioned cellar path)
+[[ -f /opt/homebrew/opt/pyenv/completions/pyenv.zsh ]] && source /opt/homebrew/opt/pyenv/completions/pyenv.zsh
 pyenv() {
   local command=${1:-}
   [ "$#" -gt 0 ] && shift
@@ -96,8 +96,6 @@ export MANPATH
 ###############################
 export GOROOT=/usr/local/go
 export GOPATH=$HOME/go
-path+=($GOPATH/bin $GOROOT/bin)
-export PATH="${path[*]}"
 
 ###############################
 # Mono framework
@@ -108,7 +106,7 @@ export MONO_GAC_PREFIX="/usr/local"
 # Bun JavaScript runtime
 ###############################
 export BUN_INSTALL="$HOME/.bun"
-path+=($BUN_INSTALL/bin)
+path+=($GOPATH/bin $GOROOT/bin $BUN_INSTALL/bin)
 export PATH="${path[*]}"
 
 ###############################
@@ -189,6 +187,7 @@ test -e "${HOME}/.iterm2_shell_integration.zsh" && source "${HOME}/.iterm2_shell
 [ -s "$HOME/.bun/_bun" ] && source "$HOME/.bun/_bun"
 [ -f "$HOME/.cargo/env" ] && source "$HOME/.cargo/env"
 eval "$(zoxide init zsh)"
+export ITERM_ENABLE_SHELL_INTEGRATION_WITH_TMUX=YES
 
 ###############################
 # Performance Improvements

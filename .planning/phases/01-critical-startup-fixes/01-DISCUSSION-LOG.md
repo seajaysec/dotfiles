@@ -86,3 +86,5 @@ Removed `eval "$(~/.local/bin/agent shell-integration zsh)"` from deployed `~/.z
 ## zshenv (plan 01-02 task 1)
 
 Removed `source` lines for `$HOME/.cargo/env` and `$HOME/.bun/_bun` from `~/.zshenv`. Interactive shells load both once from `~/dotfiles/.zshrc` (see `source` guards there).
+
+baseline_export_path_count=5
