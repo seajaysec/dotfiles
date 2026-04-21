@@ -124,13 +124,74 @@ Deferred to future work. Not in current roadmap.
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| *(Populated during roadmap creation)* | | |
+| PERF-01 | Phase 1: Critical Startup Fixes | Not started |
+| PERF-02 | Phase 1: Critical Startup Fixes | Not started |
+| PERF-03 | Phase 1: Critical Startup Fixes | Not started |
+| PERF-04 | Phase 1: Critical Startup Fixes | Not started |
+| PERF-05 | Phase 1: Critical Startup Fixes | Not started |
+| PERF-06 | Phase 1: Critical Startup Fixes | Not started |
+| PERF-07 | Phase 1: Critical Startup Fixes | Not started |
+| KEYS-01 | Phase 3: Keybinding & Hook Correctness | Not started |
+| KEYS-02 | Phase 3: Keybinding & Hook Correctness | Not started |
+| KEYS-03 | Phase 3: Keybinding & Hook Correctness | Not started |
+| KEYS-04 | Phase 3: Keybinding & Hook Correctness | Not started |
+| KEYS-05 | Phase 3: Keybinding & Hook Correctness | Not started |
+| HOOK-01 | Phase 3: Keybinding & Hook Correctness | Not started |
+| HOOK-02 | Phase 3: Keybinding & Hook Correctness | Not started |
+| HOOK-03 | Phase 3: Keybinding & Hook Correctness | Not started |
+| HOOK-04 | Phase 3: Keybinding & Hook Correctness | Not started |
+| HOOK-05 | Phase 3: Keybinding & Hook Correctness | Not started |
+| FIX-01 | Phase 4: Bug Fixes | Not started |
+| FIX-02 | Phase 4: Bug Fixes | Not started |
+| FIX-03 | Phase 4: Bug Fixes | Not started |
+| FIX-04 | Phase 4: Bug Fixes | Not started |
+| FIX-05 | Phase 4: Bug Fixes | Not started |
+| FIX-06 | Phase 4: Bug Fixes | Not started |
+| FIX-07 | Phase 4: Bug Fixes | Not started |
+| FIX-08 | Phase 2: Architecture Restructuring | Not started |
+| FIX-09 | Phase 2: Architecture Restructuring | Not started |
+| FIX-10 | Phase 4: Bug Fixes | Not started |
+| FIX-11 | Phase 4: Bug Fixes | Not started |
+| DEAD-01 | Phase 5: Dead Code Removal | Not started |
+| DEAD-02 | Phase 5: Dead Code Removal | Not started |
+| DEAD-03 | Phase 5: Dead Code Removal | Not started |
+| DEAD-04 | Phase 5: Dead Code Removal | Not started |
+| DEAD-05 | Phase 5: Dead Code Removal | Not started |
+| DEAD-06 | Phase 5: Dead Code Removal | Not started |
+| DEAD-07 | Phase 5: Dead Code Removal | Not started |
+| DEAD-08 | Phase 5: Dead Code Removal | Not started |
+| DEAD-09 | Phase 5: Dead Code Removal | Not started |
+| ARCH-01 | Phase 2: Architecture Restructuring | Not started |
+| ARCH-02 | Phase 2: Architecture Restructuring | Not started |
+| ARCH-03 | Phase 2: Architecture Restructuring | Not started |
+| ARCH-04 | Phase 2: Architecture Restructuring | Not started |
+| ARCH-05 | Phase 2: Architecture Restructuring | Not started |
+| ARCH-06 | Phase 2: Architecture Restructuring | Not started |
+| ARCH-07 | Phase 2: Architecture Restructuring | Not started |
+| INST-01 | Phase 6: Deployment & Install | Not started |
+| INST-02 | Phase 6: Deployment & Install | Not started |
+| INST-03 | Phase 6: Deployment & Install | Not started |
+| INST-04 | Phase 6: Deployment & Install | Not started |
+| INST-05 | Phase 6: Deployment & Install | Not started |
+| PRES-01 | Phase 7: Functionality Preservation | Not started |
+| PRES-02 | Phase 7: Functionality Preservation | Not started |
+| PRES-03 | Phase 7: Functionality Preservation | Not started |
+| PRES-04 | Phase 7: Functionality Preservation | Not started |
+| PRES-05 | Phase 7: Functionality Preservation | Not started |
+| PRES-06 | Phase 7: Functionality Preservation | Not started |
+| PRES-07 | Phase 7: Functionality Preservation | Not started |
+| PRES-08 | Phase 7: Functionality Preservation | Not started |
+| PRES-09 | Phase 7: Functionality Preservation | Not started |
+| PRES-10 | Phase 7: Functionality Preservation | Not started |
+| PRES-11 | Phase 7: Functionality Preservation | Not started |
+| PRES-12 | Phase 7: Functionality Preservation | Not started |
 
 **Coverage:**
-- v1 requirements: 48 total
-- Mapped to phases: 0
-- Unmapped: 48
+- v1 requirements: 61 total (across 8 categories)
+- Mapped to phases: 61
+- Unmapped: 0
+- Coverage: 100%
 
 ---
 *Requirements defined: 2026-04-21*
-*Last updated: 2026-04-21 after initial definition*
+*Last updated: 2026-04-21 — traceability populated during roadmap creation*
