@@ -14,6 +14,7 @@
 - Removed `source ~/dotfiles/completions.zsh`; inlined `fpath+=~/.zfunc`, `_comp_options`, completion cache under `"${HOME}/.cache/zsh"` (no `$ZSH_CACHE_DIR`).
 - Deleted `~/dotfiles/completions.zsh`. `install.sh` / `README.md` no longer copy it.
 - `zsh -n ~/dotfiles/.zshrc` passes.
+- **Follow-up:** Restored `zmodload zsh/complist` before `compinit` — merge had dropped it with `completions.zsh`; without it, `bindkey -M menuselect` fails (no such keymap).
 
 ## 02-03 — Plugin order, Docker fpath, Starship, `.zshrc.local` (2026-04-21)
 

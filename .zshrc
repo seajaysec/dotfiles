@@ -158,6 +158,9 @@ zstyle ':completion:*:options' auto-description '%d'
 zstyle ':completion:*:default' list-prompt '%S%M matches%s'
 zstyle ':completion:*' group-name ''
 
+# menuselect keymap (needed before `bindkey -M menuselect` in Vi Mode) — was in completions.zsh
+zmodload zsh/complist
+
 autoload -Uz compinit
 if [ "$(date +'%j')" != "$(stat -f '%Sm' -t '%j' ~/.zcompdump)" ]; then
   compinit
