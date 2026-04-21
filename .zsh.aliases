@@ -29,8 +29,9 @@ alias nc='rlwrap nc'                        # Netcat with readline support (shor
 
 # Network Monitoring & Security
 alias lsock='sudo /usr/sbin/lsof -i -P'             # List all open network files
-alias lsockT='sudo /usr/sbin/lsof -nP | rg -F TCP'   # List only TCP connections
-alias lsockU='sudo /usr/sbin/lsof -nP | rg -F UDP'   # List only UDP connections
+# Use /usr/bin/grep so pipelines after `sudo` still work (sudo resets PATH; rg may be missing).
+alias lsockT='sudo /usr/sbin/lsof -nP | /usr/bin/grep -F TCP'   # List only TCP connections
+alias lsockU='sudo /usr/sbin/lsof -nP | /usr/bin/grep -F UDP'   # List only UDP connections
 alias nmapr='grc nmap --randomize-hosts --script-args http.useragent="Mozilla/5.0 (Windows NT 10.0; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/39.0.2171.71 Safari/537.36 Edge/12.0i" --script-timeout 10m'  # Nmap with randomized hosts and browser UA
 
 # System Maintenance

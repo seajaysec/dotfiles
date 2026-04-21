@@ -40,7 +40,7 @@
 
 ### Efficiency edits (EFF-02)
 
-- `lsockT` / `lsockU`: `grep` → `rg -F` on `lsof` output (same filtering, one less BSD-grep dependency in pipeline).
+- `lsockT` / `lsockU`: use **`/usr/bin/grep -F`** (not `rg`) so these aliases still work on hosts where Homebrew `rg` is not on `PATH` (SSH, minimal envs); filter is a tiny pipe so `rg` vs `grep` cost is irrelevant.
 - `clipsort`: `grep -v '^$'` → `rg -v '^$'`.
 - `dualping`: VPN detection uses one `awk` per interface instead of `grep -q` + `grep|awk` triple.
 
