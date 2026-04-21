@@ -6,7 +6,7 @@ source:
   - 01-02-SUMMARY.md
   - 01-03-SUMMARY.md
 started: 2026-04-21T12:00:00Z
-updated: 2026-04-21T12:00:00Z
+updated: 2026-04-21T18:40:00Z
 ---
 
 ## Current Test
@@ -31,13 +31,18 @@ severity: major
 
 ### 2. Automated smoke (minimal parent environment)
 expected: |
-  `env -i HOME=$HOME USER=$USER TERM=xterm-256color zsh -i -c 'command -v starship'` resolves to Homebrew starship.
+  `env -i HOME=$HOME USER=$USER TERM=xterm-256color zsh -i -c 'command -v starship'` resolves to Homebrew starship; no `command not found` during startup.
+result: pass
+
+### 3. Regression — full `.zsh.aliases` restored
+expected: |
+  Git history shows 153-line `.zsh.aliases` (not truncated); only `clipsort` quoting changed.
 result: pass
 
 ## Summary
 
-total: 2
-passed: 1
+total: 3
+passed: 2
 issues: 1
 pending: 1
 skipped: 0
