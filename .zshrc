@@ -81,7 +81,8 @@ export PYENV_ROOT="$HOME/.pyenv"
 export PATH="$PYENV_ROOT/shims:$PYENV_ROOT/bin:$PATH"
 export PYENV_SHELL=zsh
 # Source pyenv completions (use symlinked path, not versioned cellar path)
-[[ -f /opt/homebrew/opt/pyenv/completions/pyenv.zsh ]] && source /opt/homebrew/opt/pyenv/completions/pyenv.zsh
+_pyenv_root="$(brew --prefix pyenv 2>/dev/null)" && [[ -f "$_pyenv_root/completions/pyenv.zsh" ]] && source "$_pyenv_root/completions/pyenv.zsh"
+unset _pyenv_root
 pyenv() {
   local command=${1:-}
   [ "$#" -gt 0 ] && shift
@@ -177,8 +178,8 @@ zstyle ':completion:*:corrections' format '%B%d (errors: %e)%b'
 ###############################
 source ~/secrets.sh
 
-source ~/dotfiles/.zsh.aliases
-source ~/dotfiles/.zsh.functions
+source "${DOTFILES}/.zsh.aliases"
+source "${DOTFILES}/.zsh.functions"
 
 ###############################
 # Vi + keymaps (KEYS-* — Phase 3: bindkey -v before other bindkeys; emacs keys on viins)
@@ -224,7 +225,7 @@ if [ -f "$CHECK_ROOT/check_function.zsh" ]; then
 fi
 
 # Starship last among interactive tool evals (ARCH-06 / 02-03)
-export STARSHIP_CONFIG=~/dotfiles/config/starship/starship.toml
+export STARSHIP_CONFIG="${DOTFILES}/config/starship/starship.toml"
 eval "$(starship init zsh)"
 
 # Vi cursor shape after Starship init so we don't clobber Starship's zle / precmd registration (HOOK-* / Phase 3)
@@ -236,6 +237,9 @@ zle-keymap-select() {
   fi
 }
 zle -N zle-keymap-select
+# HOOK-03 risk: we redefine `zle-keymap-select` after Starship; if prompt glitches on keymap change,
+# compare with Starship zsh docs / version — may need to chain the previous widget instead of replacing.
+
 add-zsh-hook precmd _dotfiles_cursor_precmd
 _dotfiles_cursor_precmd() { echo -ne '\e[5 q'; }
 add-zsh-hook preexec _dotfiles_cursor_preexec

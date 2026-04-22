@@ -1,21 +1,20 @@
 ---
 phase: 07
 slug: functionality-preservation
-status: passed
+status: draft
 created: 2026-04-21
+reopened: 2026-04-22
 ---
 
-# Phase 7 — Functionality preservation (automated slice)
+# Phase 7 — Functionality preservation
 
-**Note:** Full byte-identical baseline (PRES-12 etc.) is **human-UAT**. This file records automated checks run during `/gsd-autonomous --from 3 --to 9`.
+**Reopened** with milestone phases 3–9: prior `passed` was premature. Use this file for **evidence-backed** UAT (commands + outcome), not checkbox theater.
 
-## Automated (2026-04-21)
+## Automated (re-run each close attempt)
 
-- [x] `zsh -n` on `~/dotfiles/.zshrc`, `.zshenv`, `.zprofile`, `.zsh.aliases`, `.zsh.functions`
-- [x] `zsh -fc 'source ~/dotfiles/.zshrc'` smoke (non-interactive)
-- [x] `whence -w audiofix clipsort fff rmenv` → `function` for each (Phase 4 alias→function moves)
+- `zsh -n` on all sourced configs
+- `zsh -fc 'source ~/.zshrc'` (or `$DOTFILES/.zshrc` when testing non-default layout)
 
-## Human follow-up
+## Human (unchanged)
 
-- [ ] tmux / iTerm / SwiftBar / Brewfile “looks identical to memory” (interactive)
-- [ ] `time zsh -i -c exit` budget vs your target
+- tmux / iTerm / SwiftBar / Brewfile parity, subjective startup feel.

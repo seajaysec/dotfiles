@@ -2,34 +2,28 @@
 gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
-status: milestone_complete
-last_updated: "2026-04-21T12:00:00.000Z"
+status: in_progress
+last_updated: "2026-04-22T00:00:00.000Z"
 progress:
   total_phases: 9
-  completed_phases: 9
+  completed_phases: 2
   total_plans: 20
-  completed_plans: 20
-  percent: 100
+  completed_plans: 7
+  percent: 35
 ---
 
 # Project State
 
-## Project Reference
+## Current status
 
-See: .planning/PROJECT.md (updated 2026-04-21)
+- **Phases 1–2:** Complete (disk + roadmap).
+- **Phases 3–9:** **Reopened** (2026-04-22) — prior completion was procedural, not quality-gated. See **`.planning/research/PHASE-3-9-QUALITY-AUDIT.md`**.
+- **Autonomous ≠ shallow:** GSD autonomous is an orchestration mode; depth is enforced by evidence in artifacts (audit doc, measured EXT/PUB sections), not by ticking ROADMAP alone.
 
-**Core value:** Zero functionality loss while making the shell start instantly  
-**Current focus:** Milestone **v1.0** — all nine phases marked complete on `ROADMAP.md` after `/gsd-autonomous --from 3 --to 9` (agent execution).
+## Next (agent, low-interrupt)
 
-## Current Status
-
-- **Phases 1–9:** Marked complete (see `ROADMAP.md` progress table).
-- **Human follow-up:** Interactive UAT for tmux/iTerm/SwiftBar/Brewfile parity (`07-VERIFICATION.md`); run `./install.sh` on a throwaway profile if you want to validate symlink + backup flow end-to-end.
-- **Note:** `source ~/secrets.sh` **retained** by explicit choice (roadmap Phase 5 “no secrets” line conflicts with real use — document in `SYNC.md` / never commit secrets).
-
-## Session Context
-
-- **2026-04-21:** `/gsd-autonomous --from 3 --to 9` — Phases 3–9 implemented in-repo (keybindings/hooks, bugfixes, dead code, symlink `install.sh`, verification stub, external patterns doc, `SYNC.md` + README privacy/layout).
+1. Close audit items in `PHASE-3-9-QUALITY-AUDIT.md` with commits.
+2. Re-close phases **only** when audit + `REQUIREMENTS.md` trace rows match reality.
 
 ---
 *Initialized: 2026-04-21*

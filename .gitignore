@@ -1,1 +1,7 @@
 .DS_Store
+
+# Machine-only / secrets (never commit even if copied into repo by mistake)
+secrets.sh
+.env
+.env.*
+.claude/

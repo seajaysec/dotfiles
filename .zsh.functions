@@ -568,6 +568,12 @@ audiofix() {
 }
 
 rmenv() {
+  emulate -L zsh
+  if ! read -q "?Remove all env_* virtualenv dirs with sudo? "; then
+    print -u2 Aborted.
+    return 1
+  fi
+  print
   sudo rm -rf env_*(N) 2>/dev/null
 }
 

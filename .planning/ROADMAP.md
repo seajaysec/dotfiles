@@ -7,13 +7,13 @@ This roadmap takes a cruft-laden, slow-starting zsh environment and transforms i
 ## Phases
 - [x] **Phase 1: Critical Startup Fixes** - Eliminate hang, double-loads, and redundant PATH construction
 - [x] **Phase 2: Architecture Restructuring** - Establish .zshenv/.zprofile/.zshrc separation with correct sourcing order
-- [x] **Phase 3: Keybinding & Hook Correctness** - Fix vi-mode ordering and Starship hook conflicts
-- [x] **Phase 4: Bug Fixes** - Fix aliases, options, and completion path bugs
-- [x] **Phase 5: Dead Code Removal** - Strip oh-my-zsh vestiges, unused files, and stale git artifacts
-- [x] **Phase 6: Deployment & Install** - Replace cp-based install with symlink deployment
-- [x] **Phase 7: Functionality Preservation Verification** - Verify zero functionality loss across all integrations
-- [x] **Phase 8: External Patterns & Public Dotfiles Research** - Survey similar use cases and repos; synthesize adopt / reject / defer
-- [x] **Phase 9: Public Remote Reconciliation & Multi-Machine Sync** - Integrate upstream, refresh README, establish ongoing non-secret publication
+- [ ] **Phase 3: Keybinding & Hook Correctness** - Fix vi-mode ordering and Starship hook conflicts *(reopened 2026-04-22 — prior “complete” was agent-shallow; see `.planning/research/PHASE-3-9-QUALITY-AUDIT.md`)*
+- [ ] **Phase 4: Bug Fixes** - Fix aliases, options, and completion path bugs *(reopened)* 
+- [ ] **Phase 5: Dead Code Removal** - Strip oh-my-zsh vestiges, unused files, and stale git artifacts *(reopened — reconcile with `secrets.sh` waivers in audit doc)*
+- [ ] **Phase 6: Deployment & Install** - Replace cp-based install with symlink deployment *(reopened — install script depth pass)*
+- [ ] **Phase 7: Functionality Preservation Verification** - Verify zero functionality loss across all integrations *(reopened)*
+- [ ] **Phase 8: External Patterns & Public Dotfiles Research** - Survey similar use cases and repos; synthesize adopt / reject / defer *(reopened — substantive research, not placeholder tables)*
+- [ ] **Phase 9: Public Remote Reconciliation & Multi-Machine Sync** - Integrate upstream, refresh README, establish ongoing non-secret publication *(reopened)*
 
 ## Phase Details
 
@@ -64,11 +64,11 @@ Plans:
   2. Ctrl-A, Ctrl-E, arrow keys, and word movement all work in vi insert mode (`bindkey -M viins` confirms)
   3. Starship prompt renders correctly — `precmd_functions` and `preexec_functions` contain Starship entries (not shadowed)
   4. Vi-mode cursor changes shape (beam in insert, block in normal) without conflicting with Starship's `zle-keymap-select`
-  5. Changing directory triggers auto-ls via `chpwd_functions` (not a bare `chpwd()` definition)
+  5. Changing directory triggers auto-ls via **`add-zsh-hook chpwd`** (preferred) or `chpwd_functions` — not a bare `chpwd()` definition
 
 Plans:
-- [x] 03-01: Fix keybinding ordering — vi-mode first, then emacs convenience bindings in viins keymap
-- [x] 03-02: Fix Starship hook conflicts (precmd, preexec, zle-keymap-select) and chpwd auto-ls
+- [ ] 03-01: Fix keybinding ordering — vi-mode first, then emacs convenience bindings in viins keymap
+- [ ] 03-02: Fix Starship hook conflicts (precmd, preexec, zle-keymap-select) and chpwd auto-ls
 
 ---
 
@@ -84,8 +84,8 @@ Plans:
   5. No references to `$ZSH_CACHE_DIR` or hardcoded pyenv Cellar version paths in any config file
 
 Plans:
-- [x] 04-01: Fix environment variables, history options, and completion path references
-- [x] 04-02: Convert broken aliases to functions (fff, audiofix, clipsort, rmenv)
+- [ ] 04-01: Fix environment variables, history options, and completion path references
+- [ ] 04-02: Convert broken aliases to functions (fff, audiofix, clipsort, rmenv)
 
 ---
 
@@ -100,8 +100,8 @@ Plans:
   4. No `source ~/secrets.sh` or `MONO_GAC_PREFIX` in any sourced file
 
 Plans:
-- [x] 05-01: Remove oh-my-zsh vestiges and dead code lines from config files
-- [x] 05-02: Delete unused files (.p10k.zsh, .fzf.zsh) and commit Kali/ removal
+- [ ] 05-01: Remove oh-my-zsh vestiges and dead code lines from config files
+- [ ] 05-02: Delete unused files (.p10k.zsh, .fzf.zsh) and commit Kali/ removal
 
 ---
 
@@ -116,7 +116,7 @@ Plans:
   4. `.zshenv` and `.zprofile` tracked in git (`git ls-files` includes them)
 
 Plans:
-- [x] 06-01: Rewrite install.sh with symlink deployment, backup, and idempotency
+- [ ] 06-01: Rewrite install.sh with symlink deployment, backup, and idempotency
 
 ---
 
@@ -132,8 +132,8 @@ Plans:
   5. tmux, Starship, SwiftBar, and Brewfile configs byte-identical to pre-overhaul baseline
 
 Plans:
-- [x] 07-01: Audit all aliases, functions, and git workflow preservation
-- [x] 07-02: Verify tool integrations, PATH correctness, and untouched configs
+- [ ] 07-01: Audit all aliases, functions, and git workflow preservation
+- [ ] 07-02: Verify tool integrations, PATH correctness, and untouched configs
 
 ---
 
@@ -147,7 +147,7 @@ Plans:
   3. At least two items are either merged into this repo in Phase 8 **or** explicitly scheduled on ROADMAP / backlog with owner “next milestone”
 
 Plans:
-- [x] 08-01: Survey public dotfiles & articles; write EXTERNAL-PATTERNS.md and backlog entries
+- [ ] 08-01: Survey public dotfiles & articles; write EXTERNAL-PATTERNS.md and backlog entries
 
 ---
 
@@ -162,9 +162,9 @@ Plans:
   4. `.gitignore` / docs cross-check: no secret file patterns accidentally tracked
 
 Plans:
-- [x] 09-01: Fetch, diff, integrate upstream; resolve conflicts
-- [x] 09-02: README + privacy / multi-machine section
-- [x] 09-03: Non-secret sync playbook (optional helper script if it reduces friction)
+- [ ] 09-01: Fetch, diff, integrate upstream; resolve conflicts
+- [ ] 09-02: README + privacy / multi-machine section
+- [ ] 09-03: Non-secret sync playbook (optional helper script if it reduces friction)
 
 ## Parallel Execution Note
 
@@ -176,14 +176,14 @@ Phases 3, 4, and 5 can execute in parallel after Phase 2 completes — they modi
 |-------|----------------|--------|-----------|
 | 1. Critical Startup Fixes | 3/3 | Complete | 2026-04-21 |
 | 2. Architecture Restructuring | 4/4 | Complete | 2026-04-21 |
-| 3. Keybinding & Hook Correctness | 2/2 | Complete | 2026-04-21 |
-| 4. Bug Fixes | 2/2 | Complete | 2026-04-21 |
-| 5. Dead Code Removal | 2/2 | Complete | 2026-04-21 |
-| 6. Deployment & Install | 1/1 | Complete | 2026-04-21 |
-| 7. Functionality Preservation Verification | 2/2 | Complete | 2026-04-21 |
-| 8. External Patterns & Public Dotfiles Research | 1/1 | Complete | 2026-04-21 |
-| 9. Public Remote Reconciliation & Multi-Machine Sync | 3/3 | Complete | 2026-04-21 |
+| 3. Keybinding & Hook Correctness | 0/2 | **Reopened** | — |
+| 4. Bug Fixes | 0/2 | **Reopened** | — |
+| 5. Dead Code Removal | 0/2 | **Reopened** | — |
+| 6. Deployment & Install | 0/1 | **Reopened** | — |
+| 7. Functionality Preservation Verification | 0/2 | **Reopened** | — |
+| 8. External Patterns & Public Dotfiles Research | 0/1 | **Reopened** | — |
+| 9. Public Remote Reconciliation & Multi-Machine Sync | 0/3 | **Reopened** | — |
 
 ---
 *Roadmap created: 2026-04-21*
-*Last updated: 2026-04-21 — Phases 3–9 executed via `/gsd-autonomous --from 3 --to 9` (agent session)*
+*Last updated: 2026-04-22 — Phases 3–9 **reopened** after quality review (`PHASE-3-9-QUALITY-AUDIT.md`). “Autonomous” must not mean shallow checklist completion.*

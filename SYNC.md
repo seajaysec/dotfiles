@@ -15,10 +15,11 @@
 
 ## Fresh machine
 
-1. Clone this repo to `~/dotfiles` (or set `REPO_ROOT` and adjust paths in `~/.zshrc` if nonstandard).
-2. Run `./install.sh` (symlinks `~/.zshrc`, `~/.zshenv`, `~/.zprofile` into the repo; backs up prior files under `~/.dotfiles-backup/<timestamp>/`).
-3. Create `~/secrets.sh` and optional `~/.zshrc.local` on that machine only.
+1. Clone this repo — **default** layout is **`$HOME/dotfiles`**. The shell exports **`DOTFILES`** from `.zshenv` (`export DOTFILES="${DOTFILES:-$HOME/dotfiles}"`). If you clone elsewhere, set **`DOTFILES`** in **`~/.zshenv`** *before* interactive `.zshrc` runs (e.g. `export DOTFILES="$HOME/src/dotfiles"`).
+2. **Link only (safe repeat):** `./install.sh --link-only` — symlinks `~/.zshrc`, `~/.zshenv`, `~/.zprofile`, and under **`$DOTFILES`**: `.zsh.aliases`, `.zsh.functions`, `config/starship/starship.toml`, plus **`~/.tmux.conf`** when present in the repo. Backs up replaced files under **`~/.dotfiles-backup/<timestamp>/`**.
+3. **Full bootstrap** (brew + nvm + bun + rust + fzf installer): `./install.sh` — use **once** per machine or when you intentionally want package installs.
+4. Create `~/secrets.sh` and optional `~/.zshrc.local` on that machine only.
 
-## Upstream integration (this session)
+## Upstream integration
 
-- `git fetch origin` executed **2026-04-21**; local `main` was **ahead** of `origin/main` (no remote-only commits to merge).
+See **`.planning/research/REMOTE-SYNC-STATUS.md`** (regenerate after a clean `git status` before a release push).

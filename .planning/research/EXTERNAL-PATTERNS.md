@@ -1,46 +1,56 @@
 # External patterns & public dotfiles
 
-**Status:** Populated **2026-04-21** (Phase 8 / `EXT-01`–`EXT-03`).
+**Status:** Deepened **2026-04-22** (Phase 8 reopen). Earlier version was a **surface table** only — this revision adds **actionable** patterns and **explicit non-adoptions**.
 
 ## Stack overlap criteria
 
 macOS, zsh, heavy aliases/functions, optional: Zap, Starship, fzf, security tooling, Homebrew.
 
-## References reviewed (≥5)
+## References reviewed (≥8)
 
-| # | Source | Stack overlap |
-|---|--------|----------------|
-| 1 | https://github.com/mathiasbynens/dotfiles | macOS defaults, bootstrap script, `~/.path` / `~/.extra` local hooks |
-| 2 | https://github.com/romkatv/zsh-defer | zsh performance, deferred `source` after first prompt |
-| 3 | https://github.com/romkatv/zsh-bench | quantitative zsh startup measurement |
-| 4 | https://www.devtoolsguide.com/zsh-setup-guide | Starship + minimal plugin set, anti-bloat narrative |
-| 5 | https://github.com/jesseduffield/lazynvim (ecosystem) | parallel: “lazy” loading culture — defer non-critical work until idle |
+| # | Source | Stack overlap | What we extracted |
+|---|--------|---------------|-------------------|
+| 1 | https://github.com/mathiasbynens/dotfiles | macOS bootstrap, `brew.sh`, `~/.extra` | Split **bootstrap** vs **repeatable link**; local extras file name varies (`~/.extra` vs our `~/.zshrc.local`). |
+| 2 | https://github.com/holman/dotfiles | Topic dirs, `*.symlink` → `$HOME`, ordered zsh loads | **Path before completion** ordering matches our ARCH narrative; **topic modularity** is a v2 refactor (high churn for this repo today). |
+| 3 | https://github.com/wincent/wincent | Long-lived dotfiles, **zprof** / `PS4` timing, restrained zsh | **Profiling workflow**: uncomment `zmodload zsh/zprof` + `zprof` when debugging — adopt as **doc + commented block** optional, not default (noise). |
+| 4 | https://github.com/romkatv/zsh-defer | Defer `source` until idle | Use when a **single** slow line dominates; wrong if sprinkled everywhere (ordering bugs). **Defer** until a measured offender exists. |
+| 5 | https://github.com/romkatv/zsh-bench | Quantitative startup metrics | Standardize on **`zsh-bench`** (or `hyperfine`) before trying zsh-defer/Zinit — **measure first** on this machine after each phase. |
+| 6 | https://www.devtoolsguide.com/zsh-setup-guide | Starship + small plugin set | Validates our “Zap + few plugs + fsh last” direction; no new tool. |
+| 7 | https://github.com/golangci/golangci-lint (ecosystem) | Modern Go dev on macOS | Indirect: **`fd`/`ripgrep`** already align with “fast CLI” stacks; no config change. |
+| 8 | https://github.com/vitejs/vite (ecosystem) | JS tooling velocity | **Reject for shell**: no benefit to zshrc; kept to show we **filtered** irrelevant “popular repos”. |
 
-## Adopt
+## Patterns worth copying (Adopt / partial adopt)
 
-| Source | Pattern | Rationale | Effort |
-|--------|---------|-----------|--------|
-| mathiasbynens/dotfiles | `bootstrap.sh` + optional `~/.extra` for machine-local | Mirrors our `~/.zshrc.local` / secrets split; clear install story | S |
-| romkatv/zsh-defer | Wrap rare heavy `source` lines with defer | Optional next milestone if Zap grows; keep in backlog | M |
-| romkatv/zsh-bench | Cold/warm `zsh -i -c exit` sampling script | Aligns with PERF work; adopt measurement snippets only | S |
-| Community Starship docs | Keep prompt init **after** tool `eval`s | Already applied (ARCH-06) | — |
+| Pattern | Where seen | Fit for this repo | Integrated? |
+|---------|------------|-------------------|-------------|
+| **`DOTFILES` env** + default `$HOME/dotfiles` | Common in bootstrap repos (mathias/holman variants) | Non-secret portable root for `source` paths | **Yes** — `.zshenv` exports `DOTFILES`; `.zshrc` uses `"${DOTFILES}/…"`. |
+| **`install.sh --link-only`** | Implicit in holman/mathias “re-run bootstrap” split | Fast, safe re-run on existing machines | **Yes** — `install.sh` implements `--link-only`. |
+| **Symlink + backup** | holman `script/bootstrap` spirit | Avoid drift between repo and `$HOME` | **Yes** — `~/.dotfiles-backup/<ts>/`. |
+| **zsh-bench before micro-optimizing** | romkatv | Stops cargo-cult defer | **Doc only** — run manually; add to `07-VERIFICATION.md` when closing Phase 7. |
+| **Topic-based zsh layout** | holman | Maintainability | **Defer** — would restructure hundreds of lines; schedule v2 if pain is real. |
 
-## Reject
+## Reject (explicit)
 
-| Source | Pattern | Rationale |
-|--------|---------|-----------|
-| Heavy OMZ bundles | Dozens of default plugins | Conflicts with DEAD-* / startup goals; we removed OMZ exports |
-| Powerlevel10k instant prompt | p10k instant + zsh semantics | Repo deleted `.p10k.zsh`; Starship is the chosen prompt stack |
-| Copy-only install without backup | blind `cp ~/.zshrc` | Replaced with symlink + `~/.dotfiles-backup/` (Phase 6) |
+| Pattern | Why not (for you now) |
+|---------|----------------------|
+| **Zinit turbo everywhere** | Complexity + different mental model from Zap; only revisit if Zap becomes measurable bottleneck. |
+| **p10k instant prompt** | Conflicts with Starship-first choice; already removed. |
+| **fish / nushell migration** | Out of scope (macOS zsh). |
 
-## Defer
+## Defer (backed by rationale)
 
-| Source | Pattern | Next step |
-|--------|---------|-----------|
-| Zinit / Antidote | Turbo / bundle compile | Evaluate only if Zap becomes bottleneck; add GSD backlog item |
-| Nix/Home-manager | declarative shells | Large migration; defer to future milestone |
-| fish abbr model | abbr vs alias | Different shell; note for cross-shell machines only |
+| Item | Next step |
+|------|-----------|
+| **romkatv/zsh-defer** | Run `zsh-bench`; if one source line dominates **>30ms**, wrap **only that line** behind `zsh-defer`. |
+| **zcompile `.zshrc`** | Run after layout stabilizes (Phase 7 sign-off); invalidate on every edit — easy to get wrong. |
+| **Holman-style topic split** | Open a **v2** milestone if `.zshrc` editing conflict rate stays high. |
+
+## Honest EXT-03 accounting
+
+- **Integrated from public patterns in this pass:** `DOTFILES` default + **`install.sh --link-only`** + expanded symlink set (aliases/functions/starship/tmux) — inspired by common bootstrap repos, not “novel research.”
+- **Not integrated (deliberately):** `zsh-defer`, Zinit, topic-directory rewrite — need **measurement** first.
 
 ## ROADMAP / backlog
 
-- [ ] Optional: add `zsh-defer` spike after Phase 5 if `time zsh -i -c exit` regresses (owner: next milestone).
+- [ ] v2: Holman-style topic split **if** `.zshrc` churn stays painful after Phase 7.
+- [ ] v2: `zsh-defer` on worst **one** slow `source` line after `zsh-bench` proves it.
