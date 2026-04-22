@@ -214,13 +214,14 @@ source <(fzf --zsh)
 test -e "${HOME}/.iterm2_shell_integration.zsh" && source "${HOME}/.iterm2_shell_integration.zsh"
 [ -s "$HOME/.bun/_bun" ] && source "$HOME/.bun/_bun"
 [ -f "$HOME/.cargo/env" ] && source "$HOME/.cargo/env"
-# Zoxide: outside Claude Code, rebind `cd` to zoxide (`--cmd cd`) so frecency-based
-# jumps are the default. Inside Claude Code (CLAUDECODE=1), install only `z` and
-# leave `cd` as the shell builtin so scripted absolute-path navigation is
-# predictable. The matching `alias cd='z'` in .zsh.aliases is guarded the same way.
-if [[ "$CLAUDECODE" == "1" ]]; then
-    eval "$(zoxide init zsh)"
-else
+# Zoxide: always install the default `z` / `zi` commands. Additionally, outside
+# Claude Code, run a second init with `--cmd cd` to rebind `cd` / `cdi` to
+# zoxide (note: `--cmd cd` renames `z`→`cd`, which is why we run the plain
+# init first to keep `z` around). Inside Claude Code, skip the `cd` rebind so
+# scripted absolute-path navigation stays predictable. The matching
+# `alias cd='z'` in .zsh.aliases is guarded the same way.
+eval "$(zoxide init zsh)"
+if [[ "$CLAUDECODE" != "1" ]]; then
     eval "$(zoxide init --cmd cd zsh)"
 fi
 export ITERM_ENABLE_SHELL_INTEGRATION_WITH_TMUX=YES
