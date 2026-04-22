@@ -8,6 +8,8 @@ if ! command -v mkdir >/dev/null 2>&1; then
 fi
 
 setopt extended_glob
+# If ~/.zshenv is stale/missing DOTFILES, or this file is sourced without going through zshenv, avoid "/.zsh.aliases".
+: "${DOTFILES:=$HOME/dotfiles}"
 autoload -Uz add-zsh-hook
 export TERM=xterm-256color
 export LANG=en_US.UTF-8
