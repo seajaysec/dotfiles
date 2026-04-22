@@ -589,6 +589,71 @@ clipsort() {
   pbpaste | rg -v '^$' | sort -Vu | pbcopy
 }
 
+# mkvenv: zsh-autoswitch-virtualenv override with pyenv-aware Python selection.
+# Usage:
+#   mkvenv                  # virtualenv using the system default Python
+#   mkvenv 3.12             # install 3.12 via pyenv if missing, then use it
+#   mkvenv --python=3.11    # same, long form
+# Also works inside pipenv / poetry projects (delegates to the matching tool).
+mkvenv () {
+    local venv_type="$(_get_venv_type "$PWD" "unknown")"
+    local params=("${@[@]}")
+    local requested_python=""
+
+    for arg in "${params[@]}"; do
+        if [[ "$arg" =~ ^[0-9]+\.[0-9]+$ ]]; then
+            requested_python="$arg"
+        elif [[ "$arg" =~ --python=([0-9]+\.[0-9]+) ]]; then
+            requested_python="${BASH_REMATCH[1]}"
+        fi
+    done
+
+    if [[ -n "$requested_python" ]]; then
+        params=("${params[@]/$requested_python}")
+        params=("${params[@]/--python=$requested_python}")
+    fi
+
+    if [[ -n "$requested_python" ]]; then
+        if ! pyenv versions --bare | grep -qx "$requested_python"; then
+            echo "Installing Python $requested_python via pyenv..."
+            pyenv install "$requested_python" || return 1
+        fi
+        export AUTOSWITCH_DEFAULT_PYTHON="$(pyenv root)/versions/$requested_python/bin/python"
+    fi
+
+    if [[ "$venv_type" == "pipenv" ]]; then
+        command -v pipenv > /dev/null || { _missing_error_message pipenv; return; }
+        pipenv install --dev "${params[@]}"
+        _activate_pipenv
+    elif [[ "$venv_type" == "poetry" ]]; then
+        command -v poetry > /dev/null || { _missing_error_message poetry; return; }
+        poetry install "${params[@]}"
+        _activate_poetry
+    else
+        command -v virtualenv > /dev/null || { _missing_error_message virtualenv; return; }
+        if [[ -f "$AUTOSWITCH_FILE" ]]; then
+            printf "$AUTOSWITCH_FILE file already exists. If this is a mistake use the rmvenv command\n"
+        else
+            local venv_name="$(basename "$PWD")-$(randstr)"
+            printf "Creating ${AUTOSWITCH_PURPLE}%s${NONE} virtualenv\n" "$venv_name"
+            if [[ -n "$AUTOSWITCH_DEFAULT_PYTHON" && ! "${params[*]}" =~ --python ]]; then
+                echo "${AUTOSWITCH_PURPLE}Using AUTOSWITCH_DEFAULT_PYTHON=${AUTOSWITCH_DEFAULT_PYTHON}${NONE}"
+                params+=("--python=$AUTOSWITCH_DEFAULT_PYTHON")
+            fi
+            mkdir -p "$VIRTUAL_ENV_DIR"
+            if [[ ${params[(I)--verbose]} -eq 0 ]]; then
+                virtualenv "${params[@]}" "$(_virtual_env_dir "$venv_name")"
+            else
+                virtualenv "${params[@]}" "$(_virtual_env_dir "$venv_name")" > /dev/null
+            fi
+            echo "$venv_name" > "$AUTOSWITCH_FILE"
+            chmod 600 "$AUTOSWITCH_FILE"
+            _maybeworkon "$(_virtual_env_dir "$venv_name")" "virtualenv"
+            install_requirements
+        fi
+    fi
+}
+
 # The following snippet causes mcd to be completed like mkdir
 compdefas () {
   if (($+_comps[$1])); then

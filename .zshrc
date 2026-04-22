@@ -98,14 +98,17 @@ pyenv() {
 ###############################
 # Golang configuration
 ###############################
-export GOROOT=/usr/local/go
+# Only export GOROOT when the canonical install exists — on machines without
+# a manual Go install we let `go`/homebrew resolve GOROOT themselves.
+[[ -d /usr/local/go ]] && export GOROOT=/usr/local/go
 export GOPATH=$HOME/go
 
 ###############################
 # Bun JavaScript runtime
 ###############################
 export BUN_INSTALL="$HOME/.bun"
-path+=($GOPATH/bin $GOROOT/bin $BUN_INSTALL/bin)
+path+=($GOPATH/bin $BUN_INSTALL/bin)
+[[ -n "$GOROOT" && -d "$GOROOT/bin" ]] && path+=($GOROOT/bin)
 export PATH="${(j.:.)path}"
 
 ###############################
@@ -211,7 +214,15 @@ source <(fzf --zsh)
 test -e "${HOME}/.iterm2_shell_integration.zsh" && source "${HOME}/.iterm2_shell_integration.zsh"
 [ -s "$HOME/.bun/_bun" ] && source "$HOME/.bun/_bun"
 [ -f "$HOME/.cargo/env" ] && source "$HOME/.cargo/env"
-eval "$(zoxide init zsh)"
+# Zoxide: outside Claude Code, rebind `cd` to zoxide (`--cmd cd`) so frecency-based
+# jumps are the default. Inside Claude Code (CLAUDECODE=1), install only `z` and
+# leave `cd` as the shell builtin so scripted absolute-path navigation is
+# predictable. The matching `alias cd='z'` in .zsh.aliases is guarded the same way.
+if [[ "$CLAUDECODE" == "1" ]]; then
+    eval "$(zoxide init zsh)"
+else
+    eval "$(zoxide init --cmd cd zsh)"
+fi
 export ITERM_ENABLE_SHELL_INTEGRATION_WITH_TMUX=YES
 
 ###############################
