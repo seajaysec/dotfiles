@@ -31,6 +31,10 @@ symlink_init() {
     echo "install.sh: missing source file: $src" >&2
     return 1
   fi
+  # Repo at DOTFILES_TARGET: dest can equal src (same path) — skip self-symlink.
+  if [[ "$src" -ef "$dest" ]]; then
+    return 0
+  fi
   mkdir -p "$(dirname "$dest")"
   backup_if_needed "$dest" "$src"
   ln -sf "$src" "$dest"
@@ -47,6 +51,12 @@ link_dotfiles() {
   symlink_init "config/starship/starship.toml" "${DOTFILES_TARGET}/config/starship/starship.toml"
   if [[ -f "${REPO_ROOT}/.tmux.conf" ]]; then
     symlink_init ".tmux.conf" "${HOME}/.tmux.conf"
+  fi
+  if [[ -f "${REPO_ROOT}/.tmux.conf.local" ]]; then
+    symlink_init ".tmux.conf.local" "${HOME}/.tmux.conf.local"
+  fi
+  if [[ -f "${REPO_ROOT}/.gitignore_global" ]]; then
+    symlink_init ".gitignore_global" "${HOME}/.gitignore_global"
   fi
 }
 

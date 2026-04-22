@@ -62,8 +62,9 @@ brew install zsh
 ```
 
 This will set up:
-- Zap plugin manager
-- Core zsh plugins:
+- Homebrew packages listed above (when you run full `./install.sh`, not `--link-only`)
+- Zsh plugin manager (**Zap**) — install separately if needed; first interactive shell may clone plugins
+- Core zsh plugins (via Zap when configured in `.zshrc`):
   - Fast Syntax Highlighting - Real-time syntax highlighting for enhanced readability and error detection
   - Autosuggestions - Fish-like suggestions based on command history
   - History Substring Search - Type part of a command and use up/down arrows to search
