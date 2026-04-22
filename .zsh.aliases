@@ -36,7 +36,6 @@ alias nmapr='grc nmap --randomize-hosts --script-args http.useragent="Mozilla/5.
 
 # System Maintenance
 alias flushDNS='dscacheutil -flushcache'    # Clear DNS cache on macOS
-alias audiofix="sudo kill -9 `ps ax | grep 'coreaudiod' | grep -v grep | awk '{print $1}'`"  # Reset audio daemon
 alias btfix='blueutil -p 0 && sleep 1 && blueutil -p 1'  # Reset Bluetooth on macOS
 alias bubu='tldr --update && brewup'        # Update tldr pages and Homebrew packages
 
@@ -52,11 +51,9 @@ alias dockrm='docker rm $(docker ps -a -q)'      # Remove all stopped containers
 alias de='deactivate'                       # Deactivate Python virtual environment
 alias pipr='pip install pipreqs pip-tools && pipreqs . --force --mode no-pin --savepath requirements.in && pip-compile requirements.in && pip install -r requirements.txt && rm requirements.in'  # Generate & Install Python requirements
 alias srcenv='source env_*/bin/activate'    # Activate virtual environment
-alias rmenv='sudo rm -rf env_*'             # Remove virtual environment directories
 
 # Text Processing & Clipboard
 alias grepcve="grep -ioE 'CVE-[0-9]{4}-[0-9]{4,}' | tr '[:lower:]' '[:upper:]' | sort -u"  # Extract and normalize CVE IDs
-alias clipsort='pbpaste | rg -v "^$" | sort -Vu | pbcopy'  # Sort clipboard contents
 alias srt='grep -v "^$" | gsed "s/^[[:space:]]*//g" | sort -Vu | LC_COLLATE=C sort --ignore-case'  # Sort and clean text
 alias uniqip='pbpaste | grepip | sort -Vu | pbcopy'  # Extract, sort, and deduplicate IPs from clipboard
 
@@ -65,7 +62,6 @@ alias tm='tmux attach -t ${tmux_session:-work} || tmux new -s ${tmux_session:-wo
 alias cmux='$HOME/.tmux/plugins/tmux-logging/scripts/save_complete_history.sh && code ~/tmuxlogs/`ls ~/tmuxlogs/ -tr | tail -1`'  # Save and open tmux history
 
 # File Search & Navigation
-alias fff='find / -type f -iname $1 2>/dev/null'  # Find files by name across filesystem
 alias ftf='fzf-tmux'                              # Fuzzy finder in tmux
 alias fzf='fzf --color=dark'                      # Fuzzy finder with dark theme
 

@@ -560,6 +560,29 @@ cve40438() {
 
 
 
+# --- Phase 4: moved from aliases (functions avoid parse-time backticks / globs in alias position) ---
+audiofix() {
+  local pid
+  pid=$(pgrep -x coreaudiod 2>/dev/null | head -1) || true
+  [[ -n $pid ]] && sudo kill -9 "$pid"
+}
+
+rmenv() {
+  sudo rm -rf env_*(N) 2>/dev/null
+}
+
+fff() {
+  if [[ -z $1 ]]; then
+    echo "usage: fff <iname-pattern>" >&2
+    return 1
+  fi
+  find / -type f -iname "$1" 2>/dev/null
+}
+
+clipsort() {
+  pbpaste | rg -v '^$' | sort -Vu | pbcopy
+}
+
 # The following snippet causes mcd to be completed like mkdir
 compdefas () {
   if (($+_comps[$1])); then

@@ -81,14 +81,43 @@ curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y
 # Install Python packages
 echo "🐍 Installing Python packages..."
 
-# Copy configuration files
-echo "📝 Copying configuration files..."
-cp .zshrc ~/.zshrc
-cp .zshenv ~/dotfiles/ 2>/dev/null || true
-cp .zprofile ~/dotfiles/ 2>/dev/null || true
-cp config/starship/starship.toml ~/dotfiles/config/starship/
-cp .zsh.functions ~/dotfiles/
-cp .zsh.aliases ~/dotfiles/
+# Shell init: symlink repo → home (INST-* / Phase 6). Idempotent; backs up replaced files.
+echo "📝 Linking shell configuration (symlinks)..."
+REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+BACKUP_ROOT="${HOME}/.dotfiles-backup"
+TS="$(date +%Y%m%d-%H%M%S)"
+BACKUP_DIR="${BACKUP_ROOT}/${TS}"
+
+backup_if_regular() {
+  local target="$1"
+  [[ -e "$target" || -L "$target" ]] || return 0
+  # Replace only real files / wrong symlinks; skip if already points into this repo
+  if [[ -L "$target" ]]; then
+    local cur
+    cur="$(readlink "$target")"
+    [[ "$cur" == "${REPO_ROOT}"/* ]] && return 0
+  fi
+  mkdir -p "$BACKUP_DIR"
+  echo "   Backup: $target → $BACKUP_DIR/"
+  mv "$target" "$BACKUP_DIR/"
+}
+
+symlink_init() {
+  local name="$1"   # basename under REPO_ROOT
+  local dest="$2"   # absolute path in HOME
+  mkdir -p "$(dirname "$dest")"
+  backup_if_regular "$dest"
+  ln -sf "${REPO_ROOT}/${name}" "$dest"
+}
+
+mkdir -p "${HOME}/dotfiles/config/starship"
+# Canonical files live in this repo (typically ~/dotfiles); home entries point here.
+symlink_init ".zshrc" "${HOME}/.zshrc"
+symlink_init ".zshenv" "${HOME}/.zshenv"
+symlink_init ".zprofile" "${HOME}/.zprofile"
+cp "${REPO_ROOT}/config/starship/starship.toml" "${HOME}/dotfiles/config/starship/"
+cp "${REPO_ROOT}/.zsh.functions" "${HOME}/dotfiles/"
+cp "${REPO_ROOT}/.zsh.aliases" "${HOME}/dotfiles/"
 
 # Create empty secrets file if it doesn't exist
 touch ~/secrets.sh

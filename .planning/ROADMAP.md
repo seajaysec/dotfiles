@@ -6,14 +6,14 @@ This roadmap takes a cruft-laden, slow-starting zsh environment and transforms i
 
 ## Phases
 - [x] **Phase 1: Critical Startup Fixes** - Eliminate hang, double-loads, and redundant PATH construction
-- [ ] **Phase 2: Architecture Restructuring** - Establish .zshenv/.zprofile/.zshrc separation with correct sourcing order
-- [ ] **Phase 3: Keybinding & Hook Correctness** - Fix vi-mode ordering and Starship hook conflicts
-- [ ] **Phase 4: Bug Fixes** - Fix aliases, options, and completion path bugs
-- [ ] **Phase 5: Dead Code Removal** - Strip oh-my-zsh vestiges, unused files, and stale git artifacts
-- [ ] **Phase 6: Deployment & Install** - Replace cp-based install with symlink deployment
-- [ ] **Phase 7: Functionality Preservation Verification** - Verify zero functionality loss across all integrations
-- [ ] **Phase 8: External Patterns & Public Dotfiles Research** - Survey similar use cases and repos; synthesize adopt / reject / defer
-- [ ] **Phase 9: Public Remote Reconciliation & Multi-Machine Sync** - Integrate upstream, refresh README, establish ongoing non-secret publication
+- [x] **Phase 2: Architecture Restructuring** - Establish .zshenv/.zprofile/.zshrc separation with correct sourcing order
+- [x] **Phase 3: Keybinding & Hook Correctness** - Fix vi-mode ordering and Starship hook conflicts
+- [x] **Phase 4: Bug Fixes** - Fix aliases, options, and completion path bugs
+- [x] **Phase 5: Dead Code Removal** - Strip oh-my-zsh vestiges, unused files, and stale git artifacts
+- [x] **Phase 6: Deployment & Install** - Replace cp-based install with symlink deployment
+- [x] **Phase 7: Functionality Preservation Verification** - Verify zero functionality loss across all integrations
+- [x] **Phase 8: External Patterns & Public Dotfiles Research** - Survey similar use cases and repos; synthesize adopt / reject / defer
+- [x] **Phase 9: Public Remote Reconciliation & Multi-Machine Sync** - Integrate upstream, refresh README, establish ongoing non-secret publication
 
 ## Phase Details
 
@@ -48,10 +48,10 @@ Plans:
   6. `02-DISCUSSION-LOG.md` documents alias/function efficiency inventory; at least three concrete edits or three documented no-change decisions across `.zsh.aliases` and `.zsh.functions`
 
 Plans:
-- [ ] 02-01: Create .zshenv and .zprofile with correct minimal contents
-- [ ] 02-02: Restructure .zshrc sourcing order and merge completions.zsh
-- [ ] 02-03: Fix plugin/completion load ordering and add ~/.zshrc.local support
-- [ ] 02-04: Aliases & functions efficiency pass (inventory + targeted pipeline / fork reductions)
+- [x] 02-01: Create .zshenv and .zprofile with correct minimal contents
+- [x] 02-02: Restructure .zshrc sourcing order and merge completions.zsh
+- [x] 02-03: Fix plugin/completion load ordering and add ~/.zshrc.local support
+- [x] 02-04: Aliases & functions efficiency pass (inventory + targeted pipeline / fork reductions)
 
 ---
 
@@ -67,8 +67,8 @@ Plans:
   5. Changing directory triggers auto-ls via `chpwd_functions` (not a bare `chpwd()` definition)
 
 Plans:
-- [ ] 03-01: Fix keybinding ordering — vi-mode first, then emacs convenience bindings in viins keymap
-- [ ] 03-02: Fix Starship hook conflicts (precmd, preexec, zle-keymap-select) and chpwd auto-ls
+- [x] 03-01: Fix keybinding ordering — vi-mode first, then emacs convenience bindings in viins keymap
+- [x] 03-02: Fix Starship hook conflicts (precmd, preexec, zle-keymap-select) and chpwd auto-ls
 
 ---
 
@@ -84,8 +84,8 @@ Plans:
   5. No references to `$ZSH_CACHE_DIR` or hardcoded pyenv Cellar version paths in any config file
 
 Plans:
-- [ ] 04-01: Fix environment variables, history options, and completion path references
-- [ ] 04-02: Convert broken aliases to functions (fff, audiofix, clipsort, rmenv)
+- [x] 04-01: Fix environment variables, history options, and completion path references
+- [x] 04-02: Convert broken aliases to functions (fff, audiofix, clipsort, rmenv)
 
 ---
 
@@ -100,8 +100,8 @@ Plans:
   4. No `source ~/secrets.sh` or `MONO_GAC_PREFIX` in any sourced file
 
 Plans:
-- [ ] 05-01: Remove oh-my-zsh vestiges and dead code lines from config files
-- [ ] 05-02: Delete unused files (.p10k.zsh, .fzf.zsh) and commit Kali/ removal
+- [x] 05-01: Remove oh-my-zsh vestiges and dead code lines from config files
+- [x] 05-02: Delete unused files (.p10k.zsh, .fzf.zsh) and commit Kali/ removal
 
 ---
 
@@ -116,7 +116,7 @@ Plans:
   4. `.zshenv` and `.zprofile` tracked in git (`git ls-files` includes them)
 
 Plans:
-- [ ] 06-01: Rewrite install.sh with symlink deployment, backup, and idempotency
+- [x] 06-01: Rewrite install.sh with symlink deployment, backup, and idempotency
 
 ---
 
@@ -132,8 +132,8 @@ Plans:
   5. tmux, Starship, SwiftBar, and Brewfile configs byte-identical to pre-overhaul baseline
 
 Plans:
-- [ ] 07-01: Audit all aliases, functions, and git workflow preservation
-- [ ] 07-02: Verify tool integrations, PATH correctness, and untouched configs
+- [x] 07-01: Audit all aliases, functions, and git workflow preservation
+- [x] 07-02: Verify tool integrations, PATH correctness, and untouched configs
 
 ---
 
@@ -147,7 +147,7 @@ Plans:
   3. At least two items are either merged into this repo in Phase 8 **or** explicitly scheduled on ROADMAP / backlog with owner “next milestone”
 
 Plans:
-- [ ] 08-01: Survey public dotfiles & articles; write EXTERNAL-PATTERNS.md and backlog entries
+- [x] 08-01: Survey public dotfiles & articles; write EXTERNAL-PATTERNS.md and backlog entries
 
 ---
 
@@ -162,9 +162,9 @@ Plans:
   4. `.gitignore` / docs cross-check: no secret file patterns accidentally tracked
 
 Plans:
-- [ ] 09-01: Fetch, diff, integrate upstream; resolve conflicts
-- [ ] 09-02: README + privacy / multi-machine section
-- [ ] 09-03: Non-secret sync playbook (optional helper script if it reduces friction)
+- [x] 09-01: Fetch, diff, integrate upstream; resolve conflicts
+- [x] 09-02: README + privacy / multi-machine section
+- [x] 09-03: Non-secret sync playbook (optional helper script if it reduces friction)
 
 ## Parallel Execution Note
 
@@ -175,15 +175,15 @@ Phases 3, 4, and 5 can execute in parallel after Phase 2 completes — they modi
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
 | 1. Critical Startup Fixes | 3/3 | Complete | 2026-04-21 |
-| 2. Architecture Restructuring | 0/4 | Not started | - |
-| 3. Keybinding & Hook Correctness | 0/2 | Not started | - |
-| 4. Bug Fixes | 0/2 | Not started | - |
-| 5. Dead Code Removal | 0/2 | Not started | - |
-| 6. Deployment & Install | 0/1 | Not started | - |
-| 7. Functionality Preservation Verification | 0/2 | Not started | - |
-| 8. External Patterns & Public Dotfiles Research | 0/1 | Not started | - |
-| 9. Public Remote Reconciliation & Multi-Machine Sync | 0/3 | Not started | - |
+| 2. Architecture Restructuring | 4/4 | Complete | 2026-04-21 |
+| 3. Keybinding & Hook Correctness | 2/2 | Complete | 2026-04-21 |
+| 4. Bug Fixes | 2/2 | Complete | 2026-04-21 |
+| 5. Dead Code Removal | 2/2 | Complete | 2026-04-21 |
+| 6. Deployment & Install | 1/1 | Complete | 2026-04-21 |
+| 7. Functionality Preservation Verification | 2/2 | Complete | 2026-04-21 |
+| 8. External Patterns & Public Dotfiles Research | 1/1 | Complete | 2026-04-21 |
+| 9. Public Remote Reconciliation & Multi-Machine Sync | 3/3 | Complete | 2026-04-21 |
 
 ---
 *Roadmap created: 2026-04-21*
-*Last updated: 2026-04-21 — Phases 8–9, Phase 2 plan 02-04, EFF requirements*
+*Last updated: 2026-04-21 — Phases 3–9 executed via `/gsd-autonomous --from 3 --to 9` (agent session)*

@@ -2,6 +2,12 @@
 
 A collection of shell configuration files and utilities for macOS development environment.
 
+## Layout (post–Phase 2 / 6)
+
+- **Canonical config** lives in this repo (typically cloned to `~/dotfiles`).
+- **Home shell entrypoints** `~/.zshrc`, `~/.zshenv`, and `~/.zprofile` should be **symlinks** into the repo after running `./install.sh` (see `SYNC.md`).
+- **Never commit** secrets: use `~/secrets.sh` (sourced from `.zshrc`) and/or `~/.zshrc.local`. Do not paste internal hostnames or credentials into tracked files.
+
 ## Prerequisites
 
 ### Command Line Tools
@@ -110,14 +116,12 @@ When in completion menus:
 - `Enter` - Select completion
 - `Esc` - Exit completion menu
 
-2. Copy configuration files:
+2. Install (symlinks `~/.zshrc`, `~/.zshenv`, `~/.zprofile` into this repo; backs up replaced files under `~/.dotfiles-backup/<timestamp>/`):
 ```bash
 mkdir -p ~/dotfiles/config/starship
-cp .zshrc ~/.zshrc
-cp .zshenv ~/dotfiles/ 2>/dev/null || true
-cp .zprofile ~/dotfiles/ 2>/dev/null || true
-cp config/starship/starship.toml ~/dotfiles/config/starship/
+./install.sh
 ```
+See **`SYNC.md`** for multi-machine and privacy boundaries.
 
 ### Development Tools
 

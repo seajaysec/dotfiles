@@ -8,10 +8,15 @@ if ! command -v mkdir >/dev/null 2>&1; then
 fi
 
 setopt extended_glob
-export ZSH=~/.oh-my-zsh
+autoload -Uz add-zsh-hook
 export TERM=xterm-256color
 export LANG=en_US.UTF-8
-export ARCHFLAGS="-arch x86_64"
+# Apple Silicon vs Intel (FIX-01 / Phase 4)
+if [[ $(uname -m) == arm64 ]]; then
+  export ARCHFLAGS="-arch arm64"
+else
+  export ARCHFLAGS="-arch x86_64"
+fi
 export GROFF_NO_SGR=1
 export EDITOR=vim
 export VISUAL=vim
@@ -19,9 +24,6 @@ export ACK_PAGER_COLOR="{$PAGER:-bat --style=plain --paging=always}"
 export PAGER='bat --style=plain --paging=always'
 export MANPAGER="sh -c 'col -bx | bat --style=plain -l man --paging=always'"
 unset LESSOPEN
-bindkey "^A" beginning-of-line
-bindkey "^E" end-of-line
-
 
 ###############################
 # FZF (Fuzzy Finder) configuration
@@ -96,11 +98,6 @@ export GOROOT=/usr/local/go
 export GOPATH=$HOME/go
 
 ###############################
-# Mono framework
-###############################
-export MONO_GAC_PREFIX="/usr/local"
-
-###############################
 # Bun JavaScript runtime
 ###############################
 export BUN_INSTALL="$HOME/.bun"
@@ -125,7 +122,6 @@ setopt HIST_SAVE_NO_DUPS
 setopt HIST_FIND_NO_DUPS
 setopt HIST_REDUCE_BLANKS
 setopt HIST_VERIFY
-setopt INC_APPEND_HISTORY
 setopt NO_HIST_BEEP
 
 ###############################
@@ -175,8 +171,6 @@ zstyle ':completion:*:descriptions' format '%B%d%b'
 zstyle ':completion:*:messages' format '%d'
 zstyle ':completion:*:warnings' format 'No matches for: %d'
 zstyle ':completion:*:corrections' format '%B%d (errors: %e)%b'
-unset ZSH
-unset ZSH_THEME
 
 ###############################
 # Source Configurations
@@ -187,16 +181,24 @@ source ~/dotfiles/.zsh.aliases
 source ~/dotfiles/.zsh.functions
 
 ###############################
-# Key Bindings
+# Vi + keymaps (KEYS-* — Phase 3: bindkey -v before other bindkeys; emacs keys on viins)
 ###############################
-bindkey '^[[A' history-substring-search-up
-bindkey '^[[B' history-substring-search-down
-bindkey "^[f" forward-word
-bindkey "^[b" backward-word
-bindkey "^[[3;5~" kill-word
-bindkey '^H' backward-kill-word
-bindkey "^[[H" beginning-of-line
-bindkey "^[[F" end-of-line
+bindkey -v
+export KEYTIMEOUT=10
+bindkey -M viins '^A' beginning-of-line
+bindkey -M viins '^E' end-of-line
+bindkey -M viins '^[[A' history-substring-search-up
+bindkey -M viins '^[[B' history-substring-search-down
+bindkey -M viins '^[f' forward-word
+bindkey -M viins '^[b' backward-word
+bindkey -M viins '^[[3;5~' kill-word
+bindkey -M viins '^H' backward-kill-word
+bindkey -M viins '^[[H' beginning-of-line
+bindkey -M viins '^[[F' end-of-line
+bindkey -M menuselect 'h' vi-backward-char
+bindkey -M menuselect 'k' vi-up-line-or-history
+bindkey -M menuselect 'l' vi-forward-char
+bindkey -M menuselect 'j' vi-down-line-or-history
 
 ###############################
 # Async Load External Tools
@@ -209,39 +211,11 @@ eval "$(zoxide init zsh)"
 export ITERM_ENABLE_SHELL_INTEGRATION_WITH_TMUX=YES
 
 ###############################
-# Performance Improvements
-###############################
-__git_files() { _wanted files expl 'local files' _files; }
-DISABLE_AUTO_UPDATE=true
-
-###############################
 # Better Terminal Experience
 ###############################
-HIST_STAMPS="mm/dd/yyyy"
 REPORTTIME=10
 auto-ls() { ls; }
-chpwd_functions=(${chpwd_functions[@]} "auto-ls")
-
-###############################
-# Vi Mode Configuration
-###############################
-bindkey -v
-export KEYTIMEOUT=1
-bindkey -M menuselect 'h' vi-backward-char
-bindkey -M menuselect 'k' vi-up-line-or-history
-bindkey -M menuselect 'l' vi-forward-char
-bindkey -M menuselect 'j' vi-down-line-or-history
-zle-keymap-select() {
-  if [[ ${KEYMAP} == vicmd ]] || [[ $1 == 'block' ]]; then
-    echo -ne '\e[1 q'
-  else
-    echo -ne '\e[5 q'
-  fi
-}
-zle -N zle-keymap-select
-echo -ne '\e[5 q'
-precmd() { echo -ne '\e[5 q'; }
-preexec() { echo -ne '\e[5 q'; }
+add-zsh-hook chpwd auto-ls
 
 export CHECK_ROOT="/Users/chris.j.farrell/gits/check"
 export CHECK_PYTHON="/Users/chris.j.farrell/.virtualenvs/check-wivc/bin/python3"
@@ -252,6 +226,20 @@ fi
 # Starship last among interactive tool evals (ARCH-06 / 02-03)
 export STARSHIP_CONFIG=~/dotfiles/config/starship/starship.toml
 eval "$(starship init zsh)"
+
+# Vi cursor shape after Starship init so we don't clobber Starship's zle / precmd registration (HOOK-* / Phase 3)
+zle-keymap-select() {
+  if [[ ${KEYMAP} == vicmd ]] || [[ $1 == 'block' ]]; then
+    echo -ne '\e[1 q'
+  else
+    echo -ne '\e[5 q'
+  fi
+}
+zle -N zle-keymap-select
+add-zsh-hook precmd _dotfiles_cursor_precmd
+_dotfiles_cursor_precmd() { echo -ne '\e[5 q'; }
+add-zsh-hook preexec _dotfiles_cursor_preexec
+_dotfiles_cursor_preexec() { echo -ne '\e[5 q'; }
 
 # PERF-05: collapse duplicate PATH segments after integrations (preserve order)
 typeset -U _dedupe_path_segments
