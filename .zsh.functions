@@ -60,8 +60,9 @@ fatsort_volume() {
 
 # mcd: Make directory and change into it
 # Usage: mcd new_directory
+# Use builtin cd so this is not rewritten by alias cd='z' (zoxide); z matches frecency, not a fresh path.
 mcd() {
-    mkdir -p "$1" && cd "$1";
+    mkdir -p "$1" && builtin cd "$1"
 }
 
 # alph_sort: Organize files into subdirectories based on their first letter
@@ -372,7 +373,7 @@ mp4togif() {
 # gistx: Clone gist from clipboard URL to /opt/gists
 # Usage: <copy gist URL> && gistx
 gistx(){
-    cd /opt/gists
+    builtin cd /opt/gists
     rm -rf .git
     git init
     git remote add origin `clipboard`
@@ -431,7 +432,7 @@ git_main_branch() {
 # Go to finder window's directory and remove duplicates
 function remove_dups() {
     # Navigate to the current Finder window's directory
-    cd "$(osascript -e 'tell application "Finder" to if (count of windows) > 0 then get POSIX path of (target of front window as alias)' 2>/dev/null)"
+    builtin cd "$(osascript -e 'tell application "Finder" to if (count of windows) > 0 then get POSIX path of (target of front window as alias)' 2>/dev/null)"
 
     # Declare an associative array to keep track of file hashes
     typeset -A hashfiles

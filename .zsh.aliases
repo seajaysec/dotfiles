@@ -18,10 +18,11 @@ alias pbc='pbpaste | rg -v '' | rg -v '' | rg -v 'Found existing' | pbcopy
 alias lx='eza -a'                           # Modern ls replacement with all files
 alias lxl='eza -lah --git --grid'          # Detailed list with git status and grid layout
 alias lxt='eza --tree --level'              # Tree view with specified depth
-# cd → zoxide's `z` outside Claude Code; inside Claude Code leave cd alone so
-# scripted absolute-path navigation isn't rewritten by the frecency DB.
+# cd → zoxide's `z` for interactive typing only. Functions and aliases that must
+# chdir to an explicit path should use `builtin cd` (see .zsh.functions, gcx, f).
+# Inside Claude Code leave cd alone so scripted navigation isn't rewritten.
 [[ "$CLAUDECODE" != "1" ]] && alias cd='z'
-alias f='cd "$(osascript -e '\''tell application "Finder" to if (count of windows) > 0 then get POSIX path of (target of front window as alias)'\'' 2>/dev/null)"'  # Jump to current Finder location
+alias f='builtin cd "$(osascript -e '\''tell application "Finder" to if (count of windows) > 0 then get POSIX path of (target of front window as alias)'\'' 2>/dev/null)"'  # Jump to current Finder location
 
 # Network Tools & Information
 alias publicip='host myip.opendns.com resolver1.opendns.com | grepip | tail -n 1'  # Get public IP using OpenDNS
@@ -46,7 +47,7 @@ alias bubu='tldr --update && brewup'        # Update tldr pages and Homebrew pac
 
 # Development & Git
 alias gaf='git add -f'                      # Force add files to git (including ignored)
-alias gcx='builtin cd ~/gits && git clone --recurse-submodules -j8 `pbpaste` && cd ./*(/om[1])'  # Clone repo from clipboard with submodules
+alias gcx='builtin cd ~/gits && git clone --recurse-submodules -j8 `pbpaste` && builtin cd ./*(/om[1])'  # Clone repo from clipboard with submodules
 
 # Docker Management
 alias dockstop='docker stop $(docker ps -a -q)'  # Stop all running containers
