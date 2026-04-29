@@ -98,9 +98,12 @@ pyenv() {
 ###############################
 # Golang configuration
 ###############################
-# Only export GOROOT when the canonical install exists — on machines without
-# a manual Go install we let `go`/homebrew resolve GOROOT themselves.
-[[ -d /usr/local/go ]] && export GOROOT=/usr/local/go
+# Do not set GOROOT here. It must match the compiler bundled with the same `go`
+# binary on PATH; forcing GOROOT=/usr/local/go while using Homebrew's `go`
+# breaks builds with: compile: version "go1.x" does not match go tool version "go1.y".
+# Stale GOROOT may also be inherited from GUI parents — clear it so `go env GOROOT`
+# follows the resolved `go` binary.
+unset GOROOT
 export GOPATH=$HOME/go
 
 ###############################
@@ -108,7 +111,10 @@ export GOPATH=$HOME/go
 ###############################
 export BUN_INSTALL="$HOME/.bun"
 path+=($GOPATH/bin $BUN_INSTALL/bin)
-[[ -n "$GOROOT" && -d "$GOROOT/bin" ]] && path+=($GOROOT/bin)
+# Std installer layout only when nothing else provides `go` (e.g. no Homebrew).
+if ! command -v go >/dev/null 2>&1 && [[ -x /usr/local/go/bin/go ]]; then
+  path=(/usr/local/go/bin $path)
+fi
 export PATH="${(j.:.)path}"
 
 ###############################
