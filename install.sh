@@ -58,6 +58,12 @@ link_dotfiles() {
   if [[ -f "${REPO_ROOT}/.gitignore_global" ]]; then
     symlink_init ".gitignore_global" "${HOME}/.gitignore_global"
   fi
+  # Shared VS Code + Cursor User settings (same file; Cursor-only keys are ignored by VS Code).
+  # Python interpreter: zsh `code`/`cursor` wrappers set PATH + VIRTUAL_ENV when autoswitch `.venv` exists; no defaultInterpreterPath in JSON.
+  if [[ -f "${REPO_ROOT}/config/editor/User/settings.json" ]]; then
+    symlink_init "config/editor/User/settings.json" "${HOME}/Library/Application Support/Code/User/settings.json"
+    symlink_init "config/editor/User/settings.json" "${HOME}/Library/Application Support/Cursor/User/settings.json"
+  fi
 }
 
 if [[ "${1:-}" == "--link-only" ]]; then

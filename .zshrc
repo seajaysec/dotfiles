@@ -76,6 +76,7 @@ path=(
     ~/.npm-packages/lib/node_modules/n/bin
     /bin/lscript
     ~/.cargo/bin
+    ~/.dotnet/tools
 )
 export PATH="${(j.:.)path}"
 

@@ -662,3 +662,71 @@ compdefas () {
   fi
 }
 compdefas mkdir mcd
+
+# VS Code / Cursor + zsh-autoswitch-virtualenv
+# --------------------------------------------
+# The Python extension does not read the autoswitch `.venv` pointer file. Wrappers
+# walk upward from the opened folder for a `.venv` pointer file; when found, they
+# prepend that env's bin/ to PATH and set VIRTUAL_ENV (venv root) for the editor
+# process only — no python.defaultInterpreterPath in settings; the Python extension
+# auto-selects. When there is no autoswitch env, nothing is set (fall back to normal
+# discovery / global tooling). Clear inherited shell activation first.
+
+_dotfiles_editor_workspace_dir_from_args() {
+  local arg root=""
+  for arg in "$@"; do
+    [[ "$arg" == -* ]] && continue
+    [[ -e "$arg" ]] || continue
+    if [[ -d "$arg" ]]; then
+      root="${arg:A}"
+    else
+      root="${arg:A:h}"
+    fi
+    print -r -- "$root"
+    return 0
+  done
+  print -r -- "${PWD:A}"
+}
+
+_dotfiles_autoswitch_python_for_workspace_dir() {
+  local dir="$1" check name py
+  dir="${dir:A}"
+  while [[ "$dir" != "/" ]]; do
+    check="$dir/.venv"
+    if [[ -f "$check" && ! -d "$check" ]]; then
+      name="$(LC_ALL=C tr -d '\r\n' <"$check")"
+      for py in "${HOME}/.virtualenvs/${name}/bin/python" \
+                "${HOME}/.virtualenvs/${name}/bin/python3"; do
+        [[ -x "$py" ]] && {
+          print -r -- "$py"
+          return 0
+        }
+      done
+    fi
+    dir="${dir:h}"
+  done
+  return 1
+}
+
+_dotfiles_prepare_vscode_python_env() {
+  local ws py
+  ws="$(_dotfiles_editor_workspace_dir_from_args "$@")"
+  if py="$(_dotfiles_autoswitch_python_for_workspace_dir "$ws")"; then
+    export PATH="${py:h}:$PATH"
+    export VIRTUAL_ENV="${py:h:h}"
+  else
+    unset VIRTUAL_ENV
+  fi
+}
+
+cursor() (
+  unset VIRTUAL_ENV
+  _dotfiles_prepare_vscode_python_env "$@"
+  exec command cursor "$@"
+)
+
+code() (
+  unset VIRTUAL_ENV
+  _dotfiles_prepare_vscode_python_env "$@"
+  exec command code "$@"
+)

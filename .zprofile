@@ -19,5 +19,6 @@ path=(
   "$HOME/.npm-packages/lib/node_modules/n/bin"
   /bin/lscript
   "$HOME/.cargo/bin"
+  "$HOME/.dotnet/tools"
 )
 export PATH="${(j.:.)path}"

@@ -1,0 +1,351 @@
+{
+  "editor.largeFileOptimizations": false,
+  "workbench.editorAssociations": {
+    "*.ipynb": "jupyter.notebook.ipynb",
+    "git-rebase-todo": "gitlens.rebase"
+  },
+  "workbench.editor.revealIfOpen": true,
+  "files.associations": {
+    ".tmux.conf.local": "shellscript"
+  },
+  "terminal.integrated.profiles.osx": {
+    "bash": {
+      "path": "bash",
+      "icon": "terminal-bash"
+    },
+    "zsh": {
+      "path": "zsh"
+    },
+    "pwsh": {
+      "path": "pwsh",
+      "icon": "terminal-powershell"
+    },
+    "python3-repl": {
+      "path": "python3",
+      "args": [
+        "-q"
+      ]
+    }
+  },
+  "[python]": {
+    "editor.defaultFormatter": "ms-python.black-formatter",
+    "editor.formatOnSave": true,
+    "editor.codeActionsOnSave": {
+      "source.organizeImports": "explicit"
+    },
+    "editor.rulers": [
+      79,
+      120
+    ],
+    "editor.wordWrap": "wordWrapColumn",
+    "editor.wordWrapColumn": 80
+  },
+  "python.analysis.typeCheckingMode": "basic",
+  "editor.fontSize": 18,
+  "security.workspace.trust.untrustedFiles": "open",
+  "editor.accessibilitySupport": "off",
+  "editor.codeLensFontFamily": "Hack NF",
+  "editor.fontLigatures": false,
+  "terminal.integrated.fontFamily": "'Hack Nerd Font'",
+  "terminal.external.osxExec": "iTerm.app",
+  "git.autofetch": false,
+  "markdown-preview-enhanced.previewTheme": "github-light.css",
+  "workbench.editor.labelFormat": "medium",
+  "explorer.confirmDelete": false,
+  "print.colourScheme": "Visual Studio",
+  "git.enableSmartCommit": true,
+  "git.confirmSync": false,
+  "C_Cpp.updateChannel": "Insiders",
+  "editor.guides.indentation": true,
+  "workbench.colorCustomizations": {
+    "editor.lineHighlightBackground": "#1073cf2d",
+    "editor.lineHighlightBorder": "#9fced11f"
+  },
+  "editor.wordWrap": "wordWrapColumn",
+  "diffEditor.wordWrap": "off",
+  "editor.inlayHints.enabled": false,
+  "gitdoc.enabled": true,
+  "gitdoc.commitValidationLevel": "none",
+  "gitdoc.autoCommitDelay": 0,
+  "explorer.confirmDragAndDrop": false,
+  "editor.guides.bracketPairs": true,
+  "editor.bracketPairColorization.enabled": true,
+  "blockman.n04Sub01ColorComboPresetForDarkTheme": "Satura (Gradients)",
+  "[git-commit]": {
+    "editor.rulers": [
+      50
+    ]
+  },
+  "terminal.integrated.fontSize": 16,
+  "emojisense.unicodeCompletionsEnabled": false,
+  "blockman.n32BlackListOfFileFormats": "plaintext, markdown, spl",
+  "blockman.n04Sub02ColorComboPresetForLightTheme": "Small Galaxy (Gradients)",
+  "blockman.n04Sub03ColorComboPresetForHighContrastTheme": "Satura (Gradients)",
+  "blockman.n05CustomColorOfDepth0": "none",
+  "pythonPreview.code.fontFamily": "Hack Nerd Font",
+  "pythonPreview.codeFooterDocs.fontFamily": "Hack Nerd Font, verdana, arial, helvetica, sans-serif",
+  "pythonPreview.fontFamily": "Hack Nerd Font, verdana, arial, helvetica, sans-serif",
+  "pythonPreview.heapObject.fontFamily": "Hack Nerd Font, verdana, arial, helvetica, sans-serif",
+  "pythonPreview.langDisplay.fontFamily": "Hack Nerd Font, verdana, arial, helvetica, sans-serif",
+  "pythonPreview.legend.fontFamily": "Hack Nerd Font, verdana, arial, helvetica, sans-serif",
+  "pythonPreview.printOutputDocs.fontFamily": "Hack Nerd Font, verdana, arial, helvetica, sans-serif",
+  "pythonPreview.stackAndHeapHeader.fontFamily": "Hack Nerd Font, verdana, arial, helvetica, sans-serif",
+  "pythonPreview.stackFrame.fontFamily": "Hack Nerd Font, verdana, arial, helvetica, sans-serif",
+  "pythonPreview.stackFrameHeader.fontFamily": "Hack Nerd Font, verdana, arial, helvetica, sans-serif",
+  "pythonPreview.typeLabel.fontFamily": "Hack Nerd Font, verdana, arial, helvetica, sans-serif",
+  "pythonPreview.code.fontSize": "10",
+  "pythonPreview.fontSize": 14,
+  "pythonPreview.langDisplay.fontSize": "14",
+  "pythonPreview.legend.fontSize": 14,
+  "pythonPreview.pyStdout.fontSize": 12,
+  "editor.fontFamily": "Hack Nerd Font, Menlo, Monaco, 'Courier New', monospace",
+  "blockman.n03MaxDepth": 20,
+  "blockman.n04ColorComboPreset": "Satura (Gradients)",
+  "blockman.n22AnalyzeCurlyBrackets": false,
+  "blockman.n25AnalyzeTags": false,
+  "pythonPreview.showAllFrameLabels": true,
+  "pythonPreview.pyStdout.fontFamily": "Hack Nerd Font, Andale mono, monospace",
+  "pythonPreview.code.lineHeight": 1,
+  "pythonPreview.codAndNavWidth": 680,
+  "jupyter.askForKernelRestart": false,
+  "editor.suggestSelection": "first",
+  "vsintellicode.modify.editor.suggestSelection": "automaticallyOverrodeDefaultValue",
+  "go.toolsManagement.autoUpdate": true,
+  "blockman.n01LineHeight": 0,
+  "editor.formatOnPaste": true,
+  "editor.formatOnSave": true,
+  "editor.formatOnType": true,
+  "splunk.commands.splunkRestUrl": "https://evm-splunk.corp.disney.com",
+  "editor.renderWhitespace": "none",
+  "markdown-preview-enhanced.revealjsTheme": "moon.css",
+  "window.autoDetectColorScheme": true,
+  "workbench.preferredDarkColorTheme": "Dracula Pro",
+  "workbench.colorTheme": "Dracula Pro",
+  "workbench.iconTheme": "portals_icon",
+  "cSpell.userWords": [
+    "AVARS",
+    "CISA",
+    "DTOC",
+    "Grafana",
+    "mitigations",
+    "Phill",
+    "Sanelli",
+    "vulnmgmt"
+  ],
+  "cSpell.enabled": true,
+  "git.openRepositoryInParentFolders": "always",
+  "[javascript]": {
+    "editor.defaultFormatter": "esbenp.prettier-vscode"
+  },
+  "git.ignoreRebaseWarning": true,
+  "interactiveSession.editor.wordWrap": "on",
+  "notebook.output.wordWrap": true,
+  "notebook.output.scrolling": true,
+  "notebook.output.textLineLimit": 40,
+  "application.shellEnvironmentResolutionTimeout": 15,
+  "update.showReleaseNotes": false,
+  "auditLanguageServer.auditCheckServiceUrl": "http://127.0.0.1:5000",
+  "console-ninja.featureSet": "Community",
+  "terminal.integrated.fontLigatures.enabled": true,
+  "workbench.startupEditor": "none",
+  "gitlab.duoCodeSuggestions.enabled": false,
+  "gitlab.duoChat.enabled": false,
+  "redhat.telemetry.enabled": false,
+  "roo-cline.allowedCommands": [
+    "npm test",
+    "npm install",
+    "tsc",
+    "git log",
+    "git diff",
+    "git show"
+  ],
+  "terminal.integrated.env.osx": {},
+  "github.copilot.nextEditSuggestions.enabled": true,
+  "[markdown]": {
+    "editor.formatOnSave": true,
+    "editor.formatOnPaste": true,
+    "editor.defaultFormatter": "simonguo.vscode-markdown-table-sort",
+    "editor.wordWrap": "wordWrapColumn",
+    "editor.wordWrapColumn": 80,
+    "editor.quickSuggestions": {
+      "comments": "off",
+      "strings": "off",
+      "other": "off"
+    }
+  },
+  "editor.codeActionsOnSave": {
+    "source.fixAll.markdownlint": "explicit"
+  },
+  "python.pipenvPath": "${env:HOME}/.local/bin/pipenv",
+  "python.poetryPath": "${env:HOME}/.local/bin/poetry",
+  "python.condaPath": "${env:HOME}/.local/bin/conda",
+  "editor.wordWrapColumn": 80,
+  "[plaintext]": {
+    "editor.wordWrapColumn": 200
+  },
+  "markdownlint.config": {
+    "MD013": false,
+    "MD033": false
+  },
+  "cursor.cpp.disabledLanguages": [
+    "plaintext",
+    "markdown",
+    "scminput"
+  ],
+  "cursor.composer.shouldChimeAfterChatFinishes": false,
+  "terminal.integrated.fontLigatures": true,
+  "terminal.integrated.tabs.defaultColor": "terminal.ansiBlue",
+  "makefile.configureOnOpen": true,
+  "cursor.composer.shouldAllowCustomModes": true,
+  "cursor.general.globalCursorIgnoreList": [
+    "**/credentials.json",
+    "**/credentials.*.json",
+    "**/secret.json",
+    "**/secrets.json",
+    "**/*.key",
+    "**/*.pem",
+    "**/*.pfx",
+    "**/*.p12",
+    "**/*.crt",
+    "**/*.cer",
+    "**/id_rsa",
+    "**/id_dsa",
+    "**/.ssh/id_*"
+  ],
+  "search.useIgnoreFiles": false,
+  "cursor.general.enableIgnoreFiles": false,
+  "cursorpyright.analysis.typeCheckingMode": "basic",
+  "peacock.favoriteColors": [
+    {
+      "name": "Angular Red",
+      "value": "#dd0531"
+    },
+    {
+      "name": "Azure Blue",
+      "value": "#007fff"
+    },
+    {
+      "name": "JavaScript Yellow",
+      "value": "#f9e64f"
+    },
+    {
+      "name": "Mandalorian Blue",
+      "value": "#1857a4"
+    },
+    {
+      "name": "Node Green",
+      "value": "#215732"
+    },
+    {
+      "name": "React Blue",
+      "value": "#61dafb"
+    },
+    {
+      "name": "Something Different",
+      "value": "#832561"
+    },
+    {
+      "name": "Svelte Orange",
+      "value": "#ff3d00"
+    },
+    {
+      "name": "Vue Green",
+      "value": "#42b883"
+    },
+    {
+      "name": "Python Blue",
+      "value": "#306998"
+    },
+    {
+      "name": "Ruby Red",
+      "value": "#cc0000"
+    },
+    {
+      "name": "Rust Orange",
+      "value": "#ce422b"
+    },
+    {
+      "name": "Go Cyan",
+      "value": "#00add8"
+    },
+    {
+      "name": "PHP Purple",
+      "value": "#777bb3"
+    },
+    {
+      "name": "Java Orange",
+      "value": "#f89820"
+    },
+    {
+      "name": "TypeScript Blue",
+      "value": "#3178c6"
+    },
+    {
+      "name": "Kotlin Purple",
+      "value": "#7f52ff"
+    },
+    {
+      "name": "Swift Orange",
+      "value": "#f05138"
+    },
+    {
+      "name": "C# Purple",
+      "value": "#68217a"
+    },
+    {
+      "name": "Elixir Purple",
+      "value": "#4e2a8e"
+    },
+    {
+      "name": "Flutter Sky",
+      "value": "#54c5f8"
+    },
+    {
+      "name": "Django Green",
+      "value": "#0c4b33"
+    },
+    {
+      "name": "Laravel Red",
+      "value": "#ff2d20"
+    },
+    {
+      "name": "Magenta Pop",
+      "value": "#e91e63"
+    },
+    {
+      "name": "Teal Fresh",
+      "value": "#009688"
+    },
+    {
+      "name": "Lime Bright",
+      "value": "#9ccc65"
+    },
+    {
+      "name": "Amber Warm",
+      "value": "#ffa726"
+    },
+    {
+      "name": "Deep Purple",
+      "value": "#5e35b1"
+    },
+    {
+      "name": "Pink Punch",
+      "value": "#d81b60"
+    },
+    {
+      "name": "Brown Earth",
+      "value": "#6d4c41"
+    }
+  ],
+  "peacock.affectDebuggingStatusBar": true,
+  "peacock.affectEditorGroupBorder": true,
+  "peacock.affectPanelBorder": true,
+  "peacock.affectSideBarBorder": true,
+  "peacock.affectStatusAndTitleBorders": true,
+  "peacock.affectTabActiveBorder": true,
+  "peacock.surpriseMeOnStartup": true,
+  "peacock.surpriseMeFromFavoritesOnly": true,
+  "markdownlint.run": "onSave",
+  "editor.minimap.enabled": true,
+  "cursor.inlineDiff.mode": "unified"
+}
