@@ -189,7 +189,7 @@ zstyle ':completion:*:corrections' format '%B%d (errors: %e)%b'
 ###############################
 # Source Configurations
 ###############################
-source ~/secrets.sh
+[[ -f "$HOME/secrets.sh" ]] && source "$HOME/secrets.sh"
 
 source "${DOTFILES}/.zsh.aliases"
 source "${DOTFILES}/.zsh.functions"
@@ -240,11 +240,8 @@ REPORTTIME=10
 auto-ls() { ls; }
 add-zsh-hook chpwd auto-ls
 
-export CHECK_ROOT="/Users/chris.j.farrell/gits/check"
-export CHECK_PYTHON="/Users/chris.j.farrell/.virtualenvs/check-wivc/bin/python3"
-if [ -f "$CHECK_ROOT/check_function.zsh" ]; then
-  source "$CHECK_ROOT/check_function.zsh"
-fi
+# Per-machine project hooks (e.g. CHECK_ROOT / CHECK_PYTHON) live in ~/.zshrc.local
+# — never commit machine-specific paths to this file. See SYNC.md.
 
 # Starship last among interactive tool evals (ARCH-06 / 02-03)
 export STARSHIP_CONFIG="${DOTFILES}/config/starship/starship.toml"

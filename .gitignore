@@ -4,4 +4,12 @@
 secrets.sh
 .env
 .env.*
+.claude
 .claude/
+
+# Machine-specific Brewfile snapshots (named with hostname / asset tag)
+Brewfile.*
+!Brewfile.template
+
+# iTerm2 binary state exports (large, contain session metadata)
+*.itermexport
