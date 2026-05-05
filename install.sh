@@ -115,8 +115,6 @@ brew install \
     ipython \
     starship
 
-echo "📱 Installing recommended applications..."
-
 echo "📁 Creating directory structure..."
 sudo mkdir -p /opt/gists
 sudo chown "$USER:staff" /opt/gists
@@ -124,17 +122,40 @@ sudo chown "$USER:staff" /opt/gists
 echo "🔧 Preparing zsh plugin paths (Zap lives under ~/.local/share/zap — install Zap separately if needed)…"
 mkdir -p ~/.local/share/zsh/plugins
 
-echo "🛠️ Installing development tools (NVM / Bun / Rust)…"
-curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.39.0/install.sh | bash
-curl -fsSL https://bun.sh/install | bash
-curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y
+# Each upstream installer below appends a shell-init block to ~/.zshrc.
+# That mutates this repo (since ~/.zshrc is a symlink into it). Guard with
+# command -v so re-runs of install.sh don't re-pollute committed files.
+echo "🛠️ Installing development tools (NVM / Bun / Rust) — skipping any already installed…"
+if [[ ! -s "$HOME/.nvm/nvm.sh" ]]; then
+  echo "   → nvm"
+  curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.40.1/install.sh | bash
+else
+  echo "   → nvm already installed (skip)"
+fi
+if ! command -v bun >/dev/null 2>&1 && [[ ! -x "$HOME/.bun/bin/bun" ]]; then
+  echo "   → bun"
+  curl -fsSL https://bun.sh/install | bash
+else
+  echo "   → bun already installed (skip)"
+fi
+if ! command -v rustc >/dev/null 2>&1 && ! command -v cargo >/dev/null 2>&1; then
+  echo "   → rustup"
+  curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y --no-modify-path
+else
+  echo "   → rust already installed (skip)"
+fi
 
 link_dotfiles
 
-touch ~/secrets.sh
+[[ -f "$HOME/secrets.sh" ]] || touch "$HOME/secrets.sh"
 
-echo "🔍 Configuring fzf..."
-"$(brew --prefix)/opt/fzf/install" --all
+# fzf's installer rewrites ~/.zshrc unless we use --no-update-rc. ~/.zshrc
+# already does `source <(fzf --zsh)` at startup, so the rc rewrite would only
+# add a duplicate block.
+if [[ -x "$(brew --prefix)/opt/fzf/install" ]]; then
+  echo "🔍 Configuring fzf (key bindings + completion, no rc rewrite)…"
+  "$(brew --prefix)/opt/fzf/install" --key-bindings --completion --no-update-rc
+fi
 
 mkdir -p ~/.zsh
 touch ~/.zsh/history
@@ -150,8 +171,10 @@ if ! grep -q "$BREW_ZSH" /etc/shells; then
     echo "$BREW_ZSH" | sudo tee -a /etc/shells
 fi
 
-if [[ $SHELL != *"zsh"* ]]; then
-    echo "🐚 Setting Homebrew's zsh as default shell..."
+# Compare $SHELL to the Homebrew zsh path directly. Substring-matching "zsh"
+# silently leaves you on Apple's /bin/zsh on a stock Mac.
+if [[ "$SHELL" != "$BREW_ZSH" ]]; then
+    echo "🐚 Setting Homebrew's zsh ($BREW_ZSH) as default shell..."
     chsh -s "$BREW_ZSH"
 fi
 
