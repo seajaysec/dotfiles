@@ -277,8 +277,15 @@ tmux_conf_copy_to_os_clipboard=true
 # increase history size
 set -g history-limit 1000000
 
-# start with mouse mode enabled
-set -g mouse on
+# Mouse OFF: under iTerm tmux integration (-CC), iTerm handles the mouse
+# natively (click-to-focus pane, drag-border resize, click-drag select, native
+# scrollback) by translating gestures into tmux commands. Leaving tmux's own
+# `mouse on` causes a scroll/trackpad gesture to drop the pane into copy-mode,
+# which silently swallows keystrokes (a live shell you can't type into).
+# To re-enable tmux mouse only outside -CC, replace the line below with:
+#   set -g mouse on
+#   set-hook -g client-attached "if -F '#{client_control_mode}' 'set mouse off' 'set mouse on'"
+set -g mouse off
 
 # force Vi mode
 #   really you should export VISUAL or EDITOR environment variable, see manual
