@@ -1,0 +1,82 @@
+[
+  {
+    "title": "whocerts <domain>",
+    "value": "whocerts ",
+    "tags": ["security", "network"],
+    "guid": "dotfiles-snippet-whocerts",
+    "escaping": 2,
+    "version": 2
+  },
+  {
+    "title": "mkvenv 3.x",
+    "value": "mkvenv 3.",
+    "tags": ["python"],
+    "guid": "dotfiles-snippet-mkvenv",
+    "escaping": 2,
+    "version": 2
+  },
+  {
+    "title": "pipreqs + install (pipr)",
+    "value": "pipr",
+    "tags": ["python"],
+    "guid": "dotfiles-snippet-pipr",
+    "escaping": 2,
+    "version": 2
+  },
+  {
+    "title": "dualping <target>",
+    "value": "dualping ",
+    "tags": ["network"],
+    "guid": "dotfiles-snippet-dualping",
+    "escaping": 2,
+    "version": 2
+  },
+  {
+    "title": "grepip from clipboard",
+    "value": "pbpaste | grepip",
+    "tags": ["network", "clipboard"],
+    "guid": "dotfiles-snippet-grepip-clipboard",
+    "escaping": 2,
+    "version": 2
+  },
+  {
+    "title": "nmap top ports + UA (nmapr)",
+    "value": "nmapr --top-ports 100 ",
+    "tags": ["security", "network"],
+    "guid": "dotfiles-snippet-nmapr-top100",
+    "escaping": 2,
+    "version": 2
+  },
+  {
+    "title": "git WIP commit (gwip)",
+    "value": "gwip",
+    "tags": ["git"],
+    "guid": "dotfiles-snippet-gwip",
+    "escaping": 2,
+    "version": 2
+  },
+  {
+    "title": "clone from clipboard (gcx)",
+    "value": "gcx",
+    "tags": ["git"],
+    "guid": "dotfiles-snippet-gcx",
+    "escaping": 2,
+    "version": 2
+  },
+  {
+    "title": "quick JSON GET",
+    "value": "getJSON ",
+    "tags": ["network", "http"],
+    "guid": "dotfiles-snippet-getjson",
+    "escaping": 2,
+    "version": 2
+  },
+  {
+    "title": "kill all docker (stop + rm)",
+    "value": "dockstop && dockrm",
+    "tags": ["docker"],
+    "guid": "dotfiles-snippet-docker-killall",
+    "escaping": 2,
+    "version": 2
+  }
+]

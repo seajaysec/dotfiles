@@ -233,6 +233,14 @@ if [[ "$CLAUDECODE" != "1" ]]; then
 fi
 export ITERM_ENABLE_SHELL_INTEGRATION_WITH_TMUX=YES
 
+# Expose the active venv name to iTerm as a user_var so the status bar can show it.
+# iTerm calls this hook on every prompt when shell integration is loaded.
+# Set DOTFILES_PROMPT=starship to disable the iTerm status bar path and re-enable
+# Starship below.
+iterm2_print_user_vars() {
+  iterm2_set_user_var python_venv "${VIRTUAL_ENV##*/}"
+}
+
 ###############################
 # Better Terminal Experience
 ###############################
@@ -243,9 +251,12 @@ add-zsh-hook chpwd auto-ls
 # Per-machine project hooks (e.g. CHECK_ROOT / CHECK_PYTHON) live in ~/.zshrc.local
 # — never commit machine-specific paths to this file. See SYNC.md.
 
-# Starship last among interactive tool evals (ARCH-06 / 02-03)
-export STARSHIP_CONFIG="${DOTFILES}/config/starship/starship.toml"
-eval "$(starship init zsh)"
+# Prompt: default is "iterm" (rely on iTerm status bar — see config/iterm2/README.md).
+# Set DOTFILES_PROMPT=starship in ~/.zshrc.local to re-enable Starship instead.
+if [[ "${DOTFILES_PROMPT:-iterm}" == "starship" ]]; then
+  export STARSHIP_CONFIG="${DOTFILES}/config/starship/starship.toml"
+  eval "$(starship init zsh)"
+fi
 
 # Vi cursor shape after Starship init so we don't clobber Starship's zle / precmd registration (HOOK-* / Phase 3)
 zle-keymap-select() {

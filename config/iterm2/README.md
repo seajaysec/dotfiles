@@ -1,10 +1,31 @@
-# iTerm2 + Session Restoration
+# iTerm2 — Session Restoration + power-user setup
 
-Persistence and "pick up where I left off" — without `tmux -CC`. Background and the why-not for `-CC` are in [`docs/superpowers/notes/2026-05-21-tmux-native-iterm-progress.md`](../../docs/superpowers/notes/2026-05-21-tmux-native-iterm-progress.md).
+Persistence and "pick up where I left off" via iTerm's native [Session Restoration](https://iterm2.com/documentation-restoration.html) (no `tmux -CC`), plus a power-user layer (status bar, APS, snippets, triggers, keybindings) configured reproducibly by [`apply-iterm-defaults.sh`](apply-iterm-defaults.sh).
 
-## How it works
+History and the why-not for `-CC` is in [`docs/superpowers/notes/2026-05-21-tmux-native-iterm-progress.md`](../../docs/superpowers/notes/2026-05-21-tmux-native-iterm-progress.md).
 
-iTerm runs each session inside a long-lived `iTermServer-*` daemon (see [iTerm Session Restoration docs](https://iterm2.com/documentation-restoration.html)). Your zsh, vim, `ping`, dev servers, etc. live inside the daemon. When iTerm quits or crashes, the daemons stay alive. When iTerm relaunches it reattaches to the existing daemons and you see exactly what you left.
+## Setup on a new machine
+
+1. `./install.sh --link-only` — symlinks shell files + APS dynamic profiles, removes any stale `-CC` era profile symlinks.
+2. **Quit iTerm completely (⌘Q).**
+3. `./config/iterm2/apply-iterm-defaults.sh`
+4. Reopen iTerm.
+5. In the GUI (one-time): Settings → Profiles → Default → Session → check **"Status bar enabled"** if it isn't already. (The layout is already written; this just turns the bar on.)
+
+Verify after relaunch:
+
+```bash
+pgrep -fl iTermServer                                                    # at least one
+defaults read com.googlecode.iterm2 killJobsInServersOnQuit              # 0
+defaults read -g NSQuitAlwaysKeepsWindows                                # 1
+defaults read com.googlecode.iterm2 IRMemory                             # 32
+```
+
+### Fallback: if processes still die on Cmd+Q after running the script
+
+macOS caches user defaults in `cfprefsd`; rarely iTerm reads a stale value before the cache flush propagates. The script kills `cfprefsd` on exit, but if you still see processes die on the first ⌘Q, toggle it via the GUI once: **Settings → Advanced → Sessions → "User-initiated quit (⌘Q) of iTerm2 will kill all running jobs."** must be **OFF**.
+
+## How Session Restoration works
 
 ```
 iTerm UI  <--reattach-->  iTermServer (your zsh + running processes)
@@ -13,33 +34,7 @@ iTerm UI  <--reattach-->  iTermServer (your zsh + running processes)
    | (with our settings)        | crash, and iTerm upgrades.
 ```
 
-Native iTerm tabs (`⌘T`), splits (`⌘D`, `⇧⌘D`), scrollback, copy (`⌘C`), find (`⌘F`) — all of it just works because there is no protocol layer.
-
-## Setup on a new machine
-
-1. `./install.sh --link-only` (symlinks shell + tmux files, removes any stale dotfiles-era iTerm Dynamic Profile symlinks).
-2. **Quit iTerm completely (⌘Q).**
-3. `./config/iterm2/apply-iterm-defaults.sh`
-4. Reopen iTerm.
-
-The apply script sets:
-- `runJobsInServers = true` (Session Restoration on)
-- `killJobsInServersOnQuit = false` (⌘Q **preserves** processes)
-- `OpenArrangementAtStartup / OpenBookmark / AlwaysOpenWindowAtStartup = false` (use macOS window restoration on startup)
-- `NSQuitAlwaysKeepsWindows = true` (the global macOS pref — equivalent to System Settings → Desktop & Dock → uncheck "Close windows when quitting an application")
-- Cleans up tmux `-CC` era keys (`OpenTmuxWindowsIn`, `AutoHideTmuxClientSession`, `NoSync*Tmux*`, etc.) and removes the dotfiles-owned dynamic-profile bookmark rows.
-
-Verify after relaunch:
-
-```bash
-pgrep -fl iTermServer
-defaults read com.googlecode.iterm2 killJobsInServersOnQuit   # 0
-defaults read -g NSQuitAlwaysKeepsWindows                      # 1
-```
-
-### Fallback: if processes still die on Cmd+Q after running the script
-
-macOS caches user defaults in `cfprefsd`; rarely iTerm reads a stale value before the cache flush propagates. The script kills `cfprefsd` on exit to avoid this, but if you still see processes die on the first ⌘Q, do it via the GUI once: **Settings → Advanced → Sessions section → "User-initiated quit (⌘Q) of iTerm2 will kill all running jobs."** must be **OFF**. iTerm writes the same key from the toggle and the in-memory state syncs immediately.
+Native iTerm tabs (`⌘T`), splits (`⌘D`, `⇧⌘D`), scrollback, copy (`⌘C`), find (`⌘F`) — no protocol layer.
 
 ## Day-to-day behavior
 
@@ -52,26 +47,103 @@ macOS caches user defaults in `cfprefsd`; rarely iTerm reads a stale value befor
 | Force-quit / crash / upgrade | Restored. |
 | Reboot or log out | Daemons die with the user session; processes are lost. Use `tm` (below) for cross-reboot persistence. |
 
-## Optional: plain tmux on top
+## Status bar (replaces Starship)
 
-If you need a process to survive a reboot, or you want tmux's own pane layouts inside a single iTerm tab, use the `tm` alias from [`.zsh.aliases`](../../.zsh.aliases):
+Set on the Default profile by the apply script. Layout (left → right):
 
-```bash
-tm   # attach to (or create) tmux session $tmux_session (default 'main')
+```
+user | hostname (ssh) | python_venv | git | cwd | (spring) | composer
 ```
 
-Inside tmux, use the normal tmux keys:
-- `Ctrl-a c` — new tmux window
-- `Ctrl-a "` / `Ctrl-a %` — split (horizontal / vertical)
-- `Ctrl-a [` — copy mode
-- `Ctrl-a d` — detach (tmux server keeps your processes alive across reboots)
+- `python_venv` is published by the `iterm2_print_user_vars` hook in [`.zshrc`](../../.zshrc) (reads `$VIRTUAL_ENV`).
+- Starship is wrapped in a `DOTFILES_PROMPT=starship` guard in [`.zshrc`](../../.zshrc) — default is `iterm`, so Starship is skipped.
+- To re-enable Starship on a specific host: `export DOTFILES_PROMPT=starship` in `~/.zshrc.local`.
 
-Session name lives in `tmux_session` (set in [`.zshenv`](../../.zshenv), override per-host via `~/.zshrc.local`).
+## Automatic Profile Switching (per project directory)
 
-Tmux is **not** auto-started. [`.tmux.conf`](../../.tmux.conf) and [`.tmux.conf.local`](../../.tmux.conf.local) are still symlinked so `tm` works when you want it.
+Two starter dynamic profiles in [`DynamicProfiles/aps-projects.json`](DynamicProfiles/aps-projects.json):
 
-## Why not `tmux -CC` anymore
+| Bound path | Profile | Tab color |
+|---|---|---|
+| `/Users/chris.j.farrell/dotfiles*` | Project: dotfiles | teal |
+| `/Users/chris.j.farrell/work*` | Project: work | orange |
 
-Short version: `tmux -CC` over local tmux + `⌘Q` hits a known race in the control protocol ([tmux/tmux#2246](https://github.com/tmux/tmux/issues/2246) — `%exit` vs. in-flight iTerm queries). Symptoms include raw `%output` lines in new tabs, "session ended very soon after starting" warnings on reattach, and `tmux list-clients` filling up with stuck `wait-exit` orphans. iTerm Session Restoration sidesteps the entire protocol.
+Adding more: edit `DynamicProfiles/aps-projects.json` (or drop a new `*.json`), then `./install.sh --link-only`. iTerm hot-reloads — no restart.
 
-Long version in [`docs/superpowers/notes/2026-05-21-tmux-native-iterm-progress.md`](../../docs/superpowers/notes/2026-05-21-tmux-native-iterm-progress.md).
+APS switches the live session's profile in place (Tab color, font, anything you override) when the cwd matches. Leaves dir → reverts to Default. Requires Shell Integration (already sourced from [`.zshrc:221`](../../.zshrc)).
+
+## Snippets
+
+Seeded from [`snippets.json`](snippets.json). Reach via **Edit → Snippets**, the Snippets toolbelt, the Snippets status bar component, or per-snippet shortcuts you assign:
+
+- `whocerts <domain>`, `mkvenv 3.x`, `pipr`, `dualping <target>`, `pbpaste | grepip`, `nmapr --top-ports 100`, `gwip`, `gcx`, `getJSON`, `dockstop && dockrm`.
+
+All identifiable by the `dotfiles-snippet-` GUID prefix — apply script preserves your own snippets, replaces only the dotfiles ones.
+
+## Triggers
+
+Three live on the Default profile (idempotent via the `dotfiles:` name prefix):
+
+| Name | Regex | Action |
+|---|---|---|
+| dotfiles: error/fail highlight | `(?i)\b(error\|fail(ed\|ure)?\|FATAL\|panic\|traceback)\b` | Highlight white-on-red |
+| dotfiles: build done bell | `\bBUILD (SUCCESS\|SUCCEEDED\|PASSED\|FAILED)\b` | Ring bell |
+| dotfiles: prod host bounce | `@(prod\|production\|live)[A-Za-z0-9._-]*` | Bounce dock icon |
+
+Edit / disable any of them: Settings → Profiles → Default → Advanced → Edit Triggers.
+
+## Keybindings
+
+Set in `GlobalKeyMap` by the apply script, identifiable by `dotfiles:` label prefix:
+
+| Combo | Action | Notes |
+|---|---|---|
+| ⌘E | Open Composer | Replaces the awkward default ⌘⇧. |
+| ⌘⌥E | Toggle Auto Composer | Always-on prompt editor mode |
+| ⌘⇧N | Add Annotation at Cursor | Sticky note pinned to buffer location |
+| ⌘⌥V | Paste, stripping newlines | One-shot; no Advanced Paste dialog |
+| ⌘⌥B | Start Instant Replay | iTerm default; buffer now 32 MB per session |
+
+### Useful built-ins worth knowing (not changed)
+
+- **⌘;** — autocomplete from current scrollback (great for grabbing URLs / IPs / hashes already on screen without retyping).
+- **⌘⇧;** — recent commands (across sessions, via Shell Integration).
+- **⌘⇧↑ / ⌘⇧↓** — jump between command prompts (Shell Integration marks).
+- **⌘⇧A** — Select Output of Last Command (then ⌘C to copy it).
+- **⌘⇧H** — Paste History.
+
+## Optional: plain tmux on top
+
+Cross-reboot persistence still needs tmux. Use the `tm` alias from [`.zsh.aliases`](../../.zsh.aliases):
+
+```bash
+tm    # attach to (or create) tmux session $tmux_session (default 'main')
+```
+
+Inside tmux: `Ctrl-a c` (new window), `Ctrl-a " / %` (splits), `Ctrl-a [` (copy mode), `Ctrl-a d` (detach). Tmux is **not** auto-started.
+
+## No-go calls (and why)
+
+- **Hotkey window** — fundamentally a separate iTerm window; tabs can be dragged out into normal windows but the hotkey behavior is window-attached, not session-attached. If you want one anyway, Settings → Keys → Create a Dedicated Hotkey Window.
+- **Minimap** — iTerm doesn't have one. Closest things: Instant Replay (`⌘⌥B`, time-travel through buffer) and Shell Integration's `⌘⇧↑/↓` prompt-jumping.
+- **Tab badges** — distracting; we use APS tab color instead.
+- **Whole-plist iCloud sync** — explicitly avoided. `NoSync*` keys (snippets, key bindings dialog selections, etc.) are designed to stay per-machine; dotfiles ships only what we want shared.
+- **iTerm AI Chat** — requires API keys (no OAuth/consumer login). Use `claude` (Claude Code) or Cursor's `cursor-agent` CLI inside a tab instead.
+
+## What your existing stack already does better
+
+| Need | Use this | Why |
+|---|---|---|
+| Directory recall | `z` / zoxide | Global, frecency-ranked. Beats iTerm's per-session Recent Directories. |
+| Fuzzy history / files | `fzf` (`Ctrl-R`, `Ctrl-T`) | Richer matcher than `⌘⇧;`. |
+| Grab a token off the screen | `⌘;` | Reads from current scrollback — fzf can't see that. |
+| Cross-session command recall | `⌘⇧;` | Shell Integration; lighter than fzf for "what did I run yesterday". |
+
+## Repo layout
+
+- [`apply-iterm-defaults.sh`](apply-iterm-defaults.sh) — single source of truth for prefs. Sections labeled `B1` through `B5`.
+- [`snippets.json`](snippets.json) — dotfiles snippets (loaded into `NoSyncSnippets`).
+- [`DynamicProfiles/aps-projects.json`](DynamicProfiles/aps-projects.json) — APS project profiles.
+- [`README.md`](README.md) — this file.
+
+Re-running the apply script is safe and idempotent (status bar, snippets, triggers, keybindings, IRMemory all checked).

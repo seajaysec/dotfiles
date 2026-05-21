@@ -104,6 +104,233 @@ plistlib.dump(data, p.open("wb"))
 print("  Cleaned bookmarks (removed dotfiles-* dynamic-profile rows + pollution keys).")
 PY
 
+# -- B1: Status bar layout (Starship parity) ---------------------------------
+# Sets a per-profile Status Bar Layout on the Default profile with:
+#   user | host(+ssh) | python_venv | git | cwd | spring | composer
+# Powered by Shell Integration (already sourced from .zshrc); python_venv is
+# read from the user_var published by iterm2_print_user_vars in .zshrc.
+# Enables the status bar via `Show Status Bar = True`.
+python3 <<'PY'
+import plistlib
+from pathlib import Path
+
+p = Path.home() / "Library/Preferences/com.googlecode.iterm2.plist"
+data = plistlib.loads(p.read_bytes())
+
+def knobs(extra=None):
+    base = {
+        "base: priority": 5,
+        "base: compression resistance": 1,
+    }
+    if extra:
+        base.update(extra)
+    return base
+
+# python_venv user_var component: iTermStatusBarVariableBaseComponent reads from
+# session variable scope; "path" knob = "user.python_venv" (set by zsh hook).
+venv_knobs = knobs({
+    "path": "user.python_venv",
+    "prefix": "  ",
+    "minwidth": 0,
+    "maxwidth": 60,
+})
+
+cwd_knobs = knobs({
+    "path": "path",  # or "shortPath" for fish-style abbreviation
+    "minwidth": 0,
+    "maxwidth": 1.7976931348623157e+308,
+})
+
+host_knobs = knobs({
+    "prefix": "  ",  # nf-fa-server glyph; remove if your font lacks Nerd icons
+    "minwidth": 0,
+    "maxwidth": 60,
+})
+
+user_knobs = knobs({
+    "prefix": "  ",
+    "minwidth": 0,
+    "maxwidth": 60,
+})
+
+git_knobs = knobs({
+    "minwidth": 0,
+    "maxwidth": 200,
+})
+
+spacer_knobs = knobs({"iTermStatusBarFixedSpacerComponentWidthKnob": 8})
+
+layout = {
+    "components": [
+        {"class": "iTermStatusBarUserComponent",             "configuration": {"knobs": user_knobs}},
+        {"class": "iTermStatusBarFixedSpacerComponent",      "configuration": {"knobs": spacer_knobs}},
+        {"class": "iTermStatusBarHostnameComponent",         "configuration": {"knobs": host_knobs}},
+        {"class": "iTermStatusBarFixedSpacerComponent",      "configuration": {"knobs": spacer_knobs}},
+        {"class": "iTermStatusBarVariableBaseComponent",     "configuration": {"knobs": venv_knobs}},
+        {"class": "iTermStatusBarFixedSpacerComponent",      "configuration": {"knobs": spacer_knobs}},
+        {"class": "iTermStatusBarGitComponent",              "configuration": {"knobs": git_knobs}},
+        {"class": "iTermStatusBarFixedSpacerComponent",      "configuration": {"knobs": spacer_knobs}},
+        {"class": "iTermStatusBarWorkingDirectoryComponent", "configuration": {"knobs": cwd_knobs}},
+        {"class": "iTermStatusBarSpringComponent",           "configuration": {"knobs": knobs()}},
+        {"class": "iTermStatusBarComposerComponent",         "configuration": {"knobs": knobs()}},
+    ],
+    "advanced configuration": {
+        "remove empty components": True,  # hides venv segment when not in a venv
+        "auto-rainbow style": 0,
+        "font": ".AppleSystemUIFont 12",
+        "algorithm": 0,  # 0 = stable, components fixed-width per knob
+    },
+}
+
+ORIGINAL_DEFAULT_GUID = "74FD8F10-9C21-4853-AF71-8801DCF39FD7"
+default = next(b for b in data["New Bookmarks"] if b.get("Guid") == ORIGINAL_DEFAULT_GUID)
+default["Show Status Bar"] = True
+default["StatusBarPosition"] = 1  # 0=top, 1=bottom
+default["Status Bar Layout"] = layout
+
+plistlib.dump(data, p.open("wb"))
+print("  Wrote Status Bar Layout (user|host|venv|git|cwd ... composer) and enabled it.")
+PY
+
+# -- B3: Snippets seeded from aliases + history ------------------------------
+# Loads config/iterm2/snippets.json into the NoSyncSnippets array. dotfiles-
+# owned snippets are identified by guid prefix 'dotfiles-snippet-'; existing
+# user snippets are preserved.
+python3 - "$(cd "$(dirname "$0")/../.." && pwd)/config/iterm2/snippets.json" <<'PY'
+import json, plistlib, sys
+from pathlib import Path
+
+snippets_path = Path(sys.argv[1])
+if not snippets_path.exists():
+    print(f"  No snippets file at {snippets_path}, skipping.")
+    raise SystemExit(0)
+
+p = Path.home() / "Library/Preferences/com.googlecode.iterm2.plist"
+data = plistlib.loads(p.read_bytes())
+existing = data.get("NoSyncSnippets", [])
+kept = [s for s in existing if not (s.get("guid") or "").startswith("dotfiles-snippet-")]
+dotfiles = json.loads(snippets_path.read_text())
+data["NoSyncSnippets"] = kept + dotfiles
+plistlib.dump(data, p.open("wb"))
+print(f"  Installed {len(dotfiles)} dotfiles snippets ({len(kept)} user snippets preserved).")
+PY
+
+# -- B4: Triggers (three high-signal defaults) -------------------------------
+# Triggers run regex on terminal output and react. All three are conservative
+# and easy to disable in Settings > Profiles > Advanced > Edit Triggers.
+python3 <<'PY'
+import plistlib
+from pathlib import Path
+
+ORIGINAL_DEFAULT_GUID = "74FD8F10-9C21-4853-AF71-8801DCF39FD7"
+p = Path.home() / "Library/Preferences/com.googlecode.iterm2.plist"
+data = plistlib.loads(p.read_bytes())
+default = next(b for b in data["New Bookmarks"] if b.get("Guid") == ORIGINAL_DEFAULT_GUID)
+
+# Highlight enum: 2 = kWhiteOnRedHighlight (from iTerm HighlightTrigger.m).
+WHITE_ON_RED = 2
+
+dotfiles_triggers = [
+    {
+        # Errors/failures highlighted in white on red anywhere on screen.
+        "name": "dotfiles: error/fail highlight",
+        "regex": r"(?i)\b(error|fail(ed|ure)?|FATAL|panic|traceback)\b",
+        "action": "HighlightTrigger",
+        "parameter": WHITE_ON_RED,
+        "partial": True,
+    },
+    {
+        # Long-running build done? Ring the bell to alert the user.
+        "name": "dotfiles: build done bell",
+        "regex": r"\bBUILD (SUCCESS|SUCCEEDED|PASSED|FAILED)\b",
+        "action": "BellTrigger",
+        "parameter": "",
+        "partial": False,
+    },
+    {
+        # Heads-up when connecting to a prod-like host. BounceTrigger pulses
+        # the dock icon (subtle); swap for AlertTrigger if you want a modal.
+        "name": "dotfiles: prod host bounce",
+        "regex": r"@(prod|production|live)[A-Za-z0-9._-]*",
+        "action": "BounceTrigger",
+        "parameter": "",
+        "partial": True,
+    },
+]
+
+existing = default.get("Triggers", []) or []
+# Idempotent: strip prior dotfiles-* triggers before re-adding.
+kept = [t for t in existing if not (t.get("name", "") or "").startswith("dotfiles:")]
+default["Triggers"] = kept + dotfiles_triggers
+
+plistlib.dump(data, p.open("wb"))
+print(f"  Installed {len(dotfiles_triggers)} dotfiles triggers ({len(kept)} user triggers preserved).")
+PY
+
+# -- B5: Power-user keybindings (GlobalKeyMap) -------------------------------
+# Action codes from iTerm gen_binding.py:
+#   25 = SELECT_MENU_ITEM     (Text = menu item title)
+#   41 = PASTE_SPECIAL        (Text = JSON paste config)
+# Modifier flags (NSEvent):
+#   Cmd     = 0x100000
+#   Opt     = 0x080000
+#   Shift   = 0x020000
+#   Ctrl    = 0x040000
+# Key format: "0xKEYCHAR-0xMODMASK"
+python3 <<'PY'
+import json, plistlib
+from pathlib import Path
+
+p = Path.home() / "Library/Preferences/com.googlecode.iterm2.plist"
+data = plistlib.loads(p.read_bytes())
+gkm = data.get("GlobalKeyMap", {}) or {}
+
+# Idempotency: replace prior dotfiles bindings keyed by Label prefix.
+gkm = {k: v for k, v in gkm.items()
+       if not (v.get("Label", "") or "").startswith("dotfiles:")}
+
+paste_no_newlines = json.dumps({
+    "RemoveNewlines": True,
+    "BracketAllowed": False,
+})
+
+dotfiles_bindings = {
+    # Cmd+E -> open Composer (vs default Cmd+Shift+Period which is awkward).
+    "0x65-0x100000": {
+        "Version": 1, "Action": 25,
+        "Text": "Compose\u2026",
+        "Label": "dotfiles: Open Composer (\u2318E)",
+    },
+    # Cmd+Opt+E -> toggle Auto Composer (always-on prompt editor).
+    "0x65-0x180000": {
+        "Version": 1, "Action": 25,
+        "Text": "Auto Composer",
+        "Label": "dotfiles: Toggle Auto Composer (\u2318\u2325E)",
+    },
+    # Cmd+Shift+N -> annotate at cursor (sticky note on a buffer location).
+    "0x6e-0x120000": {
+        "Version": 1, "Action": 25,
+        "Text": "Add Annotation at Cursor",
+        "Label": "dotfiles: Add Annotation at Cursor (\u2318\u21e7N)",
+    },
+    # Cmd+Opt+V -> paste, strip newlines (one-step ad-hoc paste from URLs etc).
+    "0x76-0x180000": {
+        "Version": 1, "Action": 41,
+        "Text": paste_no_newlines,
+        "Label": "dotfiles: Paste without newlines (\u2318\u2325V)",
+    },
+}
+
+gkm.update(dotfiles_bindings)
+data["GlobalKeyMap"] = gkm
+plistlib.dump(data, p.open("wb"))
+print(f"  Installed {len(dotfiles_bindings)} dotfiles keybindings.")
+PY
+
+# Instant Replay memory: 32 MB per session (default 4 MB). Lets you scrub
+# much farther back via View > Step Back in Time (Cmd+Opt+B).
+defaults write "$DOMAIN" IRMemory -int 32
+
 echo "Applied. Relaunch iTerm — sessions now restore via iTermServer daemons."
 echo
 echo "Verify (current values on disk):"
