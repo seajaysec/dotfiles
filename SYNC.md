@@ -1,4 +1,4 @@
-# Multi-machine sync playbook (Phase 9 / `PUB-*`)
+# Multi-machine sync playbook
 
 ## What never goes to the public remote
 
@@ -19,7 +19,3 @@
 2. **Link only (safe repeat):** `./install.sh --link-only` — symlinks `~/.zshrc`, `~/.zshenv`, `~/.zprofile`, and under **`$DOTFILES`**: `.zsh.aliases`, `.zsh.functions`, `config/starship/starship.toml`, plus when present in the repo: **`~/.tmux.conf`**, **`~/.tmux.conf.local`** (gpakosz sources this from home), **`~/.gitignore_global`**. Backs up replaced files under **`~/.dotfiles-backup/<timestamp>/`**. After linking gitignore, run once: `git config --global core.excludesfile ~/.gitignore_global` (not automated so it never overwrites an existing choice).
 3. **Full bootstrap** (brew + nvm + bun + rust + fzf installer): `./install.sh` — use **once** per machine or when you intentionally want package installs.
 4. Create `~/secrets.sh` and optional `~/.zshrc.local` on that machine only.
-
-## Upstream integration
-
-See **`.planning/research/REMOTE-SYNC-STATUS.md`** (regenerate after a clean `git status` before a release push).

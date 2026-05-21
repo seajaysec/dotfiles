@@ -2,7 +2,7 @@
 
 A collection of shell configuration files and utilities for macOS development environment.
 
-## Layout (post–Phase 2 / 6)
+## Layout
 
 - **Canonical config** lives in this repo (typically cloned to `~/dotfiles`).
 - **Home shell entrypoints** `~/.zshrc`, `~/.zshenv`, and `~/.zprofile` should be **symlinks** into the repo after running `./install.sh` (see `SYNC.md`).
