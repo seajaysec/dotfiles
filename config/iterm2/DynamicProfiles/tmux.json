@@ -1,0 +1,15 @@
+{
+  "Profiles": [
+    {
+      "Name": "tmux",
+      "Guid": "dotfiles-tmux-cc",
+      "Custom Command": "Yes",
+      "Command": "/opt/homebrew/bin/tmux -CC new-session -A -s main"
+    },
+    {
+      "Name": "Plain",
+      "Guid": "dotfiles-plain-shell",
+      "Custom Command": "No"
+    }
+  ]
+}
