@@ -192,6 +192,29 @@ plistlib.dump(data, p.open("wb"))
 print("  Wrote Status Bar Layout (user|host|venv|git|cwd ... composer) and enabled it.")
 PY
 
+# -- B3: Snippets seeded from aliases + history ------------------------------
+# Loads config/iterm2/snippets.json into the NoSyncSnippets array. dotfiles-
+# owned snippets are identified by guid prefix 'dotfiles-snippet-'; existing
+# user snippets are preserved.
+python3 - "$(cd "$(dirname "$0")/../.." && pwd)/config/iterm2/snippets.json" <<'PY'
+import json, plistlib, sys
+from pathlib import Path
+
+snippets_path = Path(sys.argv[1])
+if not snippets_path.exists():
+    print(f"  No snippets file at {snippets_path}, skipping.")
+    raise SystemExit(0)
+
+p = Path.home() / "Library/Preferences/com.googlecode.iterm2.plist"
+data = plistlib.loads(p.read_bytes())
+existing = data.get("NoSyncSnippets", [])
+kept = [s for s in existing if not (s.get("guid") or "").startswith("dotfiles-snippet-")]
+dotfiles = json.loads(snippets_path.read_text())
+data["NoSyncSnippets"] = kept + dotfiles
+plistlib.dump(data, p.open("wb"))
+print(f"  Installed {len(dotfiles)} dotfiles snippets ({len(kept)} user snippets preserved).")
+PY
+
 echo "Applied. Relaunch iTerm — sessions now restore via iTermServer daemons."
 echo
 echo "Verify (current values on disk):"
