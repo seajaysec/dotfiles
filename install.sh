@@ -65,6 +65,16 @@ link_dotfiles() {
     rm -f "${HOME}/Library/Application Support/iTerm2/DynamicProfiles/${_iterm_dyn}"
   done
   unset _iterm_dyn
+  # Symlink dotfiles-owned APS profiles into iTerm's DynamicProfiles folder.
+  # iTerm watches the folder and hot-reloads — no restart needed.
+  if [[ -d "${REPO_ROOT}/config/iterm2/DynamicProfiles" ]]; then
+    for _iterm_dyn in "${REPO_ROOT}/config/iterm2/DynamicProfiles"/*.json; do
+      [[ -f "$_iterm_dyn" ]] || continue
+      symlink_init "config/iterm2/DynamicProfiles/$(basename "$_iterm_dyn")" \
+        "${HOME}/Library/Application Support/iTerm2/DynamicProfiles/$(basename "$_iterm_dyn")"
+    done
+    unset _iterm_dyn
+  fi
   # Shared VS Code + Cursor User settings (same file; Cursor-only keys are ignored by VS Code).
   # Python interpreter: zsh `code`/`cursor` wrappers set PATH + VIRTUAL_ENV when autoswitch `.venv` exists; no defaultInterpreterPath in JSON.
   if [[ -f "${REPO_ROOT}/config/editor/User/settings.json" ]]; then
