@@ -233,12 +233,19 @@ if [[ "$CLAUDECODE" != "1" ]]; then
 fi
 export ITERM_ENABLE_SHELL_INTEGRATION_WITH_TMUX=YES
 
-# Expose the active venv name to iTerm as a user_var so the status bar can show it.
-# iTerm calls this hook on every prompt when shell integration is loaded.
-# Set DOTFILES_PROMPT=starship to disable the iTerm status bar path and re-enable
-# Starship below.
+# Expose venv name + Python version to iTerm as user_vars (status bar reads
+# these via Interpolated String components: \(user.python_venv), \(user.python_version)).
+# Shell Integration calls this on every prompt redraw. Python version is read
+# directly from $VIRTUAL_ENV/bin/python so we don't pay PATH-resolve cost when
+# not in a venv. Set DOTFILES_PROMPT=starship in ~/.zshrc.local to disable the
+# iTerm-bar path and bring back Starship.
 iterm2_print_user_vars() {
   iterm2_set_user_var python_venv "${VIRTUAL_ENV##*/}"
+  if [[ -n "$VIRTUAL_ENV" && -x "$VIRTUAL_ENV/bin/python" ]]; then
+    iterm2_set_user_var python_version "$("$VIRTUAL_ENV/bin/python" --version 2>&1 | awk '{print $2}')"
+  else
+    iterm2_set_user_var python_version ""
+  fi
 }
 
 ###############################
@@ -256,6 +263,15 @@ add-zsh-hook chpwd auto-ls
 if [[ "${DOTFILES_PROMPT:-iterm}" == "starship" ]]; then
   export STARSHIP_CONFIG="${DOTFILES}/config/starship/starship.toml"
   eval "$(starship init zsh)"
+else
+  # Minimal prompt: iTerm status bar already shows user/host/venv/git/cwd, so
+  # PS1 collapses to a single arrow (green if last command succeeded, red if
+  # it failed). RPROMPT empty. Venv activator's '(name)' prefix suppressed
+  # because the bar shows it.
+  export VIRTUAL_ENV_DISABLE_PROMPT=1
+  setopt PROMPT_SUBST
+  PROMPT='%(?.%F{green}.%F{red})❯%f '
+  RPROMPT=''
 fi
 
 # Vi cursor shape after Starship init so we don't clobber Starship's zle / precmd registration (HOOK-* / Phase 3)
