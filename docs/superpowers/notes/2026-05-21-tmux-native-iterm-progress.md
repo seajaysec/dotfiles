@@ -78,9 +78,12 @@ This is the agreed accepted-loss: a reboot/server-kill ends processes.
 ### 6. Settings sync boundary: profile in repo, app-level toggles via a script
 - Version-controlled: the tiny, diffable `tmux.json`.
 - App-level tmux toggles (can't live in a profile) get a reproducible
-  `defaults write` script (`config/iterm2/apply-tmux-defaults.sh`) — **not yet
-  written**, see Pending. Its exact keys are captured empirically (toggle in UI,
-  read back) rather than guessed.
+  `defaults write` script (`config/iterm2/apply-tmux-defaults.sh`) — **written**.
+  It sets the default-profile GUID and the bury flag (both certain), plus
+  `OpenTmuxWindowsIn -int 2` for "tabs in existing window" (best value; the script
+  prints all three back for verification, and the enum is documented inline). It
+  refuses to run while iTerm is open (iTerm clobbers external writes on quit).
+  Still **needs to be run** once (with iTerm quit) — see Pending.
 - **Rejected:** the whole-plist "Load settings from a custom folder" approach —
   it reintroduces large binary-plist churn on every UI tweak (the same problem as
   the 20 MB state export).
@@ -140,11 +143,12 @@ plus earlier `774ae6f` GSD removal, `adb54e2`/`793ffcc` spec, `0b7019e` plan.
      `74FD8F10-9C21-4853-AF71-8801DCF39FD7`)
    - `OpenTmuxWindowsIn` → integer for "tabs in existing window" (currently unset)
    - `AutoHideTmuxClientSession` → bool (currently unset)
-3. **Write `config/iterm2/apply-tmux-defaults.sh`** from the captured values
-   (README + SYNC already reference this path, so it must exist to avoid a
-   dangling reference). Must guard against running while iTerm is open (iTerm
-   overwrites external `defaults write` on quit) — quit iTerm, run script,
-   relaunch.
+3. **Run `config/iterm2/apply-tmux-defaults.sh`** (the script now exists). It can
+   replace the manual GUI toggles in step 1: quit iTerm, run it, relaunch. While
+   running it, confirm `OpenTmuxWindowsIn` actually gives "tabs in existing
+   window"; if not, the inline enum comment lists the alternatives. (If you do
+   step 1 by hand in the UI instead, also re-read `OpenTmuxWindowsIn` so the
+   committed `-int 2` matches reality.)
 4. **Gesture check (Task 3):** confirm `⌘T` / `⌘D` / `⌘⇧D` produce native
    tabs/splits backed by real tmux objects (`tmux list-windows` / `list-panes`).
 5. **End-to-end persistence test (Task 8):** start a long process, ⌘Q, reopen,
