@@ -54,10 +54,13 @@ Create `config/iterm2/DynamicProfiles/tmux.json` with exactly:
 
 Note: `/opt/homebrew/bin/tmux` is the Apple Silicon path. On an Intel Mac this would be `/usr/local/bin/tmux` — out of scope here (repo targets Apple Silicon), but worth knowing if this repo is ever cloned to an Intel machine.
 
-- [ ] **Step 2: Validate it is a well-formed property list**
+- [ ] **Step 2: Validate it parses as a property list**
 
-Run: `plutil -lint config/iterm2/DynamicProfiles/tmux.json`
-Expected: `config/iterm2/DynamicProfiles/tmux.json: OK`
+Note: `plutil -lint` on current macOS only lints XML/binary plists and rejects
+JSON. Validate by extracting a key instead — this exercises the same plist
+parser iTerm uses:
+Run: `plutil -extract Profiles.0.Guid raw config/iterm2/DynamicProfiles/tmux.json`
+Expected: `dotfiles-tmux-cc`
 
 - [ ] **Step 3: Confirm the launch command resolves on this machine**
 
