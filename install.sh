@@ -58,6 +58,12 @@ link_dotfiles() {
   if [[ -f "${REPO_ROOT}/.gitignore_global" ]]; then
     symlink_init ".gitignore_global" "${HOME}/.gitignore_global"
   fi
+  # iTerm2 Dynamic Profile (tmux -CC default profile + Plain escape hatch).
+  # iTerm watches this folder and hot-reloads; no iTerm restart needed.
+  if [[ -f "${REPO_ROOT}/config/iterm2/DynamicProfiles/tmux.json" ]]; then
+    symlink_init "config/iterm2/DynamicProfiles/tmux.json" \
+      "${HOME}/Library/Application Support/iTerm2/DynamicProfiles/tmux.json"
+  fi
   # Shared VS Code + Cursor User settings (same file; Cursor-only keys are ignored by VS Code).
   # Python interpreter: zsh `code`/`cursor` wrappers set PATH + VIRTUAL_ENV when autoswitch `.venv` exists; no defaultInterpreterPath in JSON.
   if [[ -f "${REPO_ROOT}/config/editor/User/settings.json" ]]; then
