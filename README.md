@@ -8,6 +8,28 @@ A collection of shell configuration files and utilities for macOS development en
 - **Home shell entrypoints** `~/.zshrc`, `~/.zshenv`, and `~/.zprofile` should be **symlinks** into the repo after running `./install.sh` (see `SYNC.md`).
 - **Never commit** secrets: use `~/secrets.sh` (sourced from `.zshrc`) and/or `~/.zshrc.local`. Do not paste internal hostnames or credentials into tracked files.
 
+## tmux-native iTerm
+
+iTerm uses tmux as its window/pane substrate via `-CC` control mode. The `tmux`
+profile (default) runs `tmux -CC new-session -A -s main`, so every new window
+lands in the persistent `main` session.
+
+- **Native gestures drive tmux:** `⌘T` = new tmux window, `⌘D` / `⇧⌘D` = splits.
+- **Restore across app restarts:** **⌘Q (quit iTerm) detaches and keeps every
+  process running.** Reopen iTerm → you're back in `main`, live.
+- **⚠️ `⌘W` / closing a window KILLS those processes.** To keep them, *detach*:
+  ⌘Q, or **Shell ▸ tmux ▸ Detach**. Never "close" to preserve work.
+- **Plain shell:** open the `Plain` profile (⌘O → Plain) for a non-tmux shell.
+- **`⌘N`** opens a *second* mirror of `main` (a second `-CC` client) — useful on
+  a second display, but use `⌘T` for an ordinary new tab/window.
+
+### Setup on a new machine
+
+1. `./install.sh --link-only` — symlinks the Dynamic Profile into iTerm.
+2. Quit iTerm, then run `./config/iterm2/apply-tmux-defaults.sh` to set `tmux`
+   as the default profile and enable client burial.
+3. Relaunch iTerm — new windows open directly into tmux `main`.
+
 ## Prerequisites
 
 ### Command Line Tools

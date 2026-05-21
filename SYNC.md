@@ -19,3 +19,7 @@
 2. **Link only (safe repeat):** `./install.sh --link-only` — symlinks `~/.zshrc`, `~/.zshenv`, `~/.zprofile`, and under **`$DOTFILES`**: `.zsh.aliases`, `.zsh.functions`, `config/starship/starship.toml`, plus when present in the repo: **`~/.tmux.conf`**, **`~/.tmux.conf.local`** (gpakosz sources this from home), **`~/.gitignore_global`**. Backs up replaced files under **`~/.dotfiles-backup/<timestamp>/`**. After linking gitignore, run once: `git config --global core.excludesfile ~/.gitignore_global` (not automated so it never overwrites an existing choice).
 3. **Full bootstrap** (brew + nvm + bun + rust + fzf installer): `./install.sh` — use **once** per machine or when you intentionally want package installs.
 4. Create `~/secrets.sh` and optional `~/.zshrc.local` on that machine only.
+5. iTerm tmux integration: after `install.sh --link-only`, quit iTerm and run
+   `./config/iterm2/apply-tmux-defaults.sh` (sets the `tmux` profile as default,
+   enables client burial). The Dynamic Profile itself is symlinked from the repo
+   and hot-reloads — no plist sync, no `.zshrc` changes.
