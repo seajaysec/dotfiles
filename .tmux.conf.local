@@ -317,7 +317,11 @@ set -g @plugin 'jaclu/tmux-menus'
 
 # Plugin settings
 set -g @tmux-pop-color 'black'
-set -g @continuum-restore 'on'
+# Off: with tmux -CC the live server is the source of truth across iTerm
+# restarts. continuum-restore only fires on fresh server start (after reboot/
+# kill-server), where it would spawn a stale duplicate layout alongside the
+# fresh attach. Flip back to 'on' to re-enable reboot-resurrection.
+set -g @continuum-restore 'off'
 set -g @resurrect-capture-pane-contents 'on'
 set -g @continuum-save-interval '1'
 set -g @yank_selection 'clipboard' # or 'secondary' or 'clipboard'
