@@ -282,6 +282,16 @@ git add .tmux.conf.local
 git commit -m "feat(tmux): disable continuum-restore for live -CC reattach"
 ```
 
+### Task 5b (added during execution): disable mouse mode
+
+Discovered while testing: with `set -g mouse on`, a scroll/trackpad gesture under
+`-CC` drops the pane into copy-mode, silently swallowing keystrokes (a live shell
+you cannot type into). iTerm handles the mouse natively in `-CC`, so tmux mouse
+is redundant there. Changed `.tmux.conf.local` `set -g mouse on` → `set -g mouse
+off` (with a comment showing how to re-enable conditionally for plain tmux), and
+applied it live with `tmux set -g mouse off`. Committed as
+`fix(tmux): disable mouse mode — it wedges -CC panes into copy-mode`.
+
 ---
 
 ## Task 6: Remove the tracked iTerm state export

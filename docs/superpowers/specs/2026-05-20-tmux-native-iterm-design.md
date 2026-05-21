@@ -169,15 +169,19 @@ init changes.
   keeps iTerm shell integration working inside `-CC`.
 - oh-my-tmux theme, keybindings, plugins, Starship, the gpakosz `.tmux.conf`
   core — all untouched.
-- `set -g mouse on` stays; native iTerm mouse selection works in `-CC`. If
-  selection ever misbehaves, this is the first knob.
+- **`set -g mouse off`** (changed from `on` during testing). Under `-CC`, tmux
+  `mouse on` captures scroll/trackpad gestures and drops the pane into copy-mode,
+  silently swallowing keystrokes — a live shell you cannot type into (observed in
+  testing). iTerm handles the mouse natively in `-CC` (focus, resize, select,
+  scrollback), so turning tmux's mouse off loses no capability. `.tmux.conf.local`
+  documents how to re-enable it conditionally (control-mode hook) for plain tmux.
 
 ## Files touched
 
 | File | Change |
 |------|--------|
 | `config/iterm2/DynamicProfiles/tmux.json` | **new** — `tmux` (default) + `Plain` profiles |
-| `.tmux.conf.local` | `@continuum-restore` `'on'` → `'off'` |
+| `.tmux.conf.local` | `@continuum-restore` `'on'` → `'off'`; `mouse` `on` → `off` (copy-mode wedge under `-CC`) |
 | `install.sh` | one `symlink_init` line for the Dynamic Profile |
 | `iTerm2 State.itermexport` | **deleted** from repo |
 | `README.md` / `SYNC.md` | document the tmux workflow, the ⌘Q-vs-⌘W gotcha, and the `defaults write` snippet |
