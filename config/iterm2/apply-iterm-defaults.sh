@@ -104,6 +104,94 @@ plistlib.dump(data, p.open("wb"))
 print("  Cleaned bookmarks (removed dotfiles-* dynamic-profile rows + pollution keys).")
 PY
 
+# -- B1: Status bar layout (Starship parity) ---------------------------------
+# Sets a per-profile Status Bar Layout on the Default profile with:
+#   user | host(+ssh) | python_venv | git | cwd | spring | composer
+# Powered by Shell Integration (already sourced from .zshrc); python_venv is
+# read from the user_var published by iterm2_print_user_vars in .zshrc.
+# Enables the status bar via `Show Status Bar = True`.
+python3 <<'PY'
+import plistlib
+from pathlib import Path
+
+p = Path.home() / "Library/Preferences/com.googlecode.iterm2.plist"
+data = plistlib.loads(p.read_bytes())
+
+def knobs(extra=None):
+    base = {
+        "base: priority": 5,
+        "base: compression resistance": 1,
+    }
+    if extra:
+        base.update(extra)
+    return base
+
+# python_venv user_var component: iTermStatusBarVariableBaseComponent reads from
+# session variable scope; "path" knob = "user.python_venv" (set by zsh hook).
+venv_knobs = knobs({
+    "path": "user.python_venv",
+    "prefix": "  ",
+    "minwidth": 0,
+    "maxwidth": 60,
+})
+
+cwd_knobs = knobs({
+    "path": "path",  # or "shortPath" for fish-style abbreviation
+    "minwidth": 0,
+    "maxwidth": 1.7976931348623157e+308,
+})
+
+host_knobs = knobs({
+    "prefix": "  ",  # nf-fa-server glyph; remove if your font lacks Nerd icons
+    "minwidth": 0,
+    "maxwidth": 60,
+})
+
+user_knobs = knobs({
+    "prefix": "  ",
+    "minwidth": 0,
+    "maxwidth": 60,
+})
+
+git_knobs = knobs({
+    "minwidth": 0,
+    "maxwidth": 200,
+})
+
+spacer_knobs = knobs({"iTermStatusBarFixedSpacerComponentWidthKnob": 8})
+
+layout = {
+    "components": [
+        {"class": "iTermStatusBarUserComponent",             "configuration": {"knobs": user_knobs}},
+        {"class": "iTermStatusBarFixedSpacerComponent",      "configuration": {"knobs": spacer_knobs}},
+        {"class": "iTermStatusBarHostnameComponent",         "configuration": {"knobs": host_knobs}},
+        {"class": "iTermStatusBarFixedSpacerComponent",      "configuration": {"knobs": spacer_knobs}},
+        {"class": "iTermStatusBarVariableBaseComponent",     "configuration": {"knobs": venv_knobs}},
+        {"class": "iTermStatusBarFixedSpacerComponent",      "configuration": {"knobs": spacer_knobs}},
+        {"class": "iTermStatusBarGitComponent",              "configuration": {"knobs": git_knobs}},
+        {"class": "iTermStatusBarFixedSpacerComponent",      "configuration": {"knobs": spacer_knobs}},
+        {"class": "iTermStatusBarWorkingDirectoryComponent", "configuration": {"knobs": cwd_knobs}},
+        {"class": "iTermStatusBarSpringComponent",           "configuration": {"knobs": knobs()}},
+        {"class": "iTermStatusBarComposerComponent",         "configuration": {"knobs": knobs()}},
+    ],
+    "advanced configuration": {
+        "remove empty components": True,  # hides venv segment when not in a venv
+        "auto-rainbow style": 0,
+        "font": ".AppleSystemUIFont 12",
+        "algorithm": 0,  # 0 = stable, components fixed-width per knob
+    },
+}
+
+ORIGINAL_DEFAULT_GUID = "74FD8F10-9C21-4853-AF71-8801DCF39FD7"
+default = next(b for b in data["New Bookmarks"] if b.get("Guid") == ORIGINAL_DEFAULT_GUID)
+default["Show Status Bar"] = True
+default["StatusBarPosition"] = 1  # 0=top, 1=bottom
+default["Status Bar Layout"] = layout
+
+plistlib.dump(data, p.open("wb"))
+print("  Wrote Status Bar Layout (user|host|venv|git|cwd ... composer) and enabled it.")
+PY
+
 echo "Applied. Relaunch iTerm — sessions now restore via iTermServer daemons."
 echo
 echo "Verify (current values on disk):"
