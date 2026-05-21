@@ -215,6 +215,58 @@ plistlib.dump(data, p.open("wb"))
 print(f"  Installed {len(dotfiles)} dotfiles snippets ({len(kept)} user snippets preserved).")
 PY
 
+# -- B4: Triggers (three high-signal defaults) -------------------------------
+# Triggers run regex on terminal output and react. All three are conservative
+# and easy to disable in Settings > Profiles > Advanced > Edit Triggers.
+python3 <<'PY'
+import plistlib
+from pathlib import Path
+
+ORIGINAL_DEFAULT_GUID = "74FD8F10-9C21-4853-AF71-8801DCF39FD7"
+p = Path.home() / "Library/Preferences/com.googlecode.iterm2.plist"
+data = plistlib.loads(p.read_bytes())
+default = next(b for b in data["New Bookmarks"] if b.get("Guid") == ORIGINAL_DEFAULT_GUID)
+
+# Highlight enum: 2 = kWhiteOnRedHighlight (from iTerm HighlightTrigger.m).
+WHITE_ON_RED = 2
+
+dotfiles_triggers = [
+    {
+        # Errors/failures highlighted in white on red anywhere on screen.
+        "name": "dotfiles: error/fail highlight",
+        "regex": r"(?i)\b(error|fail(ed|ure)?|FATAL|panic|traceback)\b",
+        "action": "HighlightTrigger",
+        "parameter": WHITE_ON_RED,
+        "partial": True,
+    },
+    {
+        # Long-running build done? Ring the bell to alert the user.
+        "name": "dotfiles: build done bell",
+        "regex": r"\bBUILD (SUCCESS|SUCCEEDED|PASSED|FAILED)\b",
+        "action": "BellTrigger",
+        "parameter": "",
+        "partial": False,
+    },
+    {
+        # Heads-up when connecting to a prod-like host. BounceTrigger pulses
+        # the dock icon (subtle); swap for AlertTrigger if you want a modal.
+        "name": "dotfiles: prod host bounce",
+        "regex": r"@(prod|production|live)[A-Za-z0-9._-]*",
+        "action": "BounceTrigger",
+        "parameter": "",
+        "partial": True,
+    },
+]
+
+existing = default.get("Triggers", []) or []
+# Idempotent: strip prior dotfiles-* triggers before re-adding.
+kept = [t for t in existing if not (t.get("name", "") or "").startswith("dotfiles:")]
+default["Triggers"] = kept + dotfiles_triggers
+
+plistlib.dump(data, p.open("wb"))
+print(f"  Installed {len(dotfiles_triggers)} dotfiles triggers ({len(kept)} user triggers preserved).")
+PY
+
 echo "Applied. Relaunch iTerm — sessions now restore via iTermServer daemons."
 echo
 echo "Verify (current values on disk):"
