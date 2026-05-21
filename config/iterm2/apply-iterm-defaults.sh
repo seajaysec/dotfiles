@@ -126,11 +126,13 @@ def knobs(extra=None):
         base.update(extra)
     return base
 
-# python_venv user_var component: iTermStatusBarVariableBaseComponent reads from
-# session variable scope; "path" knob = "user.python_venv" (set by zsh hook).
+# python_venv: use SwiftyString (Interpolated String) component, NOT the
+# abstract iTermStatusBarVariableBaseComponent — that class crashes iTerm's
+# status-bar setup UI (-[iTermStatusBarVariableBaseComponent
+# statusBarComponentShortDescription] is unimplemented, EXC_BREAKPOINT).
+# SwiftyString takes an "expression" knob containing \(user.python_venv).
 venv_knobs = knobs({
-    "path": "user.python_venv",
-    "prefix": "  ",
+    "expression": r" \(user.python_venv)",
     "minwidth": 0,
     "maxwidth": 60,
 })
@@ -166,7 +168,7 @@ layout = {
         {"class": "iTermStatusBarFixedSpacerComponent",      "configuration": {"knobs": spacer_knobs}},
         {"class": "iTermStatusBarHostnameComponent",         "configuration": {"knobs": host_knobs}},
         {"class": "iTermStatusBarFixedSpacerComponent",      "configuration": {"knobs": spacer_knobs}},
-        {"class": "iTermStatusBarVariableBaseComponent",     "configuration": {"knobs": venv_knobs}},
+        {"class": "iTermStatusBarSwiftyStringComponent",     "configuration": {"knobs": venv_knobs}},
         {"class": "iTermStatusBarFixedSpacerComponent",      "configuration": {"knobs": spacer_knobs}},
         {"class": "iTermStatusBarGitComponent",              "configuration": {"knobs": git_knobs}},
         {"class": "iTermStatusBarFixedSpacerComponent",      "configuration": {"knobs": spacer_knobs}},
