@@ -58,12 +58,13 @@ link_dotfiles() {
   if [[ -f "${REPO_ROOT}/.gitignore_global" ]]; then
     symlink_init ".gitignore_global" "${HOME}/.gitignore_global"
   fi
-  # iTerm2 Dynamic Profile (tmux -CC default profile + Plain escape hatch).
-  # iTerm watches this folder and hot-reloads; no iTerm restart needed.
-  if [[ -f "${REPO_ROOT}/config/iterm2/DynamicProfiles/tmux.json" ]]; then
-    symlink_init "config/iterm2/DynamicProfiles/tmux.json" \
-      "${HOME}/Library/Application Support/iTerm2/DynamicProfiles/tmux.json"
-  fi
+  # Remove stale dotfiles-owned iTerm Dynamic Profiles from the -CC era so
+  # reruns on old machines drop the tmux/Plain symlinks that broke ⌘T. iTerm
+  # Session Restoration (see config/iterm2/README.md) replaces that approach.
+  for _iterm_dyn in tmux.json plain.json; do
+    rm -f "${HOME}/Library/Application Support/iTerm2/DynamicProfiles/${_iterm_dyn}"
+  done
+  unset _iterm_dyn
   # Shared VS Code + Cursor User settings (same file; Cursor-only keys are ignored by VS Code).
   # Python interpreter: zsh `code`/`cursor` wrappers set PATH + VIRTUAL_ENV when autoswitch `.venv` exists; no defaultInterpreterPath in JSON.
   if [[ -f "${REPO_ROOT}/config/editor/User/settings.json" ]]; then

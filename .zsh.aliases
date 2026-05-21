@@ -64,7 +64,7 @@ alias srt='grep -v "^$" | gsed "s/^[[:space:]]*//g" | sort -Vu | LC_COLLATE=C so
 alias uniqip='pbpaste | grepip | sort -Vu | pbcopy'  # Extract, sort, and deduplicate IPs from clipboard
 
 # Terminal & Session Management
-alias tm='tmux attach -t ${tmux_session:-work} || tmux new -s ${tmux_session:-work}'  # Attach to tmux session or create new
+alias tm='tmux attach -t ${tmux_session:-main} || tmux new -s ${tmux_session:-main}'  # Session name: config/iterm2/session-name
 alias cmux='$HOME/.tmux/plugins/tmux-logging/scripts/save_complete_history.sh && code ~/tmuxlogs/`ls ~/tmuxlogs/ -tr | tail -1`'  # Save and open tmux history
 
 # File Search & Navigation

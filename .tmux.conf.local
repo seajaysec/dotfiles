@@ -287,6 +287,10 @@ set -g history-limit 1000000
 #   set-hook -g client-attached "if -F '#{client_control_mode}' 'set mouse off' 'set mouse on'"
 set -g mouse off
 
+# Under -CC, a trackpad scroll can leave a pane in copy-mode (no typing). Cancel on focus/attach.
+set-hook -g client-attached 'send-keys -X cancel'
+set-hook -g pane-focus-in 'if -F "#{pane_in_mode}" "send-keys -X cancel"'
+
 # force Vi mode
 #   really you should export VISUAL or EDITOR environment variable, see manual
 #set -g status-keys vi

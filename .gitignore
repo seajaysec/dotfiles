@@ -13,3 +13,9 @@ Brewfile.*
 
 # iTerm2 binary state exports (large, contain session metadata)
 *.itermexport
+
+# Cursor IDE workspace cache (transcripts, hook state, plans)
+.cursor/
+
+# gpakosz/.tmux backup files left by the pivot away from -CC
+*.gpakosz.bak

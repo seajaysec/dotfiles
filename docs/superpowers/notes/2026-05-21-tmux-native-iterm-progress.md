@@ -143,15 +143,17 @@ plus earlier `774ae6f` GSD removal, `adb54e2`/`793ffcc` spec, `0b7019e` plan.
      `74FD8F10-9C21-4853-AF71-8801DCF39FD7`)
    - `OpenTmuxWindowsIn` → integer for "tabs in existing window" (currently unset)
    - `AutoHideTmuxClientSession` → bool (currently unset)
-3. **Run `config/iterm2/apply-tmux-defaults.sh`** (the script now exists). It can
-   replace the manual GUI toggles in step 1: quit iTerm, run it, relaunch. While
-   running it, confirm `OpenTmuxWindowsIn` actually gives "tabs in existing
-   window"; if not, the inline enum comment lists the alternatives. (If you do
-   step 1 by hand in the UI instead, also re-read `OpenTmuxWindowsIn` so the
-   committed `-int 2` matches reality.)
-4. **Gesture check (Task 3):** confirm `⌘T` / `⌘D` / `⌘⇧D` produce native
+3. **Run `config/iterm2/apply-tmux-defaults.sh`** (`e9f8e3a` on `origin/main`). Quit
+   iTerm, run it, relaunch — replaces manual GUI in step 1. Confirm
+   `OpenTmuxWindowsIn` = tabs in existing window (enum in script comments).
+4. **This machine only (if needed):** if `LoadPrefsFromCustomFolder` was enabled
+   during the plist experiment, add to the apply script (or run once):
+   `LoadPrefsFromCustomFolder=false` and delete `PrefsCustomFolder`. Optional
+   follow-up to push: `session-name` + `render-tmux-profile.sh` (one-line session
+   edit) — see untracked `config/iterm2/README.md` on laptop.
+5. **Gesture check (Task 3):** confirm `⌘T` / `⌘D` / `⌘⇧D` produce native
    tabs/splits backed by real tmux objects (`tmux list-windows` / `list-panes`).
-5. **End-to-end persistence test (Task 8):** start a long process, ⌘Q, reopen,
+6. **End-to-end persistence test (Task 8):** start a long process, ⌘Q, reopen,
    confirm it's still running; confirm `Plain` is a non-tmux shell; confirm no
    stale continuum layout after `kill-server` + reopen.
 
@@ -175,3 +177,58 @@ Delete the symlink + `tmux.json` (profile vanishes on hot-reload), reset
 `Default Bookmark Guid` to `74FD8F10-9C21-4853-AF71-8801DCF39FD7` (from
 `/tmp/iterm-before.txt`), and flip `@continuum-restore` back to `'on'` and
 `mouse` back to `on` in `.tmux.conf.local`.
+
+---
+
+## Pivot away from `-CC` (2026-05-21)
+
+After repeated reattach failures (raw `%output` dumps, "session ended very soon
+after starting" warnings, stuck `wait-exit` orphans in `tmux list-clients`),
+we abandoned `tmux -CC` for the local-tmux + ⌘Q workflow. New direction:
+**iTerm's native Session Restoration** — see [`config/iterm2/README.md`](../../../config/iterm2/README.md).
+
+### Why `-CC` couldn't be made reliable for this workflow
+
+- The `-CC` control protocol has a known race on detach
+  ([tmux/tmux#2246](https://github.com/tmux/tmux/issues/2246)): after `%exit`,
+  iTerm may still have in-flight queries that arrive after tmux has changed
+  state. iTerm mitigates with `wait-exit` but the iTerm Best Practices wiki is
+  explicit: *"iTerm2 cannot reliably detect when control mode has been
+  cleanly exited."*
+- Examples that work in the wild (Eugene Oleinik's blog, the iTerm wiki) are
+  all `-CC` **over SSH**. SSH connection death cleans up the client naturally
+  via TCP timeout / sshd reaping. Local iTerm + ⌘Q has no such cleanup; iTerm
+  is killed before the protocol handshake completes, leaving orphan clients.
+- Adding `-D` (`new-session -A -D`) to detach orphans on reattach traded the
+  "raw output" failure for a "session ended very soon after starting" error
+  because the `client-detached` event iTerm raised on the orphan was
+  interpreted as the new client also leaving.
+- `AutoHideTmuxClientSession` + `OpenTmuxWindowsIn=2` has a documented bug
+  ([iterm2-discuss](https://iterm2-discuss.narkive.com/MmEpKW19/automatically-bury-the-tmux-client-session-loses-open-tmux-windows-as-tabs))
+  where the gateway tab isn't reliably buried. The gateway's
+  `tmuxMode == TMUX_GATEWAY` (not `TMUX_CLIENT`), so ⌘T from a still-visible
+  gateway tab bypasses tmux integration entirely
+  ([PTYSession.m `isTmuxClient`](https://github.com/gnachman/iTerm2/blob/master/sources/PTYSession.m)).
+
+### What replaced it
+
+iTerm's [Session Restoration](https://iterm2.com/documentation-restoration.html):
+sessions run inside `iTermServer-*` daemons; iTerm reattaches to them on
+relaunch. No control protocol, no race, no orphan clients. ⌘Q preserves
+processes when `killJobsInServersOnQuit = false`. Tradeoff: processes don't
+survive a reboot/logout (the daemons die with the user session). For
+cross-reboot persistence, use plain tmux via the `tm` alias.
+
+### Repo cleanup committed with the pivot
+
+- Removed `config/iterm2/DynamicProfiles/{tmux,plain}.json`,
+  `config/iterm2/session-name`, `config/iterm2/render-tmux-profile.sh`.
+- Renamed `apply-tmux-defaults.sh` → `apply-iterm-defaults.sh` and rewrote
+  body for Session Restoration.
+- Rewrote `config/iterm2/README.md`.
+- `install.sh` now removes stale dotfiles-owned dynamic-profile symlinks
+  instead of creating them.
+- `.zshenv`: dropped the read-from-`session-name` block; `tmux_session` keeps
+  its `main` default, overridable via `~/.zshrc.local`.
+- `.tmux.conf` and `.tmux.conf.local` are unchanged and still symlinked, so
+  `tm` works whenever you want explicit tmux.

@@ -11,8 +11,10 @@ A collection of shell configuration files and utilities for macOS development en
 ## tmux-native iTerm
 
 iTerm uses tmux as its window/pane substrate via `-CC` control mode. The `tmux`
-profile (default) runs `tmux -CC new-session -A -s main`, so every new window
-lands in the persistent `main` session.
+profile (default) runs `tmux -CC new-session -A -s <session>`, so every new window
+lands in one persistent session. **Session name:** edit `config/iterm2/session-name`
+(one line, default `main`), then `./config/iterm2/render-tmux-profile.sh` and
+`./install.sh --link-only`. Shell `tm` uses the same name via `tmux_session` in `.zshenv`.
 
 - **Native gestures drive tmux:** `⌘T` = new tmux window, `⌘D` / `⇧⌘D` = splits.
 - **Restore across app restarts:** **⌘Q (quit iTerm) detaches and keeps every
@@ -28,7 +30,13 @@ lands in the persistent `main` session.
 1. `./install.sh --link-only` — symlinks the Dynamic Profile into iTerm.
 2. Quit iTerm, then run `./config/iterm2/apply-tmux-defaults.sh` to set `tmux`
    as the default profile and enable client burial.
-3. Relaunch iTerm — new windows open directly into tmux `main`.
+3. Relaunch iTerm — new windows open directly into your configured session.
+
+**Apple Silicon** uses `/opt/homebrew/bin/tmux` in the Dynamic Profile. **Intel**
+Homebrew is `/usr/local/bin/tmux` (not supported in-repo; set `TMUX_BIN` when
+rendering — see `config/iterm2/README.md`).
+
+Details and gotchas: `config/iterm2/README.md`.
 
 ## Prerequisites
 
