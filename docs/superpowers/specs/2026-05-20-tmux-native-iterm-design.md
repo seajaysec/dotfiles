@@ -38,6 +38,11 @@ folder and hot-reloads on change.
       "Guid": "dotfiles-tmux-cc",
       "Custom Command": "Yes",
       "Command": "/opt/homebrew/bin/tmux -CC new-session -A -s main"
+    },
+    {
+      "Name": "Plain",
+      "Guid": "dotfiles-plain-shell",
+      "Custom Command": "No"
     }
   ]
 }
@@ -53,10 +58,20 @@ folder and hot-reloads on change.
   same command both creates the session the first time and reattaches after a
   quit. One deterministic command for both paths.
 
-**Entry point**: `tmux` is a *dedicated, non-default* profile. The plain login
-shell stays the default profile. Open tmux deliberately (⌘O → `tmux`, or bind it
-to a hotkey/default bookmark later). This keeps a clean non-tmux shell one
-keystroke away.
+**Entry point**: `tmux` is the **default profile**. Every new iTerm window
+launches straight into the `main` session, so the experience is seamless — open
+iTerm and you're already in tmux, processes intact.
+
+- The default is set by pointing iTerm's default-bookmark preference at this
+  profile's GUID (`defaults write com.googlecode.iterm2 "Default Bookmark Guid"
+  dotfiles-tmux-cc`; exact key confirmed empirically per Section 5). Setting it
+  via the prefs GUID is more reliable than relying on a JSON "make me default"
+  flag.
+- **Escape hatch — a `Plain` profile.** Because every window is now tmux, a
+  second Dynamic Profile named `Plain` (plain login shell, no custom command)
+  ships in the same repo file so a guaranteed, consistent non-tmux shell is
+  always one ⌘O away on every machine. (iTerm's built-in Default profile also
+  remains, but shipping `Plain` makes the escape hatch explicit and portable.)
 
 ### 2. Session model: single `main`
 
@@ -106,6 +121,13 @@ from elsewhere or in text mode.
 - All windows in a tmux session share one size (uniform rows/cols).
 - A tab cannot mix a tmux pane and a non-tmux pane.
 
+**Default-profile quirk (`⌘N`):** with `tmux` as default, `⌘N` (new iTerm
+*window*) launches another `-CC` client attached to the same `main` session — a
+second native mirror of it. This is a legitimate tmux feature (handy for a second
+display), not a bug, but the everyday habit for a new tab/window should be `⌘T`
+(a new tmux window *inside* the session), not `⌘N`. To get a fresh, separate
+shell instead, open the `Plain` profile.
+
 ### 5. Settings sync boundary
 
 - **In the repo (version-controlled):** `config/iterm2/DynamicProfiles/tmux.json`
@@ -115,6 +137,9 @@ from elsewhere or in text mode.
   install docs. Target settings:
   - "When attaching, restore windows as…" → **Tabs in the existing window**
   - "Automatically bury the tmux client session after connecting" → **on**
+    (required when `tmux` is the default profile, so the launcher window hides
+    itself instead of leaving a stray gateway window)
+  - Default profile → the `tmux` GUID (`Default Bookmark Guid` → `dotfiles-tmux-cc`)
   - The **exact `defaults` keys/values must be confirmed empirically** during
     implementation by toggling each option in the iTerm UI and reading it back
     with `defaults read com.googlecode.iterm2 | grep -i tmux`. Do not hardcode
@@ -151,7 +176,7 @@ init changes.
 
 | File | Change |
 |------|--------|
-| `config/iterm2/DynamicProfiles/tmux.json` | **new** — Dynamic Profile launcher |
+| `config/iterm2/DynamicProfiles/tmux.json` | **new** — `tmux` (default) + `Plain` profiles |
 | `.tmux.conf.local` | `@continuum-restore` `'on'` → `'off'` |
 | `install.sh` | one `symlink_init` line for the Dynamic Profile |
 | `iTerm2 State.itermexport` | **deleted** from repo |
@@ -164,8 +189,10 @@ init changes.
    resolves into the repo.
 2. iTerm shows a profile named `tmux` (Settings ▸ Profiles) without restart
    (hot-reload).
-3. Open the `tmux` profile → lands in a `-CC` session named `main`; status bar
-   reflects tmux.
+3. Open a brand-new iTerm window (no profile chosen) → it lands directly in a
+   `-CC` session named `main` (proves `tmux` is the default); status bar
+   reflects tmux; no stray gateway window remains (proves bury-on). Opening the
+   `Plain` profile (⌘O) yields an ordinary non-tmux login shell.
 4. `⌘T`, `⌘D`, `⇧⌘D` create tmux windows/panes; `tmux list-windows`/`list-panes`
    from another client confirms they are real tmux objects.
 5. Start a long-running process (e.g. `ping -i5 1.1.1.1`), **⌘Q** iTerm, reopen,
