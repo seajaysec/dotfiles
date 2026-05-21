@@ -267,6 +267,70 @@ plistlib.dump(data, p.open("wb"))
 print(f"  Installed {len(dotfiles_triggers)} dotfiles triggers ({len(kept)} user triggers preserved).")
 PY
 
+# -- B5: Power-user keybindings (GlobalKeyMap) -------------------------------
+# Action codes from iTerm gen_binding.py:
+#   25 = SELECT_MENU_ITEM     (Text = menu item title)
+#   41 = PASTE_SPECIAL        (Text = JSON paste config)
+# Modifier flags (NSEvent):
+#   Cmd     = 0x100000
+#   Opt     = 0x080000
+#   Shift   = 0x020000
+#   Ctrl    = 0x040000
+# Key format: "0xKEYCHAR-0xMODMASK"
+python3 <<'PY'
+import json, plistlib
+from pathlib import Path
+
+p = Path.home() / "Library/Preferences/com.googlecode.iterm2.plist"
+data = plistlib.loads(p.read_bytes())
+gkm = data.get("GlobalKeyMap", {}) or {}
+
+# Idempotency: replace prior dotfiles bindings keyed by Label prefix.
+gkm = {k: v for k, v in gkm.items()
+       if not (v.get("Label", "") or "").startswith("dotfiles:")}
+
+paste_no_newlines = json.dumps({
+    "RemoveNewlines": True,
+    "BracketAllowed": False,
+})
+
+dotfiles_bindings = {
+    # Cmd+E -> open Composer (vs default Cmd+Shift+Period which is awkward).
+    "0x65-0x100000": {
+        "Version": 1, "Action": 25,
+        "Text": "Compose\u2026",
+        "Label": "dotfiles: Open Composer (\u2318E)",
+    },
+    # Cmd+Opt+E -> toggle Auto Composer (always-on prompt editor).
+    "0x65-0x180000": {
+        "Version": 1, "Action": 25,
+        "Text": "Auto Composer",
+        "Label": "dotfiles: Toggle Auto Composer (\u2318\u2325E)",
+    },
+    # Cmd+Shift+N -> annotate at cursor (sticky note on a buffer location).
+    "0x6e-0x120000": {
+        "Version": 1, "Action": 25,
+        "Text": "Add Annotation at Cursor",
+        "Label": "dotfiles: Add Annotation at Cursor (\u2318\u21e7N)",
+    },
+    # Cmd+Opt+V -> paste, strip newlines (one-step ad-hoc paste from URLs etc).
+    "0x76-0x180000": {
+        "Version": 1, "Action": 41,
+        "Text": paste_no_newlines,
+        "Label": "dotfiles: Paste without newlines (\u2318\u2325V)",
+    },
+}
+
+gkm.update(dotfiles_bindings)
+data["GlobalKeyMap"] = gkm
+plistlib.dump(data, p.open("wb"))
+print(f"  Installed {len(dotfiles_bindings)} dotfiles keybindings.")
+PY
+
+# Instant Replay memory: 32 MB per session (default 4 MB). Lets you scrub
+# much farther back via View > Step Back in Time (Cmd+Opt+B).
+defaults write "$DOMAIN" IRMemory -int 32
+
 echo "Applied. Relaunch iTerm — sessions now restore via iTermServer daemons."
 echo
 echo "Verify (current values on disk):"
