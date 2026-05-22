@@ -8,35 +8,22 @@ A collection of shell configuration files and utilities for macOS development en
 - **Home shell entrypoints** `~/.zshrc`, `~/.zshenv`, and `~/.zprofile` should be **symlinks** into the repo after running `./install.sh` (see `SYNC.md`).
 - **Never commit** secrets: use `~/secrets.sh` (sourced from `.zshrc`) and/or `~/.zshrc.local`. Do not paste internal hostnames or credentials into tracked files.
 
-## tmux-native iTerm
+## iTerm2 (Session Restoration + project tab colors)
 
-iTerm uses tmux as its window/pane substrate via `-CC` control mode. The `tmux`
-profile (default) runs `tmux -CC new-session -A -s <session>`, so every new window
-lands in one persistent session. **Session name:** edit `config/iterm2/session-name`
-(one line, default `main`), then `./config/iterm2/render-tmux-profile.sh` and
-`./install.sh --link-only`. Shell `tm` uses the same name via `tmux_session` in `.zshenv`.
-
-- **Native gestures drive tmux:** `⌘T` = new tmux window, `⌘D` / `⇧⌘D` = splits.
-- **Restore across app restarts:** **⌘Q (quit iTerm) detaches and keeps every
-  process running.** Reopen iTerm → you're back in `main`, live.
-- **⚠️ `⌘W` / closing a window KILLS those processes.** To keep them, *detach*:
-  ⌘Q, or **Shell ▸ tmux ▸ Detach**. Never "close" to preserve work.
-- **Plain shell:** open the `Plain` profile (⌘O → Plain) for a non-tmux shell.
-- **`⌘N`** opens a *second* mirror of `main` (a second `-CC` client) — useful on
-  a second display, but use `⌘T` for an ordinary new tab/window.
+Native iTerm tabs/splits with **Session Restoration** (processes survive ⌘Q via
+`iTermServer` daemons). Optional plain tmux for cross-reboot: `tm` alias (session
+`main` by default). Per-project tab colors via Automatic Profile Switching.
 
 ### Setup on a new machine
 
-1. `./install.sh --link-only` — symlinks the Dynamic Profile into iTerm.
-2. Quit iTerm, then run `./config/iterm2/apply-tmux-defaults.sh` to set `tmux`
-   as the default profile and enable client burial.
-3. Relaunch iTerm — new windows open directly into your configured session.
+1. `./install.sh --link-only` — shell symlinks + rendered APS dynamic profiles.
+2. Quit iTerm (⌘Q), then `./config/iterm2/apply-iterm-defaults.sh`.
+3. Relaunch iTerm.
 
-**Apple Silicon** uses `/opt/homebrew/bin/tmux` in the Dynamic Profile. **Intel**
-Homebrew is `/usr/local/bin/tmux` (not supported in-repo; set `TMUX_BIN` when
-rendering — see `config/iterm2/README.md`).
+Edit project paths/colors in `config/iterm2/DynamicProfiles/aps-projects.json.in`,
+then re-run `./install.sh --link-only` (or `./config/iterm2/render-aps-projects.sh`).
 
-Details and gotchas: `config/iterm2/README.md`.
+Full guide: [`config/iterm2/README.md`](config/iterm2/README.md).
 
 ## Prerequisites
 

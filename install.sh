@@ -40,6 +40,48 @@ symlink_init() {
   ln -sf "$src" "$dest"
 }
 
+# iTerm: works whether iTerm is installed, never launched, or still on old -CC prefs.
+# - Creates DynamicProfiles/ if missing (fresh Mac).
+# - Drops stale tmux -CC era profile files/symlinks.
+# - Renders APS JSON with this machine's $HOME (not a symlink — paths are per-host).
+setup_iterm_dynamic_profiles() {
+  local iterm_support="${HOME}/Library/Application Support/iTerm2"
+  local dyn_dir="${iterm_support}/DynamicProfiles"
+  local render_script="${REPO_ROOT}/config/iterm2/render-aps-projects.sh"
+  local aps_out="${dyn_dir}/aps-projects.json"
+  local stale
+
+  mkdir -p "$dyn_dir"
+
+  # Legacy tmux -CC dynamic profiles (broke native ⌘T when left behind).
+  for stale in tmux.json plain.json; do
+    rm -f "${dyn_dir}/${stale}"
+  done
+  unset stale
+
+  if [[ ! -x "$render_script" ]]; then
+    chmod +x "$render_script" 2>/dev/null || true
+  fi
+  if [[ -f "${REPO_ROOT}/config/iterm2/DynamicProfiles/aps-projects.json.in" ]]; then
+    "$render_script" "$aps_out"
+    echo "   iTerm APS: rendered aps-projects.json → DynamicProfiles/"
+  else
+    echo "   iTerm APS: skipped (no aps-projects.json.in template)" >&2
+  fi
+
+  # Optional extra dynamic profile JSON files (symlinked as-is).
+  shopt -s nullglob
+  for _iterm_dyn in "${REPO_ROOT}/config/iterm2/DynamicProfiles"/*.json; do
+    [[ "$(basename "$_iterm_dyn")" == "aps-projects.json" ]] && continue
+    symlink_init "config/iterm2/DynamicProfiles/$(basename "$_iterm_dyn")" \
+      "${dyn_dir}/$(basename "$_iterm_dyn")"
+  done
+  shopt -u nullglob
+  unset _iterm_dyn
+
+  echo "   iTerm: quit iTerm (⌘Q), then run: ${REPO_ROOT}/config/iterm2/apply-iterm-defaults.sh"
+}
+
 link_dotfiles() {
   echo "📝 Symlinking shell + portable configs (DOTFILES_TARGET=$DOTFILES_TARGET)…"
   mkdir -p "${DOTFILES_TARGET}/config/starship"
@@ -58,23 +100,7 @@ link_dotfiles() {
   if [[ -f "${REPO_ROOT}/.gitignore_global" ]]; then
     symlink_init ".gitignore_global" "${HOME}/.gitignore_global"
   fi
-  # Remove stale dotfiles-owned iTerm Dynamic Profiles from the -CC era so
-  # reruns on old machines drop the tmux/Plain symlinks that broke ⌘T. iTerm
-  # Session Restoration (see config/iterm2/README.md) replaces that approach.
-  for _iterm_dyn in tmux.json plain.json; do
-    rm -f "${HOME}/Library/Application Support/iTerm2/DynamicProfiles/${_iterm_dyn}"
-  done
-  unset _iterm_dyn
-  # Symlink dotfiles-owned APS profiles into iTerm's DynamicProfiles folder.
-  # iTerm watches the folder and hot-reloads — no restart needed.
-  if [[ -d "${REPO_ROOT}/config/iterm2/DynamicProfiles" ]]; then
-    for _iterm_dyn in "${REPO_ROOT}/config/iterm2/DynamicProfiles"/*.json; do
-      [[ -f "$_iterm_dyn" ]] || continue
-      symlink_init "config/iterm2/DynamicProfiles/$(basename "$_iterm_dyn")" \
-        "${HOME}/Library/Application Support/iTerm2/DynamicProfiles/$(basename "$_iterm_dyn")"
-    done
-    unset _iterm_dyn
-  fi
+  setup_iterm_dynamic_profiles
   # Shared VS Code + Cursor User settings (same file; Cursor-only keys are ignored by VS Code).
   # Python interpreter: zsh `code`/`cursor` wrappers set PATH + VIRTUAL_ENV when autoswitch `.venv` exists; no defaultInterpreterPath in JSON.
   if [[ -f "${REPO_ROOT}/config/editor/User/settings.json" ]]; then

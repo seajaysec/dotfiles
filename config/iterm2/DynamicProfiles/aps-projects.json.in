@@ -1,0 +1,111 @@
+{
+  "Profiles": [
+    {
+      "Name": "Project: home",
+      "Guid": "dotfiles-aps-home",
+      "Dynamic Profile Parent Name": "Default",
+      "Bound Hosts": ["__HOME__"],
+      "Use Tab Color": true,
+      "Tab Color": {
+        "Red Component": 0.55,
+        "Green Component": 0.55,
+        "Blue Component": 0.62,
+        "Alpha Component": 1.0
+      }
+    },
+    {
+      "Name": "Project: gits",
+      "Guid": "dotfiles-aps-gits",
+      "Dynamic Profile Parent Name": "Default",
+      "Bound Hosts": ["__HOME__/gits*"],
+      "Use Tab Color": true,
+      "Tab Color": {
+        "Red Component": 0.72,
+        "Green Component": 0.47,
+        "Blue Component": 0.92,
+        "Alpha Component": 1.0
+      }
+    },
+    {
+      "Name": "Project: dotfiles",
+      "Guid": "dotfiles-aps-dotfiles",
+      "Dynamic Profile Parent Name": "Default",
+      "Bound Hosts": ["__HOME__/dotfiles*"],
+      "Use Tab Color": true,
+      "Tab Color": {
+        "Red Component": 0.30,
+        "Green Component": 0.65,
+        "Blue Component": 0.78,
+        "Alpha Component": 1.0
+      }
+    },
+    {
+      "Name": "Project: avars",
+      "Guid": "dotfiles-aps-avars",
+      "Dynamic Profile Parent Name": "Default",
+      "Bound Hosts": ["__HOME__/gits/avars*"],
+      "Use Tab Color": true,
+      "Tab Color": {
+        "Red Component": 0.95,
+        "Green Component": 0.45,
+        "Blue Component": 0.55,
+        "Alpha Component": 1.0
+      }
+    },
+    {
+      "Name": "Project: xanatos-lab",
+      "Guid": "dotfiles-aps-xanatos-lab",
+      "Dynamic Profile Parent Name": "Default",
+      "Bound Hosts": ["__HOME__/gits/xanatos-lab*"],
+      "Use Tab Color": true,
+      "Tab Color": {
+        "Red Component": 0.50,
+        "Green Component": 0.85,
+        "Blue Component": 0.55,
+        "Alpha Component": 1.0
+      }
+    },
+    {
+      "Name": "Project: xanatos",
+      "Guid": "dotfiles-aps-xanatos",
+      "Dynamic Profile Parent Name": "Default",
+      "Bound Hosts": [
+        "__HOME__/gits/xanatos",
+        "__HOME__/gits/xanatos/*"
+      ],
+      "Use Tab Color": true,
+      "Tab Color": {
+        "Red Component": 0.35,
+        "Green Component": 0.78,
+        "Blue Component": 0.88,
+        "Alpha Component": 1.0
+      }
+    },
+    {
+      "Name": "Project: vkb-python",
+      "Guid": "dotfiles-aps-vkb-python",
+      "Dynamic Profile Parent Name": "Default",
+      "Bound Hosts": ["__HOME__/gits/vkb-python*"],
+      "Use Tab Color": true,
+      "Tab Color": {
+        "Red Component": 0.75,
+        "Green Component": 0.88,
+        "Blue Component": 0.35,
+        "Alpha Component": 1.0
+      }
+    },
+    {
+      "Name": "Project: work",
+      "Guid": "dotfiles-aps-work",
+      "Dynamic Profile Parent Name": "Default",
+      "Bound Hosts": ["__HOME__/work*"],
+      "Use Tab Color": true,
+      "Tab Color": {
+        "Red Component": 0.84,
+        "Green Component": 0.38,
+        "Blue Component": 0.30,
+        "Alpha Component": 1.0
+      }
+    }
+  ]
+}

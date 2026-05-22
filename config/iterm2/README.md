@@ -6,7 +6,7 @@ History and the why-not for `-CC` is in [`docs/superpowers/notes/2026-05-21-tmux
 
 ## Setup on a new machine
 
-1. `./install.sh --link-only` — symlinks shell files + APS dynamic profiles, removes any stale `-CC` era profile symlinks.
+1. `./install.sh --link-only` — symlinks shell files, renders APS profiles for `$HOME`, removes stale `-CC` era files.
 2. **Quit iTerm completely (⌘Q).**
 3. `./config/iterm2/apply-iterm-defaults.sh`
 4. Reopen iTerm.
@@ -52,23 +52,33 @@ Native iTerm tabs (`⌘T`), splits (`⌘D`, `⇧⌘D`), scrollback, copy (`⌘C`
 Set on the Default profile by the apply script. Layout (left → right):
 
 ```
-user | hostname (ssh) | python_venv | git | cwd | (spring) | composer
+username | cwd | 🐍 venv + Python version | git | composer
 ```
 
-- `python_venv` is published by the `iterm2_print_user_vars` hook in [`.zshrc`](../../.zshrc) (reads `$VIRTUAL_ENV`).
+Canonical layout: [`status-bar-layout.json`](status-bar-layout.json) (copied from your hand-edited setup). Status bar string: `🐍 \(user.python_venv) \(user.python_version)`.
+
+- `python_venv` / `python_version` are published by `iterm2_print_user_vars` in [`.zshrc`](../../.zshrc) (reads `$VIRTUAL_ENV`).
 - Starship is wrapped in a `DOTFILES_PROMPT=starship` guard in [`.zshrc`](../../.zshrc) — default is `iterm`, so Starship is skipped.
 - To re-enable Starship on a specific host: `export DOTFILES_PROMPT=starship` in `~/.zshrc.local`.
 
 ## Automatic Profile Switching (per project directory)
 
-Two starter dynamic profiles in [`DynamicProfiles/aps-projects.json`](DynamicProfiles/aps-projects.json):
+Project profiles in [`DynamicProfiles/aps-projects.json`](DynamicProfiles/aps-projects.json) (edit there — **do not** create APS profiles in the GUI or tag them “Dynamic”; that creates broken bookmark rows and can crash the profile editor):
 
 | Bound path | Profile | Tab color |
 |---|---|---|
-| `/Users/chris.j.farrell/dotfiles*` | Project: dotfiles | teal |
-| `/Users/chris.j.farrell/work*` | Project: work | orange |
+| `$HOME` | Project: home | gray |
+| `$HOME/gits*` | Project: gits | purple |
+| `$HOME/dotfiles*` | Project: dotfiles | teal |
+| `$HOME/gits/avars*` | Project: avars | pink |
+| `$HOME/gits/xanatos-lab*` | Project: xanatos-lab | green |
+| `$HOME/gits/xanatos` (+ subdirs, not lab) | Project: xanatos | cyan |
+| `$HOME/gits/vkb-python*` | Project: vkb-python | yellow-green |
+| `$HOME/work*` | Project: work | orange |
 
-Adding more: edit `DynamicProfiles/aps-projects.json` (or drop a new `*.json`), then `./install.sh --link-only`. iTerm hot-reloads — no restart.
+Source template: [`DynamicProfiles/aps-projects.json.in`](DynamicProfiles/aps-projects.json.in) (`__HOME__` → your home at install). Render: `./config/iterm2/render-aps-projects.sh` or `./install.sh --link-only`. **Do not** edit `aps-projects.json` in Application Support by hand — it is regenerated.
+
+More specific paths (e.g. `vkb-python`) win over parent paths (`gits`) via APS scoring. Run `apply-iterm-defaults.sh` (iTerm quit) after install to prune orphan GUI bookmarks.
 
 APS switches the live session's profile in place (Tab color, font, anything you override) when the cwd matches. Leaves dir → reverts to Default. Requires Shell Integration (already sourced from [`.zshrc:221`](../../.zshrc)).
 
@@ -143,7 +153,9 @@ Inside tmux: `Ctrl-a c` (new window), `Ctrl-a " / %` (splits), `Ctrl-a [` (copy 
 
 - [`apply-iterm-defaults.sh`](apply-iterm-defaults.sh) — single source of truth for prefs. Sections labeled `B1` through `B5`.
 - [`snippets.json`](snippets.json) — dotfiles snippets (loaded into `NoSyncSnippets`).
-- [`DynamicProfiles/aps-projects.json`](DynamicProfiles/aps-projects.json) — APS project profiles.
+- [`DynamicProfiles/aps-projects.json.in`](DynamicProfiles/aps-projects.json.in) — APS template (`__HOME__` paths).
+- [`render-aps-projects.sh`](render-aps-projects.sh) — render machine-local `aps-projects.json`.
+- [`status-bar-layout.json`](status-bar-layout.json) — canonical status bar (hand-edited).
 - [`README.md`](README.md) — this file.
 
 Re-running the apply script is safe and idempotent (status bar, snippets, triggers, keybindings, IRMemory all checked).

@@ -104,85 +104,19 @@ plistlib.dump(data, p.open("wb"))
 print("  Cleaned bookmarks (removed dotfiles-* dynamic-profile rows + pollution keys).")
 PY
 
-# -- B1: Status bar layout (Starship parity) ---------------------------------
-# Sets a per-profile Status Bar Layout on the Default profile with:
-#   user | host(+ssh) | python_venv | git | cwd | spring | composer
-# Powered by Shell Integration (already sourced from .zshrc); python_venv is
-# read from the user_var published by iterm2_print_user_vars in .zshrc.
-# Enables the status bar via `Show Status Bar = True`.
-python3 <<'PY'
-import plistlib
+# -- B1: Status bar layout (hand-edited canonical copy) ----------------------
+# Loaded from config/iterm2/status-bar-layout.json — edit that file (or tweak
+# in iTerm UI then re-export) rather than editing this script.
+# NEVER use iTermStatusBarVariableBaseComponent (crashes status-bar setup UI).
+python3 - "$(cd "$(dirname "$0")" && pwd)/status-bar-layout.json" <<'PY'
+import json, plistlib, sys
 from pathlib import Path
+
+layout_path = Path(sys.argv[1])
+layout = json.loads(layout_path.read_text())
 
 p = Path.home() / "Library/Preferences/com.googlecode.iterm2.plist"
 data = plistlib.loads(p.read_bytes())
-
-def knobs(extra=None):
-    base = {
-        "base: priority": 5,
-        "base: compression resistance": 1,
-    }
-    if extra:
-        base.update(extra)
-    return base
-
-# python_venv: use SwiftyString (Interpolated String) component, NOT the
-# abstract iTermStatusBarVariableBaseComponent — that class crashes iTerm's
-# status-bar setup UI (-[iTermStatusBarVariableBaseComponent
-# statusBarComponentShortDescription] is unimplemented, EXC_BREAKPOINT).
-# SwiftyString takes an "expression" knob containing \(user.python_venv).
-venv_knobs = knobs({
-    "expression": r" \(user.python_venv)",
-    "minwidth": 0,
-    "maxwidth": 60,
-})
-
-cwd_knobs = knobs({
-    "path": "path",  # or "shortPath" for fish-style abbreviation
-    "minwidth": 0,
-    "maxwidth": 1.7976931348623157e+308,
-})
-
-host_knobs = knobs({
-    "prefix": "  ",  # nf-fa-server glyph; remove if your font lacks Nerd icons
-    "minwidth": 0,
-    "maxwidth": 60,
-})
-
-user_knobs = knobs({
-    "prefix": "  ",
-    "minwidth": 0,
-    "maxwidth": 60,
-})
-
-git_knobs = knobs({
-    "minwidth": 0,
-    "maxwidth": 200,
-})
-
-spacer_knobs = knobs({"iTermStatusBarFixedSpacerComponentWidthKnob": 8})
-
-layout = {
-    "components": [
-        {"class": "iTermStatusBarUserComponent",             "configuration": {"knobs": user_knobs}},
-        {"class": "iTermStatusBarFixedSpacerComponent",      "configuration": {"knobs": spacer_knobs}},
-        {"class": "iTermStatusBarHostnameComponent",         "configuration": {"knobs": host_knobs}},
-        {"class": "iTermStatusBarFixedSpacerComponent",      "configuration": {"knobs": spacer_knobs}},
-        {"class": "iTermStatusBarSwiftyStringComponent",     "configuration": {"knobs": venv_knobs}},
-        {"class": "iTermStatusBarFixedSpacerComponent",      "configuration": {"knobs": spacer_knobs}},
-        {"class": "iTermStatusBarGitComponent",              "configuration": {"knobs": git_knobs}},
-        {"class": "iTermStatusBarFixedSpacerComponent",      "configuration": {"knobs": spacer_knobs}},
-        {"class": "iTermStatusBarWorkingDirectoryComponent", "configuration": {"knobs": cwd_knobs}},
-        {"class": "iTermStatusBarSpringComponent",           "configuration": {"knobs": knobs()}},
-        {"class": "iTermStatusBarComposerComponent",         "configuration": {"knobs": knobs()}},
-    ],
-    "advanced configuration": {
-        "remove empty components": True,  # hides venv segment when not in a venv
-        "auto-rainbow style": 0,
-        "font": ".AppleSystemUIFont 12",
-        "algorithm": 0,  # 0 = stable, components fixed-width per knob
-    },
-}
 
 ORIGINAL_DEFAULT_GUID = "74FD8F10-9C21-4853-AF71-8801DCF39FD7"
 default = next(b for b in data["New Bookmarks"] if b.get("Guid") == ORIGINAL_DEFAULT_GUID)
@@ -191,7 +125,47 @@ default["StatusBarPosition"] = 1  # 0=top, 1=bottom
 default["Status Bar Layout"] = layout
 
 plistlib.dump(data, p.open("wb"))
-print("  Wrote Status Bar Layout (user|host|venv|git|cwd ... composer) and enabled it.")
+print(f"  Wrote Status Bar Layout from {layout_path.name} (username|cwd|venv|git|composer).")
+PY
+
+# -- B2: Prune orphan GUI-created dynamic profile bookmarks ------------------
+# APS profiles live ONLY in DynamicProfiles/*.json. Tagging "Dynamic" in the GUI
+# creates broken bookmark rows (often empty Bound Hosts) and can crash profile
+# editors. Keep dotfiles-owned GUIDs; drop everything else tied to our APS file.
+python3 - "$(cd "$(dirname "$0")" && pwd)/DynamicProfiles/aps-projects.json" <<'PY'
+import json, plistlib, sys
+from pathlib import Path
+
+aps_path = Path(sys.argv[1])
+valid_guids = {p["Guid"] for p in json.loads(aps_path.read_text())["Profiles"]}
+ORIGINAL_DEFAULT_GUID = "74FD8F10-9C21-4853-AF71-8801DCF39FD7"
+
+p = Path.home() / "Library/Preferences/com.googlecode.iterm2.plist"
+data = plistlib.loads(p.read_bytes())
+bookmarks = data.get("New Bookmarks", [])
+cleaned = []
+removed = []
+for b in bookmarks:
+    guid = b.get("Guid", "")
+    dyn_file = b.get("Dynamic Profile Filename", "")
+    is_our_aps = "aps-projects.json" in (dyn_file or "")
+    if guid == ORIGINAL_DEFAULT_GUID:
+        cleaned.append(b)
+        continue
+    if is_our_aps and guid not in valid_guids:
+        removed.append(b.get("Name", guid))
+        continue
+    if is_our_aps and not (b.get("Bound Hosts") or []):
+        removed.append(f"{b.get('Name', guid)} (empty Bound Hosts)")
+        continue
+    cleaned.append(b)
+
+data["New Bookmarks"] = cleaned
+plistlib.dump(data, p.open("wb"))
+if removed:
+    print(f"  Removed {len(removed)} orphan APS bookmark(s): {', '.join(removed)}")
+else:
+    print("  No orphan APS bookmarks to remove.")
 PY
 
 # -- B3: Snippets seeded from aliases + history ------------------------------

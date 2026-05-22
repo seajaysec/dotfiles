@@ -14,6 +14,9 @@ Brewfile.*
 # iTerm2 binary state exports (large, contain session metadata)
 *.itermexport
 
+# Rendered from config/iterm2/DynamicProfiles/aps-projects.json.in (per-machine $HOME)
+config/iterm2/DynamicProfiles/aps-projects.json
+
 # Cursor IDE workspace cache (transcripts, hook state, plans)
 .cursor/
 

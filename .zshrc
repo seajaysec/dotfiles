@@ -242,7 +242,7 @@ export ITERM_ENABLE_SHELL_INTEGRATION_WITH_TMUX=YES
 iterm2_print_user_vars() {
   iterm2_set_user_var python_venv "${VIRTUAL_ENV##*/}"
   if [[ -n "$VIRTUAL_ENV" && -x "$VIRTUAL_ENV/bin/python" ]]; then
-    iterm2_set_user_var python_version "$("$VIRTUAL_ENV/bin/python" --version 2>&1 | awk '{print $2}')"
+    iterm2_set_user_var python_version "Python $("$VIRTUAL_ENV/bin/python" --version 2>&1 | awk '{print $2}')"
   else
     iterm2_set_user_var python_version ""
   fi
