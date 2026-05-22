@@ -2,6 +2,7 @@
 alias cld='claude --dangerously-skip-permissions'  # Launch Claude Code with auto-approval (use with care)
 
 # System Commands Enhancement
+alias ls='ls -G'
 alias cp='cp -iv'                           # Interactive and verbose copy
 alias mv='mv -iv'                           # Interactive and verbose move
 alias mkdir='mkdir -pv'                     # Create parent directories as needed, verbose
