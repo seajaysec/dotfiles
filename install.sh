@@ -91,6 +91,9 @@ link_dotfiles() {
   symlink_init ".zsh.aliases" "${DOTFILES_TARGET}/.zsh.aliases"
   symlink_init ".zsh.functions" "${DOTFILES_TARGET}/.zsh.functions"
   symlink_init "config/starship/starship.toml" "${DOTFILES_TARGET}/config/starship/starship.toml"
+  # Static zsh completions land in ~/.zfunc (already on fpath in .zshrc before compinit).
+  # Regenerate after `brew upgrade quien`: quien completion zsh > config/zsh/completions/_quien
+  symlink_init "config/zsh/completions/_quien" "${HOME}/.zfunc/_quien"
   if [[ -f "${REPO_ROOT}/.tmux.conf" ]]; then
     symlink_init ".tmux.conf" "${HOME}/.tmux.conf"
   fi

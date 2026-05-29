@@ -347,5 +347,6 @@
   "peacock.surpriseMeFromFavoritesOnly": true,
   "markdownlint.run": "onSave",
   "editor.minimap.enabled": true,
-  "cursor.inlineDiff.mode": "unified"
+  "cursor.inlineDiff.mode": "unified",
+  "python.defaultInterpreterPath": "/Users/chris.j.farrell/.virtualenvs/chris.j.farrell-axed"
 }
