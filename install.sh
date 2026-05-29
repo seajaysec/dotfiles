@@ -100,6 +100,27 @@ link_dotfiles() {
   if [[ -f "${REPO_ROOT}/.gitignore_global" ]]; then
     symlink_init ".gitignore_global" "${HOME}/.gitignore_global"
   fi
+  # Agent-chat archive viewer: self-contained, server-less HTML browser for
+  # specstory history (populated by the `ssync` shell function). These are
+  # COPIED (not symlinked) into the hidden archive dir on purpose: browsers
+  # canonicalize a symlinked file:// document to its real path, which would make
+  # the viewer's relative data.js/marked/purify resolve against the repo dir
+  # (where they aren't siblings) and load nothing. Real files keep the archive
+  # self-contained and portable. Re-run install.sh after editing the viewer.
+  if [[ -d "${REPO_ROOT}/config/agent-chats" ]]; then
+    local ac_dest="${HOME}/.secrets/agent-chats"
+    mkdir -p "$ac_dest"
+    # rm first so `cp` writes a fresh real file instead of following a stale symlink.
+    rm -f "${ac_dest}/viewer.html" "${ac_dest}/build-index.py" \
+          "${ac_dest}/collect-native.py" \
+          "${ac_dest}/marked.min.js" "${ac_dest}/purify.min.js"
+    cp "${REPO_ROOT}/config/agent-chats/viewer.html"          "${ac_dest}/viewer.html"
+    cp "${REPO_ROOT}/config/agent-chats/build-index.py"       "${ac_dest}/build-index.py"
+    cp "${REPO_ROOT}/config/agent-chats/collect-native.py"    "${ac_dest}/collect-native.py"
+    cp "${REPO_ROOT}/config/agent-chats/vendor/marked.min.js" "${ac_dest}/marked.min.js"
+    cp "${REPO_ROOT}/config/agent-chats/vendor/purify.min.js" "${ac_dest}/purify.min.js"
+    echo "   agent-chats: viewer + libs copied → ${ac_dest}"
+  fi
   setup_iterm_dynamic_profiles
   # Shared VS Code + Cursor User settings (same file; Cursor-only keys are ignored by VS Code).
   # Python interpreter: zsh `code`/`cursor` wrappers set PATH + VIRTUAL_ENV when autoswitch `.venv` exists; no defaultInterpreterPath in JSON.
@@ -155,8 +176,7 @@ brew install \
     imagemagick \
     openssl \
     python \
-    ipython \
-    starship
+    ipython
 
 echo "📁 Creating directory structure..."
 sudo mkdir -p /opt/gists
@@ -191,6 +211,11 @@ fi
 link_dotfiles
 
 [[ -f "$HOME/secrets.sh" ]] || touch "$HOME/secrets.sh"
+
+# Hidden secrets dir + archive target for `ssync` (specstory chat history).
+# `ssync` also mkdir -p's this, but create it here so the location exists on a
+# fresh box before any sync runs. Override the archive root via $SSYNC_ARCHIVE.
+mkdir -p "$HOME/.secrets/agent-chats"
 
 # fzf's installer rewrites ~/.zshrc unless we use --no-update-rc. ~/.zshrc
 # already does `source <(fzf --zsh)` at startup, so the rc rewrite would only

@@ -730,3 +730,127 @@ code() (
   _dotfiles_prepare_vscode_python_env "$@"
   exec command code "$@"
 )
+
+
+# Agent Chat Archive (specstory)
+# ------------------------------
+
+# Archive specstory chat history, or open the archive to browse it.
+#
+# No flags — SYNC: pull specstory history from every repo under src_dir (default
+# ~/gits) into one accumulating archive (default ~/.secrets/agent-chats; override
+# SSYNC_ARCHIVE) and rebuild the offline viewer index (data.js). `specstory sync`
+# captures all agents with activity (claude, codex, cursor, gemini, droid,
+# deepseek).
+#
+# Any viewing flag — OPEN (no sync): just open the existing archive in VS Code
+# (-v), Cursor (-c), Finder (-f), or the browser viewer (-b). ~/.secrets is
+# hidden, so these are how you browse it.
+# Usage: ssync [src_dir]        # sync + rebuild index
+#        ssync -v|-c|-f|-b      # open the archive for viewing (no sync)
+ssync() {
+  emulate -L zsh
+  setopt null_glob
+
+  local open_vscode=0 open_cursor=0 open_finder=0 open_browser=0
+  local OPTIND opt
+  while getopts "vcfb" opt; do
+    case $opt in
+      v) open_vscode=1 ;;
+      c) open_cursor=1 ;;
+      f) open_finder=1 ;;
+      b) open_browser=1 ;;
+      *) echo "usage: ssync [src_dir] | ssync -v|-c|-f|-b" >&2; return 1 ;;
+    esac
+  done
+  shift $((OPTIND - 1))
+
+  local dest="${SSYNC_ARCHIVE:-$HOME/.secrets/agent-chats}"
+
+  # Keep the archive's viewer assets current with the repo. They must be REAL
+  # files (a symlinked file:// document canonicalizes to the repo dir, so the
+  # viewer's relative data.js/marked/purify wouldn't resolve). Copy any that are
+  # missing, stale, or a leftover symlink. `command cp` dodges a `cp -i` alias.
+  local _acsrc="${DOTFILES:-$HOME/dotfiles}/config/agent-chats"
+  if [[ -d "$_acsrc" ]]; then
+    mkdir -p "$dest"
+    local _f _from _to
+    for _f in viewer.html:viewer.html build-index.py:build-index.py \
+              collect-native.py:collect-native.py \
+              vendor/marked.min.js:marked.min.js vendor/purify.min.js:purify.min.js; do
+      _from="$_acsrc/${_f%%:*}"; _to="$dest/${_f##*:}"
+      [[ -f "$_from" ]] || continue
+      if [[ -L "$_to" || ! -e "$_to" || "$_from" -nt "$_to" ]]; then
+        rm -f "$_to"; command cp "$_from" "$_to"
+      fi
+    done
+  fi
+
+  # Sync only when no viewing flag is given — viewing flags are view-only.
+  if (( ! (open_vscode || open_cursor || open_finder || open_browser) )); then
+    if ! command -v specstory >/dev/null 2>&1; then
+      echo "ssync: specstory not found (brew install specstory)" >&2
+      return 1
+    fi
+
+    local src="${1:-$HOME/gits}"
+    if [[ ! -d "$src" ]]; then
+      echo "ssync: source dir not found: $src" >&2
+      return 1
+    fi
+
+    mkdir -p "$dest"
+
+    local dir repo synced=0
+    for dir in "$src"/*/; do
+      # Only touch real project dirs (a git repo or one specstory already knows).
+      [[ -d "${dir}.git" || -d "${dir}.specstory" ]] || continue
+      repo=$(basename "$dir")
+      echo "=== $repo ==="
+      ( cd "$dir" && specstory sync )
+      if [[ -d "${dir}.specstory/history" ]]; then
+        mkdir -p "$dest/$repo"
+        rsync -a "${dir}.specstory/history/" "$dest/$repo/"
+        (( synced++ ))
+      fi
+    done
+
+    # Pull in GUI/IDE chats that `specstory sync` doesn't cover — Claude Code
+    # (all of ~/.claude/projects) and Cursor IDE (Cursor's globalStorage db).
+    # build-index dedupes any session that also came from specstory.
+    local collector="$dest/collect-native.py"
+    [[ -f "$collector" ]] || collector="${DOTFILES:-$HOME/dotfiles}/config/agent-chats/collect-native.py"
+    if command -v python3 >/dev/null 2>&1 && [[ -f "$collector" ]]; then
+      python3 "$collector" "$dest"
+    fi
+
+    # Rebuild the offline viewer index (data.js). Prefer the archive-local copy
+    # so the archive stays self-contained; fall back to the repo source.
+    local builder="$dest/build-index.py"
+    [[ -f "$builder" ]] || builder="${DOTFILES:-$HOME/dotfiles}/config/agent-chats/build-index.py"
+    if command -v python3 >/dev/null 2>&1 && [[ -f "$builder" ]]; then
+      python3 "$builder" "$dest"
+    else
+      echo "ssync: skipped index rebuild (need python3 + build-index.py; run install.sh)" >&2
+    fi
+
+    echo "Done. Synced ${synced} repo(s) → $dest"
+    return 0
+  fi
+
+  # Viewing mode: open the existing archive, no sync.
+  if [[ ! -d "$dest" ]]; then
+    echo "ssync: archive not found: $dest (run \`ssync\` first to populate it)" >&2
+    return 1
+  fi
+  (( open_vscode )) && code "$dest"
+  (( open_cursor )) && cursor "$dest"
+  (( open_finder )) && open "$dest"
+  if (( open_browser )); then
+    if [[ -f "$dest/viewer.html" ]]; then
+      open "$dest/viewer.html"
+    else
+      echo "ssync: viewer.html not found in $dest (run install.sh to create it)" >&2
+    fi
+  fi
+}

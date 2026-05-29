@@ -1,0 +1,257 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Agent Chat Archive</title>
+<style>
+  :root {
+    --bg: #1e1f29; --bg2: #282a36; --bg3: #21222c; --fg: #f8f8f2;
+    --muted: #6272a4; --line: #44475a; --accent: #bd93f9; --green: #50fa7b;
+    --pink: #ff79c6; --cyan: #8be9fd; --orange: #ffb86c; --sel: #44475a;
+  }
+  * { box-sizing: border-box; }
+  html, body { height: 100%; margin: 0; }
+  body {
+    display: flex; font: 14px/1.5 -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    background: var(--bg); color: var(--fg);
+  }
+  /* ---- left pane ---- */
+  #sidebar {
+    width: 340px; min-width: 220px; max-width: 60vw; flex: 0 0 auto;
+    display: flex; flex-direction: column; background: var(--bg3);
+    border-right: 1px solid var(--line); resize: horizontal; overflow: hidden;
+  }
+  #side-head { padding: 12px; border-bottom: 1px solid var(--line); }
+  #side-head h1 { font-size: 14px; margin: 0 0 8px; color: var(--accent); letter-spacing: .5px; }
+  #search {
+    width: 100%; padding: 7px 9px; background: var(--bg2); color: var(--fg);
+    border: 1px solid var(--line); border-radius: 6px; outline: none;
+  }
+  #search:focus { border-color: var(--accent); }
+  .row2 { display: flex; gap: 8px; margin-top: 8px; align-items: center; }
+  select {
+    flex: 1; padding: 6px; background: var(--bg2); color: var(--fg);
+    border: 1px solid var(--line); border-radius: 6px;
+  }
+  #meta { font-size: 11px; color: var(--muted); margin-top: 8px; }
+  #tree { flex: 1; overflow: auto; padding: 6px 0; }
+  .group > summary {
+    list-style: none; cursor: pointer; padding: 5px 12px; color: var(--cyan);
+    font-weight: 600; user-select: none; display: flex; justify-content: space-between;
+  }
+  .group > summary::-webkit-details-marker { display: none; }
+  .group > summary:hover { background: var(--bg2); }
+  .group .count { color: var(--muted); font-weight: 400; }
+  .group.lvl2 > summary { color: var(--orange); padding-left: 26px; font-size: 13px; }
+  .leaf {
+    padding: 5px 12px 5px 40px; cursor: pointer; border-left: 2px solid transparent;
+    overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+  }
+  .leaf:hover { background: var(--bg2); }
+  .leaf.active { background: var(--sel); border-left-color: var(--accent); }
+  .leaf .when { color: var(--muted); font-size: 11px; }
+  /* ---- right pane ---- */
+  #main { flex: 1; display: flex; flex-direction: column; overflow: hidden; }
+  #crumb {
+    padding: 10px 18px; border-bottom: 1px solid var(--line); background: var(--bg2);
+    font-size: 12px; color: var(--muted); display: flex; gap: 8px; align-items: baseline;
+  }
+  #crumb .chip { color: var(--bg); background: var(--accent); padding: 1px 7px; border-radius: 10px; font-weight: 600; }
+  #crumb .chip.tool { background: var(--green); }
+  #content { flex: 1; overflow: auto; padding: 24px 32px; max-width: 980px; }
+  #content h1, #content h2, #content h3 { line-height: 1.25; }
+  #content h1 { font-size: 20px; border-bottom: 1px solid var(--line); padding-bottom: 6px; }
+  #content pre {
+    background: var(--bg3); border: 1px solid var(--line); border-radius: 8px;
+    padding: 12px; overflow: auto;
+  }
+  #content code { font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 12.5px; }
+  #content :not(pre) > code { background: var(--bg3); padding: 1px 5px; border-radius: 4px; color: var(--pink); }
+  #content a { color: var(--cyan); }
+  #content blockquote { border-left: 3px solid var(--line); margin: 0; padding-left: 14px; color: var(--muted); }
+  #content table { border-collapse: collapse; } #content td, #content th { border: 1px solid var(--line); padding: 4px 8px; }
+  /* specstory custom tags */
+  #content user_query { display: block; background: var(--bg3); border-left: 3px solid var(--pink); padding: 8px 12px; border-radius: 6px; margin: 6px 0; }
+  #content tool-use { display: block; background: var(--bg3); border-left: 3px solid var(--cyan); padding: 8px 12px; border-radius: 6px; margin: 6px 0; font-size: 13px; }
+  #content think { display: block; color: var(--muted); font-style: italic; }
+  #content timestamp { color: var(--muted); font-size: 11px; }
+  #content details { background: var(--bg3); border: 1px solid var(--line); border-radius: 6px; padding: 6px 10px; margin: 6px 0; }
+  #content summary { cursor: pointer; color: var(--accent); }
+  #empty { padding: 40px; color: var(--muted); text-align: center; margin: auto; }
+  #empty code { color: var(--green); }
+</style>
+</head>
+<body>
+  <aside id="sidebar">
+    <div id="side-head">
+      <h1>⌥ AGENT CHAT ARCHIVE</h1>
+      <input id="search" type="search" placeholder="filter repo / tool / title / text…" autocomplete="off">
+      <div class="row2">
+        <label style="color:var(--muted);font-size:12px">group</label>
+        <select id="groupby">
+          <option value="repo">Repo</option>
+          <option value="tool">Tool</option>
+          <option value="repo-tool">Repo → Tool</option>
+          <option value="tool-repo">Tool → Repo</option>
+          <option value="flat">Flat (date)</option>
+        </select>
+      </div>
+      <div id="meta"></div>
+    </div>
+    <div id="tree"></div>
+  </aside>
+  <main id="main">
+    <div id="crumb"></div>
+    <div id="content"><div id="empty"></div></div>
+  </main>
+
+<script src="marked.min.js"></script>
+<script src="purify.min.js"></script>
+<!-- Load the (frequently-regenerated) index with a cache-buster so file://
+     reloads never serve a stale data.js. createElement (not document.write)
+     keeps it clean; the viewer boots from the script's onload below. -->
+<script>
+  (function () {
+    var s = document.createElement("script");
+    s.src = "data.js?v=" + Date.now();
+    s.onload = s.onerror = function () { if (window.__initViewer) window.__initViewer(); };
+    document.head.appendChild(s);
+  })();
+</script>
+<script>
+window.__initViewer = function () {
+  "use strict";
+  const A = window.ARCHIVE || { entries: [], generated: null };
+  const treeEl = document.getElementById("tree");
+  const contentEl = document.getElementById("content");
+  const crumbEl = document.getElementById("crumb");
+  const metaEl = document.getElementById("meta");
+  const searchEl = document.getElementById("search");
+  const groupEl = document.getElementById("groupby");
+
+  // give every entry a stable id
+  A.entries.forEach((e, i) => (e.id = i));
+
+  if (window.marked && marked.setOptions) marked.setOptions({ gfm: true, breaks: false });
+  // Chat logs are untrusted (tool output / pasted content) and run under file://,
+  // so sanitize the rendered HTML. Allowlist specstory's custom tags + collapsibles.
+  const PURIFY_OPTS = { ADD_TAGS: ["think", "user_query", "tool-use", "timestamp", "details", "summary"] };
+  function render(md) {
+    if (!window.marked) return md.replace(/[<&]/g, c => ({ "<": "&lt;", "&": "&amp;" }[c]));
+    const html = marked.parse(md);
+    return window.DOMPurify ? DOMPurify.sanitize(html, PURIFY_OPTS) : html;
+  }
+
+  function escapeHtml(s) { return s.replace(/[&<>"]/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c])); }
+
+  function show(entry) {
+    document.querySelectorAll(".leaf.active").forEach(el => el.classList.remove("active"));
+    const leaf = document.querySelector('.leaf[data-id="' + entry.id + '"]');
+    if (leaf) { leaf.classList.add("active"); leaf.scrollIntoView({ block: "nearest" }); }
+    crumbEl.innerHTML =
+      '<span class="chip">' + escapeHtml(entry.repo) + '</span>' +
+      '<span class="chip tool">' + escapeHtml(entry.tool) + '</span>' +
+      '<span>' + escapeHtml(entry.when) + '</span>' +
+      '<span style="margin-left:auto">' + escapeHtml(entry.file) + '</span>';
+    contentEl.innerHTML = render(entry.content);
+    contentEl.scrollTop = 0;
+    location.hash = "s" + entry.id;
+  }
+
+  function keyOf(e, dim) { return dim === "tool" ? e.tool : e.repo; }
+
+  function build() {
+    const q = searchEl.value.trim().toLowerCase();
+    const mode = groupEl.value;
+    let items = A.entries;
+    if (q) items = items.filter(e =>
+      (e.repo + " " + e.tool + " " + e.title + " " + e.when).toLowerCase().includes(q) ||
+      e.content.toLowerCase().includes(q));
+    // Most-recently-updated first, everywhere: groups are built by iterating
+    // `items` in order, so sorting here orders sessions within each group too.
+    items = items.slice().sort((a, b) => b.mtime - a.mtime);
+
+    metaEl.textContent = items.length + " / " + A.entries.length + " sessions" +
+      (A.generated ? " · built " + A.generated.replace("T", " ").slice(0, 16) : "");
+
+    treeEl.innerHTML = "";
+    if (!A.entries.length) {
+      treeEl.innerHTML = '<div id="empty">No <code>data.js</code> yet.<br><br>Run <code>ssync</code> to sync and build the index.</div>';
+      return;
+    }
+
+    const leafHTML = (e) =>
+      '<div class="leaf" data-id="' + e.id + '" title="' + escapeHtml(e.title) + '">' +
+      escapeHtml(e.title) + '<div class="when">' + escapeHtml(e.when) + ' · ' + escapeHtml(e.tool) + '</div></div>';
+
+    const groupHTML = (label, count, inner, lvl2) =>
+      '<details class="group' + (lvl2 ? " lvl2" : "") + '" open><summary>' +
+      '<span>' + escapeHtml(label) + '</span><span class="count">' + count + '</span></summary>' +
+      inner + '</details>';
+
+    if (mode === "flat") {
+      treeEl.innerHTML = items.map(leafHTML).join("");
+    } else if (mode === "repo" || mode === "tool") {
+      const dim = mode;
+      const groups = {};
+      items.forEach(e => (groups[keyOf(e, dim)] ||= []).push(e));
+      treeEl.innerHTML = Object.keys(groups).sort().map(k =>
+        groupHTML(k, groups[k].length, groups[k].map(leafHTML).join(""))).join("");
+    } else {
+      const [d1, d2] = mode === "repo-tool" ? ["repo", "tool"] : ["tool", "repo"];
+      const g1 = {};
+      items.forEach(e => (g1[keyOf(e, d1)] ||= []).push(e));
+      treeEl.innerHTML = Object.keys(g1).sort().map(k1 => {
+        const sub = {};
+        g1[k1].forEach(e => (sub[keyOf(e, d2)] ||= []).push(e));
+        const inner = Object.keys(sub).sort().map(k2 =>
+          groupHTML(k2, sub[k2].length, sub[k2].map(leafHTML).join(""), true)).join("");
+        return groupHTML(k1, g1[k1].length, inner);
+      }).join("");
+    }
+
+    treeEl.querySelectorAll(".leaf").forEach(el =>
+      el.addEventListener("click", () => show(A.entries[+el.dataset.id])));
+  }
+
+  function selectFromHash() {
+    const m = /^#s(\d+)$/.exec(location.hash);
+    if (m && A.entries[+m[1]]) show(A.entries[+m[1]]);
+    else if (A.entries.length) {
+      document.getElementById("empty").innerHTML =
+        "Select a session on the left.<br><small>" + A.entries.length + " archived.</small>";
+    } else {
+      document.getElementById("empty").innerHTML =
+        "No sessions yet. Run <code>ssync</code> to populate the archive.";
+    }
+  }
+
+  // arrow-key navigation across currently visible leaves
+  document.addEventListener("keydown", (ev) => {
+    if (ev.target === searchEl && ev.key !== "Escape") return;
+    if (ev.key === "Escape") { searchEl.focus(); searchEl.select(); return; }
+    if (ev.key !== "ArrowDown" && ev.key !== "ArrowUp") return;
+    const leaves = [...treeEl.querySelectorAll(".leaf")];
+    if (!leaves.length) return;
+    const cur = treeEl.querySelector(".leaf.active");
+    let i = cur ? leaves.indexOf(cur) : -1;
+    i = ev.key === "ArrowDown" ? Math.min(i + 1, leaves.length - 1) : Math.max(i - 1, 0);
+    leaves[i].click();
+    ev.preventDefault();
+  });
+
+  // Reflect the load result in the tab title — handy at a glance, and lets the
+  // count be confirmed without inspecting the DOM.
+  document.title = A.entries.length
+    ? "Agent Chat Archive · " + A.entries.length + " sessions"
+    : "Agent Chat Archive · NO data.js";
+
+  searchEl.addEventListener("input", build);
+  groupEl.addEventListener("change", build);
+  build();
+  selectFromHash();
+};
+</script>
+</body>
+</html>
