@@ -298,3 +298,9 @@ export PATH=${(j.:.)_dedupe_path_segments}
 
 # Machine-specific overrides (ARCH-07 / 02-03); migrate secrets from ~/secrets.sh over time
 [[ -f "$HOME/.zshrc.local" ]] && source "$HOME/.zshrc.local"
+
+# launch
+export LAUNCH_HOME="$HOME/.launch"
+export PATH="$LAUNCH_HOME/bin:$PATH"
+# launch completions
+[ -s "$LAUNCH_HOME/complete/_launch" ] && source "$LAUNCH_HOME/complete/_launch"
