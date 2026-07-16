@@ -75,6 +75,7 @@ path=(
     ~/.npm-packages/bin
     ~/.npm-packages/lib/node_modules/n/bin
     /bin/lscript
+    /opt/homebrew/opt/rustup/bin
     ~/.cargo/bin
     ~/.dotnet/tools
 )
@@ -304,3 +305,8 @@ export LAUNCH_HOME="$HOME/.launch"
 export PATH="$LAUNCH_HOME/bin:$PATH"
 # launch completions
 [ -s "$LAUNCH_HOME/complete/_launch" ] && source "$LAUNCH_HOME/complete/_launch"
+
+# Added by LM Studio CLI (lms)
+export PATH="$PATH:/Users/chris.j.farrell/.lmstudio/bin"
+# End of LM Studio CLI section
+
