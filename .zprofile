@@ -18,7 +18,6 @@ path=(
   "$HOME/.npm-packages/bin"
   "$HOME/.npm-packages/lib/node_modules/n/bin"
   /bin/lscript
-  /opt/homebrew/opt/rustup/bin
   "$HOME/.cargo/bin"
   "$HOME/.dotnet/tools"
 )

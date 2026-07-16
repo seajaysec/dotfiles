@@ -75,7 +75,6 @@ path=(
     ~/.npm-packages/bin
     ~/.npm-packages/lib/node_modules/n/bin
     /bin/lscript
-    /opt/homebrew/opt/rustup/bin
     ~/.cargo/bin
     ~/.dotnet/tools
 )

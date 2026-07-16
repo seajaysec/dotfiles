@@ -211,6 +211,79 @@ else
   echo "   → rust already installed (skip)"
 fi
 
+# --- Rust environment repair + toolchain auto-update ---------------------------
+# 1) Prune any *dangling* ~/.cargo/bin proxy symlinks. These appear when a prior
+#    Homebrew keg-only rustup (whose formula was renamed rustup-init → rustup)
+#    left cargo/rustc/... symlinked to a target that no longer exists. Official
+#    rustup proxies are live symlinks to a real ~/.cargo/bin/rustup, so a
+#    dangling-only check never touches a healthy install.
+if [[ -d "$HOME/.cargo/bin" ]]; then
+  for _p in cargo cargo-clippy cargo-fmt cargo-miri clippy-driver rls \
+            rust-analyzer rust-gdb rust-gdbgui rust-lldb rustc rustdoc \
+            rustfmt rustup; do
+    _f="$HOME/.cargo/bin/$_p"
+    if [[ -L "$_f" && ! -e "$_f" ]]; then
+      rm -f "$_f" && echo "   → pruned dangling rust proxy: $_p"
+    fi
+  done
+  unset _p _f
+fi
+
+# 2) Weekly `rustup update` launchd agent. rustup only self-updates its manager;
+#    the toolchain (rustc/cargo) is refreshed by `rustup update`, which nothing
+#    else runs. Idempotent: (re)writes the script + plist and reloads.
+if command -v launchctl >/dev/null 2>&1; then
+  echo "   → rustup weekly auto-update agent"
+  _label="com.chris.rustup-update"
+  _agent="$HOME/.local/bin/rustup-auto-update.sh"
+  _plist="$HOME/Library/LaunchAgents/${_label}.plist"
+  mkdir -p "$HOME/.local/bin" "$HOME/Library/LaunchAgents" "$HOME/Library/Logs"
+  cat > "$_agent" <<'AGENT'
+#!/bin/zsh
+# Weekly Rust toolchain update (launchd: com.chris.rustup-update).
+# Prefers official rustup in ~/.cargo/bin; falls back to a brew keg-only rustup.
+export PATH="$HOME/.cargo/bin:/opt/homebrew/opt/rustup/bin:$PATH"
+echo "===== $(date '+%Y-%m-%d %H:%M:%S') — rustup update ====="
+rustup update
+echo "----- active toolchain now: -----"
+rustc --version
+echo
+AGENT
+  chmod +x "$_agent"
+  cat > "$_plist" <<PLIST
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+    <key>Label</key>
+    <string>${_label}</string>
+    <key>ProgramArguments</key>
+    <array>
+        <string>/bin/zsh</string>
+        <string>${_agent}</string>
+    </array>
+    <key>StartCalendarInterval</key>
+    <dict>
+        <key>Weekday</key><integer>1</integer>
+        <key>Hour</key><integer>10</integer>
+        <key>Minute</key><integer>0</integer>
+    </dict>
+    <key>RunAtLoad</key>
+    <false/>
+    <key>StandardOutPath</key>
+    <string>${HOME}/Library/Logs/rustup-update.log</string>
+    <key>StandardErrorPath</key>
+    <string>${HOME}/Library/Logs/rustup-update.log</string>
+</dict>
+</plist>
+PLIST
+  launchctl bootout "gui/$(id -u)/${_label}" >/dev/null 2>&1 || true
+  launchctl bootstrap "gui/$(id -u)" "$_plist" >/dev/null 2>&1 \
+    || launchctl load -w "$_plist" >/dev/null 2>&1 || true
+  unset _label _agent _plist
+fi
+# --- end Rust repair -----------------------------------------------------------
+
 link_dotfiles
 
 [[ -f "$HOME/secrets.sh" ]] || touch "$HOME/secrets.sh"
