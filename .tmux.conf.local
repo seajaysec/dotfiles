@@ -275,7 +275,8 @@ tmux_conf_copy_to_os_clipboard=true
 # this is the place to override or undo settings
 
 # increase history size
-set -g history-limit 1000000
+# Privacy: in-memory scrollback only, cleared daily by ~/.local/bin/privacy-wipe.
+set -g history-limit 20000
 
 # Mouse OFF: under iTerm tmux integration (-CC), iTerm handles the mouse
 # natively (click-to-focus pane, drag-border resize, click-drag select, native
@@ -333,8 +334,9 @@ set -g @tmux-pop-color 'black'
 # kill-server), where it would spawn a stale duplicate layout alongside the
 # fresh attach. Flip back to 'on' to re-enable reboot-resurrection.
 set -g @continuum-restore 'off'
-set -g @resurrect-capture-pane-contents 'on'
-set -g @continuum-save-interval '1'
+# Privacy: never write pane contents to disk; no periodic autosave.
+set -g @resurrect-capture-pane-contents 'off'
+set -g @continuum-save-interval '0'
 set -g @yank_selection 'clipboard' # or 'secondary' or 'clipboard'
 set -g @yank_selection_mouse 'clipboard' # or 'primary' or 'secondary'
 set -g @yank_action 'copy-pipe' # or 'copy-pipe-and-cancel' for the default

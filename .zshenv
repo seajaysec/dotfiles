@@ -15,3 +15,6 @@ export GHIDRA_INSTALL_DIR=/opt/homebrew/opt/ghidra/libexec
 # JAVA_HOME_GHIDRA -> our wrappers; GHIDRA_CLI_JAVA_HOME -> ghidra-cli.
 export JAVA_HOME_GHIDRA=/opt/homebrew/opt/openjdk@21/libexec/openjdk.jdk/Contents/Home
 export GHIDRA_CLI_JAVA_HOME="$JAVA_HOME_GHIDRA"
+
+# Privacy: history/telemetry env shared with bash and sh.
+[[ -r "$HOME/.config/privacy/env.sh" ]] && source "$HOME/.config/privacy/env.sh"
