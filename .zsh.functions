@@ -730,3 +730,48 @@ code() (
   _dotfiles_prepare_vscode_python_env "$@"
   exec command code "$@"
 )
+
+# ssh: prompt to replace a CHANGED host key instead of hard-failing.
+# ------------------------------------------------------------------
+# Stock ssh treats a changed host key as fatal with NO prompt, because a key
+# that changed underneath you is the signature of a MITM. For hosts that
+# legitimately rotate keys (re-flashed SBCs, reimaged VMs, recycled DHCP
+# leases) this wrapper detects *only* that case and offers a y/N — showing the
+# new fingerprint first so you can sanity-check it. Unknown hosts still get
+# ssh's normal first-time prompt; unchanged hosts are never touched.
+# Only affects interactive `ssh`; scp/git/sshpass call the binary directly.
+ssh() {
+  command ssh "$@"
+  local ret=$?
+  (( ret == 255 )) || return $ret          # 255 is the only code ssh uses here
+
+  # Resolve the real destination (honors ~/.ssh/config Host/HostName/Port).
+  local cfg host port
+  cfg=$(command ssh -G "$@" 2>/dev/null)
+  host=$(print -r -- "$cfg" | awk '/^hostname /{print $2; exit}')
+  port=$(print -r -- "$cfg" | awk '/^port /{print $2; exit}')
+  [[ -n $host ]] || return $ret
+  : "${port:=22}"
+
+  # Confirm the failure was specifically a CHANGED key (not host-down / auth /
+  # remote command that happened to exit 255). BatchMode disables all prompts.
+  command ssh -o BatchMode=yes -o ConnectTimeout=5 -p "$port" "$host" true 2>&1 \
+    | grep -q "REMOTE HOST IDENTIFICATION HAS CHANGED" || return $ret
+
+  # known_hosts entry is "host" on port 22, "[host]:port" otherwise.
+  local target=$host
+  [[ $port != 22 ]] && target="[$host]:$port"
+
+  print -u2 ""
+  print -u2 "⚠️  Host key for ${target} has CHANGED. New key fingerprint:"
+  ssh-keyscan -p "$port" "$host" 2>/dev/null \
+    | ssh-keygen -lf - 2>/dev/null | sort -u | sed 's/^/    /' >&2
+
+  local ans
+  print -nu2 "Replace stored key and reconnect? [y/N] "
+  read -r ans </dev/tty
+  [[ $ans == [Yy]* ]] || return $ret
+
+  ssh-keygen -R "$target" >/dev/null 2>&1
+  command ssh -o StrictHostKeyChecking=accept-new "$@"
+}

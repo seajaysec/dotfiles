@@ -298,3 +298,8 @@ export PATH=${(j.:.)_dedupe_path_segments}
 
 # Machine-specific overrides (ARCH-07 / 02-03); migrate secrets from ~/secrets.sh over time
 [[ -f "$HOME/.zshrc.local" ]] && source "$HOME/.zshrc.local"
+
+# Added by LM Studio CLI (lms)
+export PATH="$PATH:/Users/seajay/.cache/lm-studio/bin"
+# End of LM Studio CLI section
+
