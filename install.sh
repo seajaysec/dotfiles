@@ -40,45 +40,13 @@ symlink_init() {
   ln -sf "$src" "$dest"
 }
 
-# iTerm: works whether iTerm is installed, never launched, or still on old -CC prefs.
-# - Creates DynamicProfiles/ if missing (fresh Mac).
-# - Drops stale tmux -CC era profile files/symlinks.
-# - Renders APS JSON with this machine's $HOME (not a symlink — paths are per-host).
+# iTerm: one static "Default" profile (configured by apply-iterm-defaults.sh).
+# Clears any dynamic profiles left over from older setups (APS, tmux -CC).
 setup_iterm_dynamic_profiles() {
-  local iterm_support="${HOME}/Library/Application Support/iTerm2"
-  local dyn_dir="${iterm_support}/DynamicProfiles"
-  local render_script="${REPO_ROOT}/config/iterm2/render-aps-projects.sh"
-  local aps_out="${dyn_dir}/aps-projects.json"
-  local stale
-
-  mkdir -p "$dyn_dir"
-
-  # Legacy tmux -CC dynamic profiles (broke native ⌘T when left behind).
-  for stale in tmux.json plain.json; do
-    rm -f "${dyn_dir}/${stale}"
-  done
-  unset stale
-
-  if [[ ! -x "$render_script" ]]; then
-    chmod +x "$render_script" 2>/dev/null || true
+  local dyn_dir="${HOME}/Library/Application Support/iTerm2/DynamicProfiles"
+  if [[ -d "$dyn_dir" ]]; then
+    rm -f "${dyn_dir}/tmux.json" "${dyn_dir}/plain.json" "${dyn_dir}/aps-projects.json"
   fi
-  if [[ -f "${REPO_ROOT}/config/iterm2/DynamicProfiles/aps-projects.json.in" ]]; then
-    "$render_script" "$aps_out"
-    echo "   iTerm APS: rendered aps-projects.json → DynamicProfiles/"
-  else
-    echo "   iTerm APS: skipped (no aps-projects.json.in template)" >&2
-  fi
-
-  # Optional extra dynamic profile JSON files (symlinked as-is).
-  shopt -s nullglob
-  for _iterm_dyn in "${REPO_ROOT}/config/iterm2/DynamicProfiles"/*.json; do
-    [[ "$(basename "$_iterm_dyn")" == "aps-projects.json" ]] && continue
-    symlink_init "config/iterm2/DynamicProfiles/$(basename "$_iterm_dyn")" \
-      "${dyn_dir}/$(basename "$_iterm_dyn")"
-  done
-  shopt -u nullglob
-  unset _iterm_dyn
-
   echo "   iTerm: quit iTerm (⌘Q), then run: ${REPO_ROOT}/config/iterm2/apply-iterm-defaults.sh"
 }
 
@@ -88,6 +56,9 @@ link_dotfiles() {
   symlink_init ".zshrc" "${HOME}/.zshrc"
   symlink_init ".zshenv" "${HOME}/.zshenv"
   symlink_init ".zprofile" "${HOME}/.zprofile"
+  symlink_init ".profile" "${HOME}/.profile"
+  symlink_init ".bash_profile" "${HOME}/.bash_profile"
+  symlink_init ".bashrc" "${HOME}/.bashrc"
   symlink_init ".zsh.aliases" "${DOTFILES_TARGET}/.zsh.aliases"
   symlink_init ".zsh.functions" "${DOTFILES_TARGET}/.zsh.functions"
   symlink_init "config/starship/starship.toml" "${DOTFILES_TARGET}/config/starship/starship.toml"

@@ -128,44 +128,26 @@ plistlib.dump(data, p.open("wb"))
 print(f"  Wrote Status Bar Layout from {layout_path.name} (username|cwd|venv|git|composer).")
 PY
 
-# -- B2: Prune orphan GUI-created dynamic profile bookmarks ------------------
-# APS profiles live ONLY in DynamicProfiles/*.json. Tagging "Dynamic" in the GUI
-# creates broken bookmark rows (often empty Bound Hosts) and can crash profile
-# editors. Keep dotfiles-owned GUIDs; drop everything else tied to our APS file.
-python3 - "$(cd "$(dirname "$0")" && pwd)/DynamicProfiles/aps-projects.json" <<'PY'
-import json, plistlib, sys
+# -- B2: One profile, running zsh -----------------------------------------
+# The system login shell is bash (so AI tools get a stock environment). iTerm's
+# single Default profile runs zsh as a login shell instead ("Custom Shell").
+# Also drops every non-Default bookmark (old APS "Project: *" clones etc).
+python3 <<'PY'
+import plistlib
 from pathlib import Path
 
-aps_path = Path(sys.argv[1])
-valid_guids = {p["Guid"] for p in json.loads(aps_path.read_text())["Profiles"]}
 ORIGINAL_DEFAULT_GUID = "74FD8F10-9C21-4853-AF71-8801DCF39FD7"
-
+ZSH = "/opt/homebrew/bin/zsh" if Path("/opt/homebrew/bin/zsh").exists() else "/bin/zsh"
 p = Path.home() / "Library/Preferences/com.googlecode.iterm2.plist"
 data = plistlib.loads(p.read_bytes())
 bookmarks = data.get("New Bookmarks", [])
-cleaned = []
-removed = []
-for b in bookmarks:
-    guid = b.get("Guid", "")
-    dyn_file = b.get("Dynamic Profile Filename", "")
-    is_our_aps = "aps-projects.json" in (dyn_file or "")
-    if guid == ORIGINAL_DEFAULT_GUID:
-        cleaned.append(b)
-        continue
-    if is_our_aps and guid not in valid_guids:
-        removed.append(b.get("Name", guid))
-        continue
-    if is_our_aps and not (b.get("Bound Hosts") or []):
-        removed.append(f"{b.get('Name', guid)} (empty Bound Hosts)")
-        continue
-    cleaned.append(b)
-
-data["New Bookmarks"] = cleaned
+default = next(b for b in bookmarks if b.get("Guid") == ORIGINAL_DEFAULT_GUID)
+removed = [b.get("Name", "?") for b in bookmarks if b is not default]
+default["Custom Command"] = "Custom Shell"
+default["Command"] = ZSH
+data["New Bookmarks"] = [default]
 plistlib.dump(data, p.open("wb"))
-if removed:
-    print(f"  Removed {len(removed)} orphan APS bookmark(s): {', '.join(removed)}")
-else:
-    print("  No orphan APS bookmarks to remove.")
+print(f"  Default profile shell = {ZSH}; removed {len(removed)} other profile(s): {', '.join(removed) or 'none'}")
 PY
 
 # -- B3: Snippets seeded from aliases + history ------------------------------

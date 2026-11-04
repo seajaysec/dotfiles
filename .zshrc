@@ -7,6 +7,12 @@ if ! command -v mkdir >/dev/null 2>&1; then
   export PATH="/usr/bin:/bin:/usr/sbin:/sbin:/opt/homebrew/bin:/usr/local/bin${PATH:+:$PATH}"
 fi
 
+# zsh is the interactive UI only; the system shell is bash. Advertise bash so
+# anything launched from here (claude, codex, cursor, scripts) uses stock bash
+# + ~/.bashrc instead of inheriting this zsh setup. tmux re-launches zsh via
+# default-command in .tmux.conf.local.
+export SHELL=/bin/bash
+
 setopt extended_glob
 # DOTFILES: prefer env / zshenv; else ~/dotfiles; else directory of this file (works when repo is not under ~/dotfiles).
 : "${DOTFILES:=$HOME/dotfiles}"

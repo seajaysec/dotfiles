@@ -12,16 +12,16 @@ A collection of shell configuration files and utilities for macOS development en
 
 Native iTerm tabs/splits with **Session Restoration** (processes survive ⌘Q via
 `iTermServer` daemons). Optional plain tmux for cross-reboot: `tm` alias (session
-`main` by default). Per-project tab colors via Automatic Profile Switching.
+`main` by default).
+Login shell is vanilla bash (for AI tools); iTerm's one profile runs zsh.
 
 ### Setup on a new machine
 
-1. `./install.sh --link-only` — shell symlinks + rendered APS dynamic profiles.
+1. `./install.sh --link-only` — shell symlinks (zsh + vanilla bash).
 2. Quit iTerm (⌘Q), then `./config/iterm2/apply-iterm-defaults.sh`.
 3. Relaunch iTerm.
 
-Edit project paths/colors in `config/iterm2/DynamicProfiles/aps-projects.json.in`,
-then re-run `./install.sh --link-only` (or `./config/iterm2/render-aps-projects.sh`).
+Make bash the login shell once: `chsh -s /bin/bash`.
 
 Full guide: [`config/iterm2/README.md`](config/iterm2/README.md).
 
