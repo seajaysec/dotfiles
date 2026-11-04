@@ -315,3 +315,46 @@ export PATH="$LAUNCH_HOME/bin:$PATH"
 export PATH="$PATH:/Users/chris.j.farrell/.lmstudio/bin"
 # End of LM Studio CLI section
 
+
+# EVM #vuln-rating Slack archive reader (self-contained HTML, no server needed)
+alias vulnchat="$HOME/bin/vulnchat"
+
+# ---- navi (Tenable exposure management engine) ----
+# navi hardcodes navi.db as a RELATIVE path, so the DB lands in whatever directory
+# navi is run from. Pin a single data home and always run navi there, via a subshell
+# so your own cwd is never changed. Survives `uv tool upgrade navi-pro`.
+export NAVI_HOME="$HOME/.navi"
+export NAVI_ACCESS_KEY="$VISION_TIO_ACCESS_KEY"
+export NAVI_SECRET_KEY="$VISION_TIO_SECRET_KEY"
+navi() { (mkdir -p "$NAVI_HOME" && cd "$NAVI_HOME" && command navi "$@"); }
+# NOTE: because navi runs from $NAVI_HOME, relative output paths resolve there too.
+# `navi export ... --output foo.csv` writes to ~/.navi/foo.csv, not your cwd.
+# Use absolute paths for output if you want it elsewhere.
+alias navi-home='cd "$NAVI_HOME"'
+alias navi-db='sqlite3 "$NAVI_HOME/navi.db"'
+
+# my-pi: auto-allow project-owned resources (YOLO, like Claude's --dangerously-skip-permissions)
+export MY_PI_MCP_PROJECT_CONFIG=allow
+export MY_PI_HOOKS_CONFIG=allow
+export MY_PI_LSP_PROJECT_BINARY=allow
+export MY_PI_PROMPT_PRESETS_PROJECT=allow
+export MY_PI_PROJECT_SKILLS=allow
+export MY_PI_TEAM_PROFILES_PROJECT=allow
+
+# skills CLI (vercel-labs/skills): always use latest, always install globally
+# for every skill + every agent. Bypass with `command npx skills ...`.
+npx() {
+  if [[ "$1" == skills || "$1" == skills@* ]]; then
+    shift
+    local sub="$1"; [[ $# -gt 0 ]] && shift
+    case "$sub" in
+      add|a)            command npx -y skills@latest add "$@" -g --all ;;
+      update|upgrade)   command npx -y skills@latest update "$@" -g -y ;;
+      remove|rm|ls|list) command npx -y skills@latest "$sub" "$@" -g ;;
+      *)                command npx -y skills@latest "$sub" "$@" ;;
+    esac
+  else
+    command npx "$@"
+  fi
+}
+alias skills='npx skills'
