@@ -1,0 +1,11 @@
+#!/bin/sh
+# iTerm session-log retention (daily via launchd: com.dotfiles.iterm-log-retention).
+# Logs are full transcripts: keep them local, compress after a week (zgrep still
+# searches them), delete after ITERM_LOG_KEEP_DAYS (default 45, a month plus a
+# vacation). Age = last write, so a still-running session's log is never touched.
+set -eu
+DIR="${ITERM_LOG_DIR:-$HOME/Library/Logs/iTerm2}"
+KEEP="${ITERM_LOG_KEEP_DAYS:-45}"
+[ -d "$DIR" ] || exit 0
+find "$DIR" -type f -name '*.log' -mtime +7 -exec gzip -9 {} \;
+find "$DIR" -type f \( -name '*.log' -o -name '*.log.gz' \) -mtime +"$KEEP" -delete

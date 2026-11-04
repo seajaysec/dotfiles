@@ -70,6 +70,30 @@ setup_iterm_dynamic_profiles() {
   fi
 }
 
+# Daily iTerm log retention (compress >7d, delete >45d). Idempotent.
+setup_iterm_log_retention() {
+  local label="com.dotfiles.iterm-log-retention"
+  local plist="$HOME/Library/LaunchAgents/${label}.plist"
+  mkdir -p "$HOME/Library/LaunchAgents" "$HOME/Library/Logs/iTerm2"
+  cat > "$plist" <<PLIST
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+    <key>Label</key><string>${label}</string>
+    <key>ProgramArguments</key>
+    <array><string>/bin/sh</string><string>${HOME}/.local/bin/iterm-log-retention</string></array>
+    <key>StartCalendarInterval</key>
+    <dict><key>Hour</key><integer>12</integer><key>Minute</key><integer>30</integer></dict>
+    <key>RunAtLoad</key><true/>
+    <key>StandardErrorPath</key><string>${HOME}/Library/Logs/iterm-log-retention.log</string>
+</dict>
+</plist>
+PLIST
+  launchctl bootout "gui/$(id -u)/${label}" >/dev/null 2>&1 || true
+  launchctl bootstrap "gui/$(id -u)" "$plist" >/dev/null 2>&1 || true
+}
+
 # Login shell = stock /bin/bash so AI tools (Claude Code, Codex, Cursor) get a
 # vanilla environment; zsh runs inside iTerm. Read the real account setting:
 # $SHELL is forced to /bin/bash inside zsh, so it can't be trusted.
@@ -102,6 +126,7 @@ link_dotfiles() {
   symlink_init ".bash_profile" "${HOME}/.bash_profile"
   symlink_init ".bashrc" "${HOME}/.bashrc"
   symlink_init "bin/unwrap-clipboard" "${HOME}/.local/bin/unwrap-clipboard"
+  symlink_init "bin/iterm-log-retention" "${HOME}/.local/bin/iterm-log-retention"
   symlink_init ".zsh.aliases" "${DOTFILES_TARGET}/.zsh.aliases"
   symlink_init ".zsh.functions" "${DOTFILES_TARGET}/.zsh.functions"
   symlink_init "config/starship/starship.toml" "${DOTFILES_TARGET}/config/starship/starship.toml"
@@ -166,6 +191,7 @@ link_dotfiles() {
 if [[ "${1:-}" == "--link-only" ]]; then
   link_dotfiles
   remove_stale_go
+  setup_iterm_log_retention
   ensure_login_shell
   echo "✨ Link-only complete (no packages installed)."
   exit 0
@@ -231,6 +257,7 @@ fi
 git lfs install --skip-repo >/dev/null 2>&1 || true
 
 remove_stale_go
+setup_iterm_log_retention
 
 echo "📁 Creating directory structure..."
 if [[ ! -d /opt/gists ]]; then

@@ -314,6 +314,10 @@ default["Right Option Key Sends"] = 0
 log_dir = Path.home() / "Library/Logs/iTerm2"
 log_dir.mkdir(parents=True, exist_ok=True)
 default["Log Directory"] = str(log_dir)
+# Plain text, not HTML: HTML wraps every span in styles + timestamps (one
+# Claude Code session produced a 3.4 GB log). 0=raw 1=plain 2=HTML 3=asciicast
+default["Plain Text Logging"] = 1
+default["Automatically Log"] = True
 
 # ⌘⌥C: smart copy. Runs unwrap-clipboard as a coprocess (action 35) — it
 # re-joins hard-wrapped TUI lines in the clipboard. Select text (copy-on-
@@ -330,9 +334,10 @@ plistlib.dump(data, p.open("wb"))
 print("  Left Option = Esc+; ⌘⌥C smart copy bound.")
 PY
 
-# Instant Replay memory: 32 MB per session (default 4 MB). Lets you scrub
+# Instant Replay memory: default 4 MB per session. It is per pane, so 32 MB x
+# 20 splits = 640 MB of RAM. Lets you scrub
 # much farther back via View > Step Back in Time (Cmd+Opt+B).
-defaults write "$DOMAIN" IRMemory -int 32
+defaults write "$DOMAIN" IRMemory -int 4
 
 echo "Applied. Relaunch iTerm — sessions now restore via iTermServer daemons."
 echo
