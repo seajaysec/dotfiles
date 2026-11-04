@@ -40,14 +40,56 @@ symlink_init() {
   ln -sf "$src" "$dest"
 }
 
-# iTerm: one static "Default" profile (configured by apply-iterm-defaults.sh).
-# Clears any dynamic profiles left over from older setups (APS, tmux -CC).
+# iTerm: one static "Default" profile running zsh (apply-iterm-defaults.sh).
+# Clears dynamic profiles left over from older setups (APS, tmux -CC).
 setup_iterm_dynamic_profiles() {
   local dyn_dir="${HOME}/Library/Application Support/iTerm2/DynamicProfiles"
+  local apply="${REPO_ROOT}/config/iterm2/apply-iterm-defaults.sh"
   if [[ -d "$dyn_dir" ]]; then
     rm -f "${dyn_dir}/tmux.json" "${dyn_dir}/plain.json" "${dyn_dir}/aps-projects.json"
   fi
-  echo "   iTerm: quit iTerm (⌘Q), then run: ${REPO_ROOT}/config/iterm2/apply-iterm-defaults.sh"
+  # Old rendered APS file: machine paths, no longer gitignored — never commit it.
+  rm -rf "${REPO_ROOT}/config/iterm2/DynamicProfiles"
+
+  [[ -d /Applications/iTerm.app ]] || return 0
+  if defaults read com.googlecode.iterm2 "New Bookmarks" 2>/dev/null | grep -q '"Custom Command" = "Custom Shell"'; then
+    return 0   # already one zsh profile
+  fi
+  if ! pgrep -xq iTerm2; then
+    "$apply"
+  elif ! pgrep -fq 'dotfiles-iterm-apply-on-quit'; then
+    # iTerm rewrites its prefs on quit, so wait for ⌘Q, then apply and relaunch.
+    # Session Restoration keeps running shells alive across the quit.
+    nohup /bin/bash -c '
+      : dotfiles-iterm-apply-on-quit
+      while pgrep -xq iTerm2; do sleep 1; done
+      for _ in 1 2 3 4 5 6 7 8 9 10; do "$0" && break; sleep 2; done
+      open -a iTerm' "$apply" >"${HOME}/Library/Logs/dotfiles-iterm-apply.log" 2>&1 </dev/null &
+    disown
+    echo "   iTerm: quit iTerm (⌘Q) once — profile switches to zsh and iTerm relaunches."
+  fi
+}
+
+# Login shell = stock /bin/bash so AI tools (Claude Code, Codex, Cursor) get a
+# vanilla environment; zsh runs inside iTerm. Read the real account setting:
+# $SHELL is forced to /bin/bash inside zsh, so it can't be trusted.
+ensure_login_shell() {
+  local cur
+  cur="$(dscl . -read "/Users/$USER" UserShell | awk '{print $2}')"
+  if [[ "$cur" != /bin/bash ]]; then
+    echo "🐚 Setting /bin/bash as login shell (was $cur)..."
+    chsh -s /bin/bash
+  fi
+}
+
+# Go: Homebrew's is the only one. A leftover go.dev .pkg in /usr/local/go
+# shadows it on minimal PATHs (GUI apps, launchd, sudo, agents), so `go install`
+# silently builds with a different version.
+remove_stale_go() {
+  if [[ -d /usr/local/go ]] && command -v brew >/dev/null 2>&1 && [[ -x "$(brew --prefix)/bin/go" ]]; then
+    echo "🐹 Removing stale /usr/local/go ($(/usr/local/go/bin/go version 2>/dev/null)) — Homebrew go is canonical..."
+    sudo rm -rf /usr/local/go /usr/local/bin/go /usr/local/bin/gofmt
+  fi
 }
 
 link_dotfiles() {
@@ -110,6 +152,7 @@ link_dotfiles() {
       git config --global --add include.path "${DOTFILES_TARGET}/.gitconfig"
       echo "   git: ~/.gitconfig now includes ${DOTFILES_TARGET}/.gitconfig"
     fi
+    git -C "$REPO_ROOT" config --local --unset-all user.email 2>/dev/null || true
   fi
   # Shared VS Code + Cursor User settings (same file; Cursor-only keys are ignored by VS Code).
   # Python interpreter: zsh `code`/`cursor` wrappers set PATH + VIRTUAL_ENV when autoswitch `.venv` exists; no defaultInterpreterPath in JSON.
@@ -121,6 +164,8 @@ link_dotfiles() {
 
 if [[ "${1:-}" == "--link-only" ]]; then
   link_dotfiles
+  remove_stale_go
+  ensure_login_shell
   echo "✨ Link-only complete (no packages installed)."
   exit 0
 fi
@@ -184,17 +229,13 @@ if [[ ! -d /Applications/iTerm.app ]]; then
 fi
 git lfs install --skip-repo >/dev/null 2>&1 || true
 
-# Go: Homebrew's is the only one. A leftover go.dev .pkg install in /usr/local/go
-# shadows it for anything with a minimal PATH (GUI apps, launchd, sudo, agents),
-# so `go install` silently builds with a different version. Remove it.
-if [[ -d /usr/local/go ]]; then
-  echo "🐹 Removing stale /usr/local/go ($(/usr/local/go/bin/go version 2>/dev/null)) — Homebrew go is canonical..."
-  sudo rm -rf /usr/local/go /usr/local/bin/go /usr/local/bin/gofmt
-fi
+remove_stale_go
 
 echo "📁 Creating directory structure..."
-sudo mkdir -p /opt/gists
-sudo chown "$USER:staff" /opt/gists
+if [[ ! -d /opt/gists ]]; then
+  sudo mkdir -p /opt/gists
+  sudo chown "$USER:staff" /opt/gists
+fi
 
 echo "🔌 zsh plugin manager (Zap) + iTerm shell integration…"
 mkdir -p ~/.local/share/zsh/plugins
@@ -319,19 +360,10 @@ fi
 mkdir -p ~/.zsh
 touch ~/.zsh/history
 
-# Login shell = stock /bin/bash so AI tools (Claude Code, Codex, Cursor) get a
-# vanilla environment. zsh is launched by iTerm's Default profile instead
-# (set by config/iterm2/apply-iterm-defaults.sh). Read the real account
-# setting: $SHELL is forced to /bin/bash inside zsh, so it can't be trusted.
-LOGIN_SHELL="$(dscl . -read "/Users/$USER" UserShell | awk '{print $2}')"
-if [[ "$LOGIN_SHELL" != /bin/bash ]]; then
-    echo "🐚 Setting /bin/bash as login shell (was $LOGIN_SHELL)..."
-    chsh -s /bin/bash
-fi
+ensure_login_shell
 
 echo "✨ Installation complete!"
-echo "Re-run safely: ./install.sh --link-only"
-echo "Next: quit iTerm (⌘Q), run ${REPO_ROOT}/config/iterm2/apply-iterm-defaults.sh, relaunch iTerm."
+echo "Sync later with: git pull && ./install.sh --link-only"
 
 echo "
 🔧 Maintenance:

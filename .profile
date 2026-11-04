@@ -15,6 +15,8 @@ export DOTFILES="${DOTFILES:-$HOME/dotfiles}"
 export HOMEBREW_NO_ENV_HINTS=1
 if [ -x /opt/homebrew/bin/brew ]; then
   eval "$(/opt/homebrew/bin/brew shellenv)"
+elif [ -x /usr/local/bin/brew ]; then
+  eval "$(/usr/local/bin/brew shellenv)"
 fi
 
 # Language toolchains

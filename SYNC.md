@@ -15,11 +15,24 @@
 
 ## Fresh machine
 
-1. Clone this repo — **default** layout is **`$HOME/dotfiles`**. The shell exports **`DOTFILES`** from `.zshenv` (`export DOTFILES="${DOTFILES:-$HOME/dotfiles}"`). If you clone elsewhere, set **`DOTFILES`** in **`~/.zshenv`** *before* interactive `.zshrc` runs (e.g. `export DOTFILES="$HOME/src/dotfiles"`).
-2. **Link only (safe repeat):** `./install.sh --link-only` — symlinks `~/.zshrc`, `~/.zshenv`, `~/.zprofile`, and under **`$DOTFILES`**: `.zsh.aliases`, `.zsh.functions`, `config/starship/starship.toml`, plus when present in the repo: **`~/.tmux.conf`**, **`~/.tmux.conf.local`** (gpakosz sources this from home), **`~/.gitignore_global`**. Backs up replaced files under **`~/.dotfiles-backup/<timestamp>/`**. After linking gitignore, run once: `git config --global core.excludesfile ~/.gitignore_global` (not automated so it never overwrites an existing choice).
-3. **Full bootstrap** (brew + nvm + bun + rust + fzf installer): `./install.sh` — use **once** per machine or when you intentionally want package installs.
-4. Create `~/secrets.sh` and optional `~/.zshrc.local` on that machine only.
-5. iTerm tmux integration: after `install.sh --link-only`, quit iTerm and run
-   `./config/iterm2/apply-tmux-defaults.sh` (sets the `tmux` profile as default,
-   enables client burial). The Dynamic Profile itself is symlinked from the repo
-   and hot-reloads — no plist sync, no `.zshrc` changes.
+1. Clone to `$HOME/dotfiles` (or set `DOTFILES` in `~/.zshenv` before `.zshrc` runs).
+2. `./install.sh` once: Homebrew + packages, iTerm2, Zap, iTerm shell integration, Bun, Rust, then everything below.
+3. Create `~/secrets.sh` (and optional `~/.zshrc.local`) on that machine only.
+
+## Syncing an existing machine
+
+```sh
+cd ~/dotfiles && git pull && ./install.sh --link-only
+```
+
+`--link-only` is idempotent and installs no packages. It:
+
+- symlinks shell, tmux, nvim, editor and gitignore files (anything it replaces goes to `~/.dotfiles-backup/<timestamp>/`)
+- makes `~/.gitconfig` include the tracked `.gitconfig` (machine-local bits stay in `~/.gitconfig`)
+- sets the login shell to `/bin/bash` (one password prompt the first time)
+- removes a stale `/usr/local/go` if Homebrew go exists (sudo prompt the first time)
+- switches iTerm to the single zsh profile: right away if iTerm is closed, otherwise on your next ⌘Q (iTerm relaunches itself)
+
+Re-run full `./install.sh` only when the package list changed.
+
+Note: upstream installers (rustup, LM Studio, etc.) like to append to `~/.zshrc` / `~/.bashrc`. Those are symlinks into this repo, so check `git status` after installing new tools.

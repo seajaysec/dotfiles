@@ -137,7 +137,7 @@ import plistlib
 from pathlib import Path
 
 ORIGINAL_DEFAULT_GUID = "74FD8F10-9C21-4853-AF71-8801DCF39FD7"
-ZSH = "/opt/homebrew/bin/zsh" if Path("/opt/homebrew/bin/zsh").exists() else "/bin/zsh"
+ZSH = next(z for z in ("/opt/homebrew/bin/zsh", "/usr/local/bin/zsh", "/bin/zsh") if Path(z).exists())
 p = Path.home() / "Library/Preferences/com.googlecode.iterm2.plist"
 data = plistlib.loads(p.read_bytes())
 bookmarks = data.get("New Bookmarks", [])
