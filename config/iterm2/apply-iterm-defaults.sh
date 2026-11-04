@@ -121,7 +121,7 @@ data = plistlib.loads(p.read_bytes())
 ORIGINAL_DEFAULT_GUID = "74FD8F10-9C21-4853-AF71-8801DCF39FD7"
 default = next(b for b in data["New Bookmarks"] if b.get("Guid") == ORIGINAL_DEFAULT_GUID)
 default["Show Status Bar"] = True
-default["StatusBarPosition"] = 1  # 0=top, 1=bottom
+default.pop("StatusBarPosition", None)  # not a profile key; position is global (below)
 default["Status Bar Layout"] = layout
 
 plistlib.dump(data, p.open("wb"))
@@ -283,6 +283,51 @@ gkm.update(dotfiles_bindings)
 data["GlobalKeyMap"] = gkm
 plistlib.dump(data, p.open("wb"))
 print(f"  Installed {len(dotfiles_bindings)} dotfiles keybindings.")
+PY
+
+# -- B6: Splits, mouse, copy ergonomics -------------------------------------
+# Status bar at the bottom. Global key; iTerm ignores it inside a profile.
+defaults write "$DOMAIN" StatusBarPosition -int 1
+# Keystrokes go to the pane you clicked, not whichever pane the pointer is
+# hovering over (focus-follows-mouse made typing jump between splits).
+defaults write "$DOMAIN" FocusFollowsMouse -bool false
+# Inactive splits dim, so the pane you're typing in is obvious.
+defaults write "$DOMAIN" DimInactiveSplitPanes -bool true
+defaults write "$DOMAIN" SplitPaneDimmingAmount -float 0.35
+# Copy-on-select stays on; strip trailing spaces TUIs pad lines with.
+defaults write "$DOMAIN" CopySelection -bool true
+defaults write "$DOMAIN" TrimWhitespaceOnCopy -bool true
+python3 <<'PY'
+import plistlib
+from pathlib import Path
+
+ORIGINAL_DEFAULT_GUID = "74FD8F10-9C21-4853-AF71-8801DCF39FD7"
+p = Path.home() / "Library/Preferences/com.googlecode.iterm2.plist"
+data = plistlib.loads(p.read_bytes())
+default = next(b for b in data["New Bookmarks"] if b.get("Guid") == ORIGINAL_DEFAULT_GUID)
+# Left ⌥ = Esc+ so ⌥←/⌥→/⌥⌫ jump/delete by word in zsh and TUIs.
+# Right ⌥ stays Normal for typing special characters (— é ©).
+default["Option Key Sends"] = 2
+default["Right Option Key Sends"] = 0
+# Session logs are full plain-text transcripts (secrets included). Keep them
+# out of ~/Documents, which iCloud "Desktop & Documents" may sync on some Macs.
+log_dir = Path.home() / "Library/Logs/iTerm2"
+log_dir.mkdir(parents=True, exist_ok=True)
+default["Log Directory"] = str(log_dir)
+
+# ⌘⌥C: smart copy. Runs unwrap-clipboard as a coprocess (action 35) — it
+# re-joins hard-wrapped TUI lines in the clipboard. Select text (copy-on-
+# select already copied it), then press ⌘⌥C. Coprocess output would be typed
+# into the session, so the script prints nothing.
+gkm = data.get("GlobalKeyMap", {}) or {}
+gkm["0x63-0x180000"] = {
+    "Version": 1, "Action": 35,
+    "Text": "PATH=/opt/homebrew/bin:/usr/local/bin:$PATH $HOME/.local/bin/unwrap-clipboard",
+    "Label": "dotfiles: Smart copy, unwrap lines (⌘⌥C)",
+}
+data["GlobalKeyMap"] = gkm
+plistlib.dump(data, p.open("wb"))
+print("  Left Option = Esc+; ⌘⌥C smart copy bound.")
 PY
 
 # Instant Replay memory: 32 MB per session (default 4 MB). Lets you scrub

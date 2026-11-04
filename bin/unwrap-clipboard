@@ -1,0 +1,59 @@
+#!/usr/bin/env python3
+"""Smart multi-line copy: un-hard-wrap the clipboard.
+
+TUIs (Claude Code, vim, tmux, man pages) draw text with real newlines and
+indentation, so copying a paragraph gives you broken lines. This rewrites the
+clipboard in place: strips trailing spaces, removes the shared left indent,
+and re-joins wrapped lines into paragraphs. Fenced ``` code blocks are kept
+exactly as they are.
+
+  unwrap-clipboard            # fix the clipboard in place (iTerm ⌘⌥C runs this)
+  pbpaste | unwrap-clipboard --stdin
+
+iTerm runs it as a coprocess, so it must never print to stdout.
+"""
+import subprocess
+import sys
+import textwrap
+
+
+def should_join(prev: str, nxt: str) -> bool:
+    """Decide whether `nxt` is a wrapped continuation of `prev`.
+
+    Both lines have trailing whitespace stripped and the common indent removed.
+    Neither is blank (blank lines always separate paragraphs) and neither is
+    inside a ``` fence.
+
+    TODO(you): return True to merge `nxt` onto the end of `prev` with a space.
+    """
+    return False
+
+
+def unwrap(text: str) -> str:
+    lines = textwrap.dedent("\n".join(l.rstrip() for l in text.splitlines())).split("\n")
+    out: list[str] = []
+    in_fence = False
+    for line in lines:
+        fence = line.lstrip().startswith("```")
+        if fence:
+            in_fence = not in_fence
+        if (not fence and not in_fence and out and out[-1].strip() and line.strip()
+                and not out[-1].lstrip().startswith("```")
+                and should_join(out[-1], line)):
+            out[-1] = out[-1] + " " + line.strip()
+        else:
+            out.append(line)
+    return "\n".join(out).strip("\n")
+
+
+def main() -> None:
+    if "--stdin" in sys.argv:
+        sys.stdout.write(unwrap(sys.stdin.read()) + "\n")
+        return
+    text = subprocess.run(["pbpaste"], capture_output=True, text=True).stdout
+    if text.strip():
+        subprocess.run(["pbcopy"], input=unwrap(text), text=True)
+
+
+if __name__ == "__main__":
+    main()

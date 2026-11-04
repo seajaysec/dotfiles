@@ -101,6 +101,7 @@ link_dotfiles() {
   symlink_init ".profile" "${HOME}/.profile"
   symlink_init ".bash_profile" "${HOME}/.bash_profile"
   symlink_init ".bashrc" "${HOME}/.bashrc"
+  symlink_init "bin/unwrap-clipboard" "${HOME}/.local/bin/unwrap-clipboard"
   symlink_init ".zsh.aliases" "${DOTFILES_TARGET}/.zsh.aliases"
   symlink_init ".zsh.functions" "${DOTFILES_TARGET}/.zsh.functions"
   symlink_init "config/starship/starship.toml" "${DOTFILES_TARGET}/config/starship/starship.toml"
