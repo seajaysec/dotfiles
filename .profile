@@ -20,6 +20,7 @@ fi
 # Language toolchains
 export PYENV_ROOT="$HOME/.pyenv"
 export GOPATH="$HOME/go"
+export GOBIN="$GOPATH/bin"   # `go install` drops binaries here (on PATH below)
 export BUN_INSTALL="$HOME/.bun"
 export LAUNCH_HOME="$HOME/.launch"
 unset GOROOT   # must follow whichever `go` is on PATH

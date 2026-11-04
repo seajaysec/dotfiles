@@ -112,6 +112,7 @@ pyenv() {
 # follows the resolved `go` binary.
 unset GOROOT
 export GOPATH=$HOME/go
+export GOBIN=$GOPATH/bin   # `go install` target; on PATH below
 
 ###############################
 # Bun JavaScript runtime
@@ -152,7 +153,6 @@ setopt NO_HIST_BEEP
 # Zap plugins — fast-syntax-highlighting must load last (FIX-08 / 02-03)
 plug "zsh-users/zsh-autosuggestions"
 plug "zsh-users/zsh-history-substring-search"
-plug "MichaelAquilina/zsh-you-should-use"
 plug "MichaelAquilina/zsh-autoswitch-virtualenv"
 plug "zdharma-continuum/fast-syntax-highlighting"
 

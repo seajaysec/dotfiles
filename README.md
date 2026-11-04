@@ -21,8 +21,6 @@ Login shell is vanilla bash (for AI tools); iTerm's one profile runs zsh.
 2. Quit iTerm (⌘Q), then `./config/iterm2/apply-iterm-defaults.sh`.
 3. Relaunch iTerm.
 
-Make bash the login shell once: `chsh -s /bin/bash`.
-
 Full guide: [`config/iterm2/README.md`](config/iterm2/README.md).
 
 ## Prerequisites

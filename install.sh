@@ -96,6 +96,21 @@ link_dotfiles() {
     echo "   agent-chats: viewer + libs copied → ${ac_dest}"
   fi
   setup_iterm_dynamic_profiles
+  # Neovim config (whole directory).
+  if [[ -d "${REPO_ROOT}/config/nvim" ]]; then
+    mkdir -p "${HOME}/.config"
+    symlink_init "config/nvim" "${HOME}/.config/nvim"
+  fi
+  # Git: ~/.gitconfig stays machine-local (git lfs / gh / credential helpers
+  # write there) and just includes the tracked file, so `git config --global`
+  # never edits this repo.
+  if [[ -f "${REPO_ROOT}/.gitconfig" ]]; then
+    touch "${HOME}/.gitconfig"
+    if ! git config --global --get-all include.path 2>/dev/null | grep -qxF "${DOTFILES_TARGET}/.gitconfig"; then
+      git config --global --add include.path "${DOTFILES_TARGET}/.gitconfig"
+      echo "   git: ~/.gitconfig now includes ${DOTFILES_TARGET}/.gitconfig"
+    fi
+  fi
   # Shared VS Code + Cursor User settings (same file; Cursor-only keys are ignored by VS Code).
   # Python interpreter: zsh `code`/`cursor` wrappers set PATH + VIRTUAL_ENV when autoswitch `.venv` exists; no defaultInterpreterPath in JSON.
   if [[ -f "${REPO_ROOT}/config/editor/User/settings.json" ]]; then
@@ -130,6 +145,17 @@ fi
 # Install essential packages
 echo "📦 Installing essential packages..."
 brew install \
+    git \
+    git-lfs \
+    gh \
+    glab \
+    zsh \
+    neovim \
+    jq \
+    pyenv \
+    uv \
+    node \
+    go \
     eza \
     ripgrep \
     fzf \
@@ -140,7 +166,7 @@ brew install \
     rlwrap \
     fd \
     bat \
-    delta \
+    git-delta \
     tldr \
     the_silver_searcher \
     highlight \
@@ -152,23 +178,41 @@ brew install \
     python \
     ipython
 
+if [[ ! -d /Applications/iTerm.app ]]; then
+  echo "🖥️  Installing iTerm2..."
+  brew install --cask iterm2
+fi
+git lfs install --skip-repo >/dev/null 2>&1 || true
+
+# Go: Homebrew's is the only one. A leftover go.dev .pkg install in /usr/local/go
+# shadows it for anything with a minimal PATH (GUI apps, launchd, sudo, agents),
+# so `go install` silently builds with a different version. Remove it.
+if [[ -d /usr/local/go ]]; then
+  echo "🐹 Removing stale /usr/local/go ($(/usr/local/go/bin/go version 2>/dev/null)) — Homebrew go is canonical..."
+  sudo rm -rf /usr/local/go /usr/local/bin/go /usr/local/bin/gofmt
+fi
+
 echo "📁 Creating directory structure..."
 sudo mkdir -p /opt/gists
 sudo chown "$USER:staff" /opt/gists
 
-echo "🔧 Preparing zsh plugin paths (Zap lives under ~/.local/share/zap — install Zap separately if needed)…"
+echo "🔌 zsh plugin manager (Zap) + iTerm shell integration…"
 mkdir -p ~/.local/share/zsh/plugins
+# Clone instead of Zap's installer: the installer rewrites ~/.zshrc (a symlink
+# into this repo). Plugins themselves install on first zsh start via `plug`.
+if [[ ! -f "$HOME/.local/share/zap/zap.zsh" ]]; then
+  git clone --depth 1 -b release-v1 https://github.com/zap-zsh/zap.git "$HOME/.local/share/zap"
+fi
+# Status bar user vars + cwd tracking depend on this (sourced by .zshrc).
+if [[ ! -f "$HOME/.iterm2_shell_integration.zsh" ]]; then
+  curl -fsSL https://iterm2.com/shell_integration/zsh -o "$HOME/.iterm2_shell_integration.zsh"
+fi
 
 # Each upstream installer below appends a shell-init block to ~/.zshrc.
 # That mutates this repo (since ~/.zshrc is a symlink into it). Guard with
 # command -v so re-runs of install.sh don't re-pollute committed files.
-echo "🛠️ Installing development tools (NVM / Bun / Rust) — skipping any already installed…"
-if [[ ! -s "$HOME/.nvm/nvm.sh" ]]; then
-  echo "   → nvm"
-  curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.40.1/install.sh | bash
-else
-  echo "   → nvm already installed (skip)"
-fi
+# Node comes from Homebrew (above); no nvm.
+echo "🛠️ Installing development tools (Bun / Rust) — skipping any already installed…"
 if ! command -v bun >/dev/null 2>&1 && [[ ! -x "$HOME/.bun/bin/bun" ]]; then
   echo "   → bun"
   curl -fsSL https://bun.sh/install | bash
@@ -269,33 +313,25 @@ mkdir -p "$HOME/.secrets/agent-chats"
 # add a duplicate block.
 if [[ -x "$(brew --prefix)/opt/fzf/install" ]]; then
   echo "🔍 Configuring fzf (key bindings + completion, no rc rewrite)…"
-  "$(brew --prefix)/opt/fzf/install" --key-bindings --completion --no-update-rc
+  "$(brew --prefix)/opt/fzf/install" --key-bindings --completion --no-update-rc --no-bash --no-fish
 fi
 
 mkdir -p ~/.zsh
 touch ~/.zsh/history
 
-echo "🐚 Setting up zsh..."
-if ! command -v zsh >/dev/null 2>&1; then
-    brew install zsh
-fi
-
-BREW_ZSH="$(brew --prefix)/bin/zsh"
-if ! grep -q "$BREW_ZSH" /etc/shells; then
-    echo "Adding Homebrew's zsh to allowed shells..."
-    echo "$BREW_ZSH" | sudo tee -a /etc/shells
-fi
-
-# Compare $SHELL to the Homebrew zsh path directly. Substring-matching "zsh"
-# silently leaves you on Apple's /bin/zsh on a stock Mac.
-if [[ "$SHELL" != "$BREW_ZSH" ]]; then
-    echo "🐚 Setting Homebrew's zsh ($BREW_ZSH) as default shell..."
-    chsh -s "$BREW_ZSH"
+# Login shell = stock /bin/bash so AI tools (Claude Code, Codex, Cursor) get a
+# vanilla environment. zsh is launched by iTerm's Default profile instead
+# (set by config/iterm2/apply-iterm-defaults.sh). Read the real account
+# setting: $SHELL is forced to /bin/bash inside zsh, so it can't be trusted.
+LOGIN_SHELL="$(dscl . -read "/Users/$USER" UserShell | awk '{print $2}')"
+if [[ "$LOGIN_SHELL" != /bin/bash ]]; then
+    echo "🐚 Setting /bin/bash as login shell (was $LOGIN_SHELL)..."
+    chsh -s /bin/bash
 fi
 
 echo "✨ Installation complete!"
 echo "Re-run safely: ./install.sh --link-only"
-echo "exec $BREW_ZSH"
+echo "Next: quit iTerm (⌘Q), run ${REPO_ROOT}/config/iterm2/apply-iterm-defaults.sh, relaunch iTerm."
 
 echo "
 🔧 Maintenance:
