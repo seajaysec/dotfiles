@@ -21,8 +21,29 @@ mkdir -p "$(dirname "$LOG")"
 migrate_one() {
   local dir="$1" ptr="$1/.venv" name old pyver tmp
   [ -f "$ptr" ] || return 0
+  # Security: a cloned repo can ship its own .venv pointer. Only handle pointers
+  # that autoswitch wrote on this machine: owned by you, not committed to git,
+  # naming a plain directory inside ~/.virtualenvs (no ../ escapes, no symlinks out).
+  if [ ! -O "$ptr" ] || [ ! -O "$dir" ]; then
+    printf 'SKIP    %s (not owned by you)\n' "$dir" | tee -a "$LOG"; return 0
+  fi
+  if git -C "$dir" ls-files --error-unmatch .venv >/dev/null 2>&1; then
+    printf 'SKIP    %s (.venv is committed in the repo: not yours, not touched)\n' "$dir" | tee -a "$LOG"; return 0
+  fi
   name="$(tr -d ' \r\n' < "$ptr")"
+  case "$name" in
+    */*|.|..|-*) printf 'SKIP    %s (invalid pointer name %s)\n' "$dir" "$name" | tee -a "$LOG"; return 0 ;;
+  esac
   old="$OLD_ROOT/$name"
+  if [ -n "$name" ] && [ -e "$old" ]; then
+    local old_real root_real
+    old_real="$(cd "$old" 2>/dev/null && pwd -P)"
+    root_real="$(cd "$OLD_ROOT" && pwd -P)"
+    case "$old_real/" in
+      "$root_real"/?*/) ;;
+      *) printf 'SKIP    %s (pointer escapes %s)\n' "$dir" "$OLD_ROOT" | tee -a "$LOG"; return 0 ;;
+    esac
+  fi
   if [ -z "$name" ] || [ ! -d "$old" ]; then
     rm -f "$ptr"
     printf 'STALE   %s (env %s no longer exists; pointer removed)\n' "$dir" "$name" | tee -a "$LOG"
@@ -37,9 +58,16 @@ migrate_one() {
   mv "$ptr" "$ptr.pointer-backup"
   if uv venv -q --seed --prompt "$(basename "$dir")" --python "$pyver" "$dir/.venv" \
      && { [ ! -s "$tmp" ] || uv pip install -q --python "$dir/.venv/bin/python" -r "$tmp"; } \
-     && { [ ! -f "$dir/pyproject.toml" ] && [ ! -f "$dir/setup.py" ] \
-          || uv pip install -q --python "$dir/.venv/bin/python" -e "$dir" 2>/dev/null || true; }
   then
+    # Installing the project itself (-e .) runs its build code, so only do it
+    # when you named this project explicitly, never during an unattended --all.
+    if [ -f "$dir/pyproject.toml" ] || [ -f "$dir/setup.py" ]; then
+      if [ "$ALL_MODE" = 1 ]; then
+        printf 'NOTE    %s has its own package; to install it: cd %s && pysync\n' "$dir" "$dir" | tee -a "$LOG"
+      else
+        uv pip install -q --python "$dir/.venv/bin/python" -e "$dir" 2>/dev/null || true
+      fi
+    fi
     rm -f "$ptr.pointer-backup"
     grep -qxF -- "$dir/.venv" "$TRUST" 2>/dev/null || echo "$dir/.venv" >> "$TRUST"   # we built it: auto-activate OK
     printf 'OK      %s (python %s, %s packages, was %s)\n' "$dir" "$pyver" "$(wc -l < "$tmp" | tr -d ' ')" "$name" | tee -a "$LOG"
@@ -51,7 +79,9 @@ migrate_one() {
   rm -f "$tmp"
 }
 
+ALL_MODE=0
 if [ "${1:-}" = "--all" ]; then
+  ALL_MODE=1
   find "$HOME" -maxdepth 6 -name .venv -type f \
        -not -path "$HOME/Library/*" -not -path '*/node_modules/*' -not -path "$OLD_ROOT/*" 2>/dev/null \
     | while IFS= read -r p; do
