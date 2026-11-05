@@ -2,23 +2,30 @@
   {
     "title": "whocerts <domain>",
     "value": "whocerts ",
-    "tags": ["security", "network"],
+    "tags": [
+      "security",
+      "network"
+    ],
     "guid": "dotfiles-snippet-whocerts",
     "escaping": 2,
     "version": 2
   },
   {
-    "title": "mkvenv 3.x",
+    "title": "mkvenv 3.x (uv ./.venv)",
     "value": "mkvenv 3.",
-    "tags": ["python"],
+    "tags": [
+      "python"
+    ],
     "guid": "dotfiles-snippet-mkvenv",
     "escaping": 2,
     "version": 2
   },
   {
-    "title": "pipreqs + install (pipr)",
+    "title": "pipr: record + install stated and imported deps",
     "value": "pipr",
-    "tags": ["python"],
+    "tags": [
+      "python"
+    ],
     "guid": "dotfiles-snippet-pipr",
     "escaping": 2,
     "version": 2
@@ -26,7 +33,9 @@
   {
     "title": "dualping <target>",
     "value": "dualping ",
-    "tags": ["network"],
+    "tags": [
+      "network"
+    ],
     "guid": "dotfiles-snippet-dualping",
     "escaping": 2,
     "version": 2
@@ -34,7 +43,10 @@
   {
     "title": "grepip from clipboard",
     "value": "pbpaste | grepip",
-    "tags": ["network", "clipboard"],
+    "tags": [
+      "network",
+      "clipboard"
+    ],
     "guid": "dotfiles-snippet-grepip-clipboard",
     "escaping": 2,
     "version": 2
@@ -42,7 +54,10 @@
   {
     "title": "nmap top ports + UA (nmapr)",
     "value": "nmapr --top-ports 100 ",
-    "tags": ["security", "network"],
+    "tags": [
+      "security",
+      "network"
+    ],
     "guid": "dotfiles-snippet-nmapr-top100",
     "escaping": 2,
     "version": 2
@@ -50,7 +65,9 @@
   {
     "title": "git WIP commit (gwip)",
     "value": "gwip",
-    "tags": ["git"],
+    "tags": [
+      "git"
+    ],
     "guid": "dotfiles-snippet-gwip",
     "escaping": 2,
     "version": 2
@@ -58,7 +75,9 @@
   {
     "title": "clone from clipboard (gcx)",
     "value": "gcx",
-    "tags": ["git"],
+    "tags": [
+      "git"
+    ],
     "guid": "dotfiles-snippet-gcx",
     "escaping": 2,
     "version": 2
@@ -66,7 +85,10 @@
   {
     "title": "quick JSON GET",
     "value": "getJSON ",
-    "tags": ["network", "http"],
+    "tags": [
+      "network",
+      "http"
+    ],
     "guid": "dotfiles-snippet-getjson",
     "escaping": 2,
     "version": 2
@@ -74,8 +96,20 @@
   {
     "title": "kill all docker (stop + rm)",
     "value": "dockstop && dockrm",
-    "tags": ["docker"],
+    "tags": [
+      "docker"
+    ],
     "guid": "dotfiles-snippet-docker-killall",
+    "escaping": 2,
+    "version": 2
+  },
+  {
+    "title": "pyhelp (uv cheat sheet)",
+    "value": "pyhelp\n",
+    "tags": [
+      "python"
+    ],
+    "guid": "dotfiles-snippet-pyhelp",
     "escaping": 2,
     "version": 2
   }

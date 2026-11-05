@@ -69,6 +69,7 @@ export PYTHON_BUILD_HOMEBREW_OPENSSL_FORMULA="openssl@3"
 ###############################
 typeset -U path
 path=(
+    ~/.local/bin   # first: uv-managed python3, uv tools, claude
     /opt/homebrew/bin
     /opt/homebrew/opt/openssl@3/bin
     /usr/local/bin
@@ -77,7 +78,6 @@ path=(
     /usr/sbin
     /bin
     /sbin
-    ~/.local/bin
     ~/.npm-packages/bin
     ~/.npm-packages/lib/node_modules/n/bin
     /bin/lscript
@@ -85,22 +85,6 @@ path=(
     ~/.dotnet/tools
 )
 export PATH="${(j.:.)path}"
-
-# Pyenv additions (optimized - no subshells, no rehash at startup)
-export PYENV_ROOT="$HOME/.pyenv"
-export PATH="$PYENV_ROOT/shims:$PYENV_ROOT/bin:$PATH"
-export PYENV_SHELL=zsh
-# Source pyenv completions (use symlinked path, not versioned cellar path)
-_pyenv_root="$(brew --prefix pyenv 2>/dev/null)" && [[ -f "$_pyenv_root/completions/pyenv.zsh" ]] && source "$_pyenv_root/completions/pyenv.zsh"
-unset _pyenv_root
-pyenv() {
-  local command=${1:-}
-  [ "$#" -gt 0 ] && shift
-  case "$command" in
-    activate|deactivate|rehash|shell) eval "$(pyenv "sh-$command" "$@")" ;;
-    *) command pyenv "$command" "$@" ;;
-  esac
-}
 
 ###############################
 # Golang configuration
@@ -153,7 +137,6 @@ setopt NO_HIST_BEEP
 # Zap plugins — fast-syntax-highlighting must load last (FIX-08 / 02-03)
 plug "zsh-users/zsh-autosuggestions"
 plug "zsh-users/zsh-history-substring-search"
-plug "MichaelAquilina/zsh-autoswitch-virtualenv"
 plug "zdharma-continuum/fast-syntax-highlighting"
 
 # Docker completions on fpath before compinit (FIX-09 / 02-03)
@@ -199,6 +182,7 @@ zstyle ':completion:*:corrections' format '%B%d (errors: %e)%b'
 
 source "${DOTFILES}/.zsh.aliases"
 source "${DOTFILES}/.zsh.functions"
+source "${DOTFILES}/config/zsh/python.zsh"   # uv: ./.venv per project, auto-activates
 
 ###############################
 # Vi + keymaps (KEYS-* — Phase 3: bindkey -v before other bindkeys; emacs keys on viins)
@@ -246,7 +230,9 @@ export ITERM_ENABLE_SHELL_INTEGRATION_WITH_TMUX=YES
 # not in a venv. Set DOTFILES_PROMPT=starship in ~/.zshrc.local to disable the
 # iTerm-bar path and bring back Starship.
 iterm2_print_user_vars() {
-  iterm2_set_user_var python_venv "${VIRTUAL_ENV##*/}"
+  # Project name, not ".venv" (uv envs live in <project>/.venv).
+  local _v=${VIRTUAL_ENV:t}; [[ $_v == .venv ]] && _v=${VIRTUAL_ENV:h:t}
+  iterm2_set_user_var python_venv "$_v"
   if [[ -n "$VIRTUAL_ENV" && -x "$VIRTUAL_ENV/bin/python" ]]; then
     iterm2_set_user_var python_version "Python $("$VIRTUAL_ENV/bin/python" --version 2>&1 | awk '{print $2}')"
   else

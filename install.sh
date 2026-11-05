@@ -94,6 +94,17 @@ PLIST
   launchctl bootstrap "gui/$(id -u)" "$plist" >/dev/null 2>&1 || true
 }
 
+# Python = uv. uv-managed 3.12 is the default python3 (~/.local/bin, first on
+# PATH); projects get their own ./.venv. pyenv / pipx / ~/.virtualenvs retired.
+setup_python_uv() {
+  command -v uv >/dev/null 2>&1 || return 0
+  UV_PYTHON_PREFERENCE=only-managed uv python install 3.12 --default >/dev/null 2>&1 \
+    && echo "   python: $(~/.local/bin/python3 --version 2>&1) via uv (default python3)"
+  if find "$HOME" -maxdepth 6 -name .venv -type f -not -path "$HOME/Library/*" 2>/dev/null | grep -q .; then
+    echo "   python: old ~/.virtualenvs pointer files found. Convert: venv-migrate --all"
+  fi
+}
+
 # Login shell = stock /bin/bash so AI tools (Claude Code, Codex, Cursor) get a
 # vanilla environment; zsh runs inside iTerm. Read the real account setting:
 # $SHELL is forced to /bin/bash inside zsh, so it can't be trusted.
@@ -127,6 +138,7 @@ link_dotfiles() {
   symlink_init ".bashrc" "${HOME}/.bashrc"
   symlink_init "bin/unwrap-clipboard" "${HOME}/.local/bin/unwrap-clipboard"
   symlink_init "bin/iterm-log-retention" "${HOME}/.local/bin/iterm-log-retention"
+  symlink_init "bin/venv-migrate" "${HOME}/.local/bin/venv-migrate"
   symlink_init ".zsh.aliases" "${DOTFILES_TARGET}/.zsh.aliases"
   symlink_init ".zsh.functions" "${DOTFILES_TARGET}/.zsh.functions"
   symlink_init "config/starship/starship.toml" "${DOTFILES_TARGET}/config/starship/starship.toml"
@@ -191,6 +203,7 @@ link_dotfiles() {
 if [[ "${1:-}" == "--link-only" ]]; then
   link_dotfiles
   remove_stale_go
+  setup_python_uv
   setup_iterm_log_retention
   ensure_login_shell
   echo "✨ Link-only complete (no packages installed)."
@@ -224,7 +237,6 @@ brew install \
     zsh \
     neovim \
     jq \
-    pyenv \
     uv \
     node \
     go \
@@ -247,8 +259,7 @@ brew install \
     ffmpeg \
     imagemagick \
     openssl \
-    python \
-    ipython
+    python
 
 if [[ ! -d /Applications/iTerm.app ]]; then
   echo "🖥️  Installing iTerm2..."
@@ -258,6 +269,7 @@ git lfs install --skip-repo >/dev/null 2>&1 || true
 
 remove_stale_go
 setup_iterm_log_retention
+setup_python_uv
 
 echo "📁 Creating directory structure..."
 if [[ ! -d /opt/gists ]]; then

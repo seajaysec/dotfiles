@@ -20,15 +20,15 @@ elif [ -x /usr/local/bin/brew ]; then
 fi
 
 # Language toolchains
-export PYENV_ROOT="$HOME/.pyenv"
 export GOPATH="$HOME/go"
 export GOBIN="$GOPATH/bin"   # `go install` drops binaries here (on PATH below)
 export BUN_INSTALL="$HOME/.bun"
 export LAUNCH_HOME="$HOME/.launch"
 unset GOROOT   # must follow whichever `go` is on PATH
+export UV_PYTHON_PREFERENCE=only-managed   # uv uses only its own Pythons
 
 # PATH — same order as zsh, then whatever the parent passed in, de-duplicated.
-PATH="$LAUNCH_HOME/bin:$PYENV_ROOT/shims:$PYENV_ROOT/bin:/opt/homebrew/bin:/opt/homebrew/sbin:/opt/homebrew/opt/openssl@3/bin:/usr/local/bin:/usr/local/sbin:/usr/bin:/usr/sbin:/bin:/sbin:$HOME/.local/bin:$HOME/.npm-packages/bin:$HOME/.cargo/bin:$HOME/.dotnet/tools:$GOPATH/bin:$BUN_INSTALL/bin:${PATH:+$PATH:}$HOME/.lmstudio/bin"
+PATH="$HOME/.local/bin:$LAUNCH_HOME/bin:/opt/homebrew/bin:/opt/homebrew/sbin:/opt/homebrew/opt/openssl@3/bin:/usr/local/bin:/usr/local/sbin:/usr/bin:/usr/sbin:/bin:/sbin:$HOME/.npm-packages/bin:$HOME/.cargo/bin:$HOME/.dotnet/tools:$GOPATH/bin:$BUN_INSTALL/bin:${PATH:+$PATH:}$HOME/.lmstudio/bin"
 PATH="$(printf '%s' "$PATH" | awk -v RS=: -v ORS=: 'length && !seen[$0]++' | sed 's/:$//')"
 export PATH
 

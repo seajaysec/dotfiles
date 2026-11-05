@@ -1,0 +1,62 @@
+#!/bin/bash
+# venv-migrate: convert zsh-autoswitch-virtualenv pointer files (.venv files
+# naming an env in ~/.virtualenvs) into standard in-project .venv/ directories
+# built by uv, with the same Python minor version and the same packages.
+#
+#   venv-migrate              # current directory
+#   venv-migrate DIR...       # specific projects
+#   venv-migrate --all        # every pointer under ~ (skips ~ itself)
+#
+# Safe: the pointer file is restored if the new env fails to build, and the old
+# env in ~/.virtualenvs is left alone (delete that folder once you're happy).
+# Pointers whose env no longer exists are just removed.
+set -u
+export UV_PYTHON_PREFERENCE=only-managed
+OLD_ROOT="${AUTOSWITCH_VIRTUAL_ENV_DIR:-$HOME/.virtualenvs}"
+LOG="$HOME/Library/Logs/venv-migrate.log"
+mkdir -p "$(dirname "$LOG")"
+
+migrate_one() {
+  local dir="$1" ptr="$1/.venv" name old pyver tmp
+  [ -f "$ptr" ] || return 0
+  name="$(tr -d ' \r\n' < "$ptr")"
+  old="$OLD_ROOT/$name"
+  if [ -z "$name" ] || [ ! -d "$old" ]; then
+    rm -f "$ptr"
+    printf 'STALE   %s (env %s no longer exists; pointer removed)\n' "$dir" "$name" | tee -a "$LOG"
+    return 0
+  fi
+  pyver="$("$old/bin/python" -c 'import sys; print("%d.%d" % sys.version_info[:2])' 2>/dev/null || echo 3.12)"
+  tmp="$(mktemp -t venv-migrate)"
+  # uv reads the old env directly (no pip needed). Editable/local installs are
+  # re-done from the project itself below.
+  uv pip freeze --python "$old/bin/python" 2>/dev/null \
+    | grep -v -E '^-e |@ file://' > "$tmp"
+  mv "$ptr" "$ptr.pointer-backup"
+  if uv venv -q --seed --prompt "$(basename "$dir")" --python "$pyver" "$dir/.venv" \
+     && { [ ! -s "$tmp" ] || uv pip install -q --python "$dir/.venv/bin/python" -r "$tmp"; } \
+     && { [ ! -f "$dir/pyproject.toml" ] && [ ! -f "$dir/setup.py" ] \
+          || uv pip install -q --python "$dir/.venv/bin/python" -e "$dir" 2>/dev/null || true; }
+  then
+    rm -f "$ptr.pointer-backup"
+    printf 'OK      %s (python %s, %s packages, was %s)\n' "$dir" "$pyver" "$(wc -l < "$tmp" | tr -d ' ')" "$name" | tee -a "$LOG"
+  else
+    rm -rf "$dir/.venv"
+    mv "$ptr.pointer-backup" "$ptr"
+    printf 'FAILED  %s (python %s, env %s) - pointer restored; try: cd %s && mkvenv %s\n' "$dir" "$pyver" "$name" "$dir" "$pyver" | tee -a "$LOG"
+  fi
+  rm -f "$tmp"
+}
+
+if [ "${1:-}" = "--all" ]; then
+  find "$HOME" -maxdepth 6 -name .venv -type f \
+       -not -path "$HOME/Library/*" -not -path '*/node_modules/*' -not -path "$OLD_ROOT/*" 2>/dev/null \
+    | while IFS= read -r p; do
+        d="$(dirname "$p")"
+        [ "$d" = "$HOME" ] && continue
+        migrate_one "$d"
+      done
+else
+  [ $# -eq 0 ] && set -- .
+  for d in "$@"; do migrate_one "$(cd "$d" && pwd)"; done
+fi
