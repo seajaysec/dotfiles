@@ -41,11 +41,14 @@ defaults write "$DOMAIN" bootstrapDaemon -bool true
 defaults write "$DOMAIN" showSessionRestoredBanner -bool false
 
 # -- Startup mode: "Use system window restoration settings" -------------------
-# All three startup flags off => iTerm defers to macOS window restoration,
+# All four startup flags off => iTerm defers to macOS window restoration,
 # which is what Session Restoration needs.
 defaults write "$DOMAIN" OpenArrangementAtStartup -bool false
 defaults write "$DOMAIN" OpenBookmark -bool false
 defaults write "$DOMAIN" AlwaysOpenWindowAtStartup -bool false
+# "Don't Open Any Windows" — when true iTerm skips ALL restoration
+# (PseudoTerminalRestorer: "Abort because opening no windows at startup").
+defaults write "$DOMAIN" OpenNoWindowsAtStartup -bool false
 
 # -- macOS system pref --------------------------------------------------------
 # Required for Session Restoration per iTerm docs. UI equivalent:
@@ -347,4 +350,5 @@ printf '  runJobsInServers                = %s\n' "$(defaults read "$DOMAIN" run
 printf '  killJobsInServersOnQuit         = %s (want 0)\n' "$(defaults read "$DOMAIN" killJobsInServersOnQuit 2>/dev/null || echo '?')"
 printf '  AlwaysOpenWindowAtStartup       = %s (want 0)\n' "$(defaults read "$DOMAIN" AlwaysOpenWindowAtStartup 2>/dev/null || echo '?')"
 printf '  OpenArrangementAtStartup        = %s (want 0)\n' "$(defaults read "$DOMAIN" OpenArrangementAtStartup 2>/dev/null || echo '?')"
+printf '  OpenNoWindowsAtStartup          = %s (want 0)\n' "$(defaults read "$DOMAIN" OpenNoWindowsAtStartup 2>/dev/null || echo '?')"
 printf '  NSQuitAlwaysKeepsWindows (-g)   = %s (want 1)\n' "$(defaults read -g NSQuitAlwaysKeepsWindows 2>/dev/null || echo '?')"
