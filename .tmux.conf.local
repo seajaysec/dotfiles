@@ -275,7 +275,7 @@ tmux_conf_copy_to_os_clipboard=true
 # this is the place to override or undo settings
 
 # increase history size
-# Privacy: in-memory scrollback only, cleared daily by ~/.local/bin/privacy-wipe.
+# Bounded in-memory scrollback.
 set -g history-limit 20000
 
 # Mouse OFF: under iTerm tmux integration (-CC), iTerm handles the mouse

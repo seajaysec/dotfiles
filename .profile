@@ -35,6 +35,11 @@ PATH="$HOME/.local/bin:$LAUNCH_HOME/bin:/opt/homebrew/bin:/opt/homebrew/sbin:/op
 PATH="$(printf '%s' "$PATH" | awk -v RS=: -v ORS=: 'length && !seen[$0]++' | sed 's/:$//')"
 export PATH
 
+# Ghidra / REA (bash + agents; zsh gets GHIDRA_INSTALL_DIR from .zshenv). Only where installed.
+[ -d /opt/homebrew/opt/ghidra/libexec ] && export GHIDRA_INSTALL_DIR="/opt/homebrew/opt/ghidra/libexec"
+[ -z "${JAVA_HOME:-}" ] && [ -d /Library/Java/JavaVirtualMachines/temurin-27.jdk ] && \
+  export JAVA_HOME="/Library/Java/JavaVirtualMachines/temurin-27.jdk/Contents/Home"
+
 # API keys / tokens (shared with zsh)
 [ -f "$HOME/secrets.sh" ] && . "$HOME/secrets.sh"
 export NAVI_HOME="$HOME/.navi"

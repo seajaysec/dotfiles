@@ -15,6 +15,9 @@ export GHIDRA_INSTALL_DIR=/opt/homebrew/opt/ghidra/libexec
 # JAVA_HOME_GHIDRA -> our wrappers; GHIDRA_CLI_JAVA_HOME -> ghidra-cli.
 export JAVA_HOME_GHIDRA=/opt/homebrew/opt/openjdk@21/libexec/openjdk.jdk/Contents/Home
 export GHIDRA_CLI_JAVA_HOME="$JAVA_HOME_GHIDRA"
+# REA wants a default JAVA_HOME (temurin 27) when nothing else set one; same rule in .profile.
+[[ -z "${JAVA_HOME:-}" && -d /Library/Java/JavaVirtualMachines/temurin-27.jdk ]] && \
+  export JAVA_HOME=/Library/Java/JavaVirtualMachines/temurin-27.jdk/Contents/Home
 
 # Privacy: history/telemetry env shared with bash and sh.
 [[ -r "$HOME/.config/privacy/env.sh" ]] && source "$HOME/.config/privacy/env.sh"

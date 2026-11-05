@@ -1,5 +1,5 @@
 {
-  // Privacy (minimal telemetry/local history). Daily wipe: ~/.local/bin/privacy-wipe
+  // Minimal telemetry and local history.
   "telemetry.telemetryLevel": "off",
   "telemetry.feedback.enabled": false,
   "workbench.enableExperiments": false,

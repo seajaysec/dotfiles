@@ -14,7 +14,7 @@ set -euo pipefail
 DOMAIN=com.googlecode.iterm2
 ORIGINAL_DEFAULT_GUID="74FD8F10-9C21-4853-AF71-8801DCF39FD7"
 
-if pgrep -xq iTerm2 2>/dev/null || pgrep -xq iTerm 2>/dev/null; then
+if ps -axo comm= | grep '/iTerm.app/Contents/MacOS/iTerm2$' >/dev/null; then  # ps, not pgrep (can miss it); no grep -q (SIGPIPE + pipefail = false negative)
   echo "Quit iTerm first (Cmd+Q). It flushes prefs on quit and would overwrite these writes." >&2
   exit 1
 fi

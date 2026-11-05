@@ -31,7 +31,7 @@ cd ~/dotfiles && git pull && ./install.sh --link-only
 - makes `~/.gitconfig` include the tracked `.gitconfig` (machine-local bits stay in `~/.gitconfig`)
 - sets the login shell to `/bin/bash` (one password prompt the first time)
 - removes a stale `/usr/local/go` if Homebrew go exists (sudo prompt the first time)
-- switches iTerm to the single zsh profile: right away if iTerm is closed, otherwise on your next ⌘Q (iTerm relaunches itself)
+- re-applies `config/iterm2/apply-iterm-defaults.sh` (the central iTerm prefs) every time: right away if iTerm is closed, otherwise on your next ⌘Q (iTerm relaunches itself, tabs restore). Local iTerm prefs are reconciled to the repo on each sync.
 
 - installs the shared AI-tool layer (`config/ai/`) for Claude Code, Cursor and Codex, CLI and app: shared rules, the `python-env` skill, and the uv command guard
 

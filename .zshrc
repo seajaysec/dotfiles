@@ -112,15 +112,15 @@ export PATH="${(j.:.)path}"
 ###############################
 # History Configuration
 ###############################
-HISTFILE=~/.zsh/history
-# Privacy: bounded history, wiped daily by ~/.local/bin/privacy-wipe.
+# Bounded history.
 HISTFILE=~/.zsh/history
 HISTSIZE=10000
 SAVEHIST=10000
 # Root (sudo -s keeps HOME): never write history.
 (( EUID == 0 )) && { unset HISTFILE; SAVEHIST=0; }
-# After the daily wipe, drop in-memory history so long-lived shells (tmux
-# panes) don't write yesterday's commands back into the emptied file.
+# If an external cleanup empties the history file (it bumps the epoch stamp
+# below), drop in-memory history so long-lived shells don't write it back.
+# No-op when that stamp doesn't exist.
 typeset -g __privacy_seen=""
 __privacy_reset() {
   local f=$HOME/.local/state/privacy-wipe/epoch s

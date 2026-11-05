@@ -45,6 +45,8 @@ symlink_init() {
 setup_iterm_dynamic_profiles() {
   local dyn_dir="${HOME}/Library/Application Support/iTerm2/DynamicProfiles"
   local apply="${REPO_ROOT}/config/iterm2/apply-iterm-defaults.sh"
+  # One queued apply at a time (pidfile: ps listings can miss multi-line argv).
+  local pidfile="${HOME}/Library/Caches/dotfiles-iterm-apply-on-quit.pid"
   if [[ -d "$dyn_dir" ]]; then
     rm -f "${dyn_dir}/tmux.json" "${dyn_dir}/plain.json" "${dyn_dir}/aps-projects.json"
   fi
@@ -52,21 +54,25 @@ setup_iterm_dynamic_profiles() {
   rm -rf "${REPO_ROOT}/config/iterm2/DynamicProfiles"
 
   [[ -d /Applications/iTerm.app ]] || return 0
-  if defaults read com.googlecode.iterm2 "New Bookmarks" 2>/dev/null | grep -q '"Custom Command" = "Custom Shell"'; then
-    return 0   # already one zsh profile
-  fi
-  if ! pgrep -xq iTerm2; then
+  # Re-apply on EVERY sync: apply-iterm-defaults.sh is the central source of
+  # iTerm prefs, so local settings must be reconciled to it each time, not only
+  # on first conversion. (Skipping it once a machine was converted left later
+  # central changes, e.g. startup/restoration flags, never reaching that machine.)
+  # Running-check uses ps, not pgrep: pgrep can miss the app in some contexts.
+  if ! ps -axo comm= | grep '/iTerm.app/Contents/MacOS/iTerm2$' >/dev/null; then
     "$apply"
-  elif ! pgrep -fq 'dotfiles-iterm-apply-on-quit'; then
+  elif ! { [[ -r "$pidfile" ]] && kill -0 "$(cat "$pidfile")" 2>/dev/null; }; then
     # iTerm rewrites its prefs on quit, so wait for ⌘Q, then apply and relaunch.
     # Session Restoration keeps running shells alive across the quit.
     nohup /bin/bash -c '
       : dotfiles-iterm-apply-on-quit
-      while pgrep -xq iTerm2; do sleep 1; done
+      while ps -axo comm= | grep "/iTerm.app/Contents/MacOS/iTerm2$" >/dev/null; do sleep 1; done
+      sleep 1
       for _ in 1 2 3 4 5 6 7 8 9 10; do "$0" && break; sleep 2; done
       open -a iTerm' "$apply" >"${HOME}/Library/Logs/dotfiles-iterm-apply.log" 2>&1 </dev/null &
+    echo $! >"$pidfile"
     disown
-    echo "   iTerm: quit iTerm (⌘Q) once — profile switches to zsh and iTerm relaunches."
+    echo "   iTerm: settings apply on your next ⌘Q (iTerm relaunches, tabs restore)."
   fi
 }
 

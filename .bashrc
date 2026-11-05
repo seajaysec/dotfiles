@@ -16,5 +16,5 @@ HISTCONTROL=ignoreboth
 shopt -s histappend checkwinsize
 PS1='\w \$ '
 
-# Privacy (machine-local, optional): bounded history wiped daily. No-op if absent.
+# Machine-local history policy (optional). No-op if absent.
 [ -r "$HOME/.config/privacy/bash-history.sh" ] && . "$HOME/.config/privacy/bash-history.sh"
