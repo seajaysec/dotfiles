@@ -5,6 +5,9 @@
 # hooks. Personal interactive niceties live in zsh (~/.zshrc), which iTerm runs.
 # Safe to source repeatedly (PATH is de-duplicated).
 
+# Privacy (machine-local, optional): telemetry opt-outs, REPL history off. No-op if absent.
+[ -r "$HOME/.config/privacy/env.sh" ] && . "$HOME/.config/privacy/env.sh"
+
 export BASH_SILENCE_DEPRECATION_WARNING=1   # silence macOS "default shell is now zsh"
 export LANG="${LANG:-en_US.UTF-8}"
 export EDITOR=vim

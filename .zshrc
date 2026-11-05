@@ -113,8 +113,26 @@ export PATH="${(j.:.)path}"
 # History Configuration
 ###############################
 HISTFILE=~/.zsh/history
-HISTSIZE=10000000
-SAVEHIST=10000000
+# Privacy: bounded history, wiped daily by ~/.local/bin/privacy-wipe.
+HISTFILE=~/.zsh/history
+HISTSIZE=10000
+SAVEHIST=10000
+# Root (sudo -s keeps HOME): never write history.
+(( EUID == 0 )) && { unset HISTFILE; SAVEHIST=0; }
+# After the daily wipe, drop in-memory history so long-lived shells (tmux
+# panes) don't write yesterday's commands back into the emptied file.
+typeset -g __privacy_seen=""
+__privacy_reset() {
+  local f=$HOME/.local/state/privacy-wipe/epoch s
+  [[ -r $f ]] || return 0
+  s=$(<$f)
+  if [[ -z $__privacy_seen ]]; then __privacy_seen=$s; return 0; fi
+  if [[ $s != $__privacy_seen ]]; then
+    __privacy_seen=$s
+    [[ -n $HISTFILE ]] && fc -p "$HISTFILE" $HISTSIZE $SAVEHIST
+  fi
+}
+autoload -Uz add-zsh-hook && add-zsh-hook precmd __privacy_reset
 HISTORY_IGNORE="(pwd|exit)*"
 HIST_STAMPS="yyyy-mm-dd"
 setopt APPEND_HISTORY
