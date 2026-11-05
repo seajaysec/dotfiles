@@ -55,11 +55,6 @@ alias dockstop='docker stop $(docker ps -a -q)'  # Stop all running containers
 alias dockrm='docker rm $(docker ps -a -q)'      # Remove all stopped containers
 
 # Python & Virtual Environment
-alias de='deactivate'                       # Deactivate Python virtual environment
-# pipr is a function in .zsh.functions (scan → lock → install on the active interpreter).
-# Clear any stale alias so the function wins (zsh expands aliases before functions).
-unalias pipr 2>/dev/null || true
-alias srcenv='source env_*/bin/activate'    # Activate virtual environment
 
 # Text Processing & Clipboard
 alias grepcve="grep -ioE 'CVE-[0-9]{4}-[0-9]{4,}' | tr '[:lower:]' '[:upper:]' | sort -u"  # Extract and normalize CVE IDs

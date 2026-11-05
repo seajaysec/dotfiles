@@ -1,12 +1,12 @@
 # iTerm2 — Session Restoration + power-user setup
 
-Persistence and "pick up where I left off" via iTerm's native [Session Restoration](https://iterm2.com/documentation-restoration.html) (no `tmux -CC`), plus a power-user layer (status bar, APS, snippets, triggers, keybindings) configured reproducibly by [`apply-iterm-defaults.sh`](apply-iterm-defaults.sh).
+Persistence and "pick up where I left off" via iTerm's native [Session Restoration](https://iterm2.com/documentation-restoration.html) (no `tmux -CC`), plus a power-user layer (status bar, snippets, triggers, keybindings) configured reproducibly by [`apply-iterm-defaults.sh`](apply-iterm-defaults.sh).
 
 History and the why-not for `-CC` is in [`docs/superpowers/notes/2026-05-21-tmux-native-iterm-progress.md`](../../docs/superpowers/notes/2026-05-21-tmux-native-iterm-progress.md).
 
 ## Setup on a new machine
 
-1. `./install.sh --link-only` — symlinks shell files, renders APS profiles for `$HOME`, removes stale `-CC` era files.
+1. `./install.sh --link-only` — symlinks shell files, removes stale dynamic-profile files.
 2. **Quit iTerm completely (⌘Q).**
 3. `./config/iterm2/apply-iterm-defaults.sh`
 4. Reopen iTerm.
@@ -61,26 +61,13 @@ Canonical layout: [`status-bar-layout.json`](status-bar-layout.json) (copied fro
 - Starship is wrapped in a `DOTFILES_PROMPT=starship` guard in [`.zshrc`](../../.zshrc) — default is `iterm`, so Starship is skipped.
 - To re-enable Starship on a specific host: `export DOTFILES_PROMPT=starship` in `~/.zshrc.local`.
 
-## Automatic Profile Switching (per project directory)
+## One profile, zsh inside iTerm
 
-Project profiles in [`DynamicProfiles/aps-projects.json`](DynamicProfiles/aps-projects.json) (edit there — **do not** create APS profiles in the GUI or tag them “Dynamic”; that creates broken bookmark rows and can crash the profile editor):
-
-| Bound path | Profile | Tab color |
-|---|---|---|
-| `$HOME` | Project: home | gray |
-| `$HOME/gits*` | Project: gits | purple |
-| `$HOME/dotfiles*` | Project: dotfiles | teal |
-| `$HOME/gits/avars*` | Project: avars | pink |
-| `$HOME/gits/xanatos-lab*` | Project: xanatos-lab | green |
-| `$HOME/gits/xanatos` (+ subdirs, not lab) | Project: xanatos | cyan |
-| `$HOME/gits/vkb-python*` | Project: vkb-python | yellow-green |
-| `$HOME/work*` | Project: work | orange |
-
-Source template: [`DynamicProfiles/aps-projects.json.in`](DynamicProfiles/aps-projects.json.in) (`__HOME__` → your home at install). Render: `./config/iterm2/render-aps-projects.sh` or `./install.sh --link-only`. **Do not** edit `aps-projects.json` in Application Support by hand — it is regenerated.
-
-More specific paths (e.g. `vkb-python`) win over parent paths (`gits`) via APS scoring. Run `apply-iterm-defaults.sh` (iTerm quit) after install to prune orphan GUI bookmarks.
-
-APS switches the live session's profile in place (Tab color, font, anything you override) when the cwd matches. Leaves dir → reverts to Default. Requires Shell Integration (already sourced from [`.zshrc:221`](../../.zshrc)).
+There is exactly one iTerm profile (**Default**). Its Command is *Custom Shell ->
+`/opt/homebrew/bin/zsh`*, set by `apply-iterm-defaults.sh` (B2). The macOS login
+shell is plain `/bin/bash` so Claude Code / Codex / Cursor get a stock
+environment (`~/.profile`, `~/.bashrc`); zsh is only what you type into.
+`.zshrc` re-exports `SHELL=/bin/bash` so tools launched from iTerm still pick bash.
 
 ## Snippets
 
@@ -136,7 +123,7 @@ Inside tmux: `Ctrl-a c` (new window), `Ctrl-a " / %` (splits), `Ctrl-a [` (copy 
 
 - **Hotkey window** — fundamentally a separate iTerm window; tabs can be dragged out into normal windows but the hotkey behavior is window-attached, not session-attached. If you want one anyway, Settings → Keys → Create a Dedicated Hotkey Window.
 - **Minimap** — iTerm doesn't have one. Closest things: Instant Replay (`⌘⌥B`, time-travel through buffer) and Shell Integration's `⌘⇧↑/↓` prompt-jumping.
-- **Tab badges** — distracting; we use APS tab color instead.
+- **Tab badges** — distracting.
 - **Whole-plist iCloud sync** — explicitly avoided. `NoSync*` keys (snippets, key bindings dialog selections, etc.) are designed to stay per-machine; dotfiles ships only what we want shared.
 - **iTerm AI Chat** — requires API keys (no OAuth/consumer login). Use `claude` (Claude Code) or Cursor's `cursor-agent` CLI inside a tab instead.
 
@@ -153,8 +140,6 @@ Inside tmux: `Ctrl-a c` (new window), `Ctrl-a " / %` (splits), `Ctrl-a [` (copy 
 
 - [`apply-iterm-defaults.sh`](apply-iterm-defaults.sh) — single source of truth for prefs. Sections labeled `B1` through `B5`.
 - [`snippets.json`](snippets.json) — dotfiles snippets (loaded into `NoSyncSnippets`).
-- [`DynamicProfiles/aps-projects.json.in`](DynamicProfiles/aps-projects.json.in) — APS template (`__HOME__` paths).
-- [`render-aps-projects.sh`](render-aps-projects.sh) — render machine-local `aps-projects.json`.
 - [`status-bar-layout.json`](status-bar-layout.json) — canonical status bar (hand-edited).
 - [`README.md`](README.md) — this file.
 

@@ -247,9 +247,6 @@ whocerts() {
 # bcbc: Brew cleanup and diagnostic
 # Usage: bcbc
 bcbc(){
-    if which pyenv >/dev/null 2>&1; then
-        brew='env PATH=${PATH//$(pyenv root)\/shims:/} brew'
-    fi
     brew tap --repair
     echo "${yellow}==>${reset} Running Brew Diagnostic..."
     brew doctor
@@ -292,24 +289,6 @@ pskill(){
 
 # Development Tools
 # ---------------
-
-# ipy: Smart iPython launcher that respects virtual environments
-# Usage: ipy
-ipy() {
-    local PY_BIN
-    local IPYTHON
-    local PYV
-    PY_BIN="$(python -c 'import sys; print(sys.executable)')"
-    IPYTHON="$(dirname "$PY_BIN")/ipython"
-    if [[ -x "$IPYTHON" ]]; then
-        "$IPYTHON"
-    else
-        PYV="$(python -c 'import sys; print(".".join(str(i) for i in sys.version_info[:2]))')"
-        echo "Looking for iPython for Python $PYV"
-        PY_BIN="$($SHELL -i -c "python$PYV -c 'import sys; print(sys.executable)'")"
-        "$(dirname "$PY_BIN")/ipython"
-    fi
-}
 
 # Clipboard Operations
 # ------------------
@@ -568,84 +547,6 @@ audiofix() {
   [[ -n $pid ]] && sudo kill -9 "$pid"
 }
 
-rmenv() {
-  emulate -L zsh
-  if ! read -q "?Remove all env_* virtualenv dirs with sudo? "; then
-    print -u2 Aborted.
-    return 1
-  fi
-  print
-  sudo rm -rf env_*(N) 2>/dev/null
-}
-
-# pipr: same pipeline as the old alias, but bound to the active venv's interpreter.
-#   pip install pipreqs pip-tools
-#   → pipreqs (imports → requirements.in, unpinned)
-#   → pip-compile (full locked tree with # via annotations → requirements.txt)
-#   → pip install -r requirements.txt
-#   → rm requirements.in
-# Fixes: Homebrew pip-compile/pip skew; clear error with no venv; local project
-# packages named `build/` must not shadow PyPI `build` during `python -m piptools`.
-# Usage: pipr [path]   # default: .
-unalias pipr 2>/dev/null || true
-pipr() {
-  emulate -L zsh
-  local root="${1:-.}"
-  local py in_file out_file
-
-  if [[ -z "${VIRTUAL_ENV:-}" ]]; then
-    print -u2 "pipr: no virtualenv active. Activate one first (e.g. cd into a project with .venv / autoswitch), then retry."
-    return 1
-  fi
-  if [[ ! -d "$root" ]]; then
-    print -u2 "pipr: not a directory: $root"
-    return 1
-  fi
-
-  py="${VIRTUAL_ENV}/bin/python"
-  if [[ ! -x "$py" ]]; then
-    print -u2 "pipr: VIRTUAL_ENV is set ($VIRTUAL_ENV) but $py is missing"
-    return 1
-  fi
-
-  # Absolute paths so compile can run outside the project tree.
-  root="$(builtin cd -q -- "$root" && pwd)" || return 1
-  in_file="$root/requirements.in"
-  out_file="$root/requirements.txt"
-
-  "$py" -m pip install -q pipreqs 'pip-tools>=7.6' || {
-    print -u2 "pipr: failed to install pipreqs/pip-tools into $VIRTUAL_ENV"
-    return 1
-  }
-
-  # Same as: pipreqs . --force --mode no-pin --savepath requirements.in
-  # Ignore vendored trees that ship non-project / Py2 scripts (e.g. toolchain gdbinit).
-  if ! "$py" -m pipreqs.pipreqs "$root" --force --mode no-pin --savepath "$in_file" \
-      --ignore "toolchain,node_modules,.mypy_cache,.pytest_cache,.ruff_cache,__pycache__,dist,.eggs"; then
-    print -u2 "pipr: pipreqs failed"
-    return 1
-  fi
-
-  # Same as: pip-compile requirements.in — keep default header + # via annotations.
-  # Run from $VIRTUAL_ENV so a project-local build/ (or similarly named top-level
-  # package) cannot shadow pip-tools' dependency on PyPI's `build` package.
-  # Always python -m piptools so PATH never picks Homebrew's stale pip-compile.
-  if ! (builtin cd -q -- "$VIRTUAL_ENV" && "$py" -m piptools compile --output-file="$out_file" "$in_file"); then
-    print -u2 "pipr: pip-compile failed — upgrading pip-tools and retrying once"
-    "$py" -m pip install -q -U 'pip-tools>=7.6' pip || return 1
-    if ! (builtin cd -q -- "$VIRTUAL_ENV" && "$py" -m piptools compile --output-file="$out_file" "$in_file"); then
-      print -u2 "pipr: pip-compile still failing; leaving $in_file for inspection"
-      return 1
-    fi
-  fi
-
-  "$py" -m pip install -r "$out_file" || {
-    print -u2 "pipr: install from $out_file failed"
-    return 1
-  }
-  rm -f -- "$in_file"
-}
-
 fff() {
   if [[ -z $1 ]]; then
     echo "usage: fff <iname-pattern>" >&2
@@ -658,71 +559,6 @@ clipsort() {
   pbpaste | rg -v '^$' | sort -Vu | pbcopy
 }
 
-# mkvenv: zsh-autoswitch-virtualenv override with pyenv-aware Python selection.
-# Usage:
-#   mkvenv                  # virtualenv using the system default Python
-#   mkvenv 3.12             # install 3.12 via pyenv if missing, then use it
-#   mkvenv --python=3.11    # same, long form
-# Also works inside pipenv / poetry projects (delegates to the matching tool).
-mkvenv () {
-    local venv_type="$(_get_venv_type "$PWD" "unknown")"
-    local params=("${@[@]}")
-    local requested_python=""
-
-    for arg in "${params[@]}"; do
-        if [[ "$arg" =~ ^[0-9]+\.[0-9]+$ ]]; then
-            requested_python="$arg"
-        elif [[ "$arg" =~ --python=([0-9]+\.[0-9]+) ]]; then
-            requested_python="${BASH_REMATCH[1]}"
-        fi
-    done
-
-    if [[ -n "$requested_python" ]]; then
-        params=("${params[@]/$requested_python}")
-        params=("${params[@]/--python=$requested_python}")
-    fi
-
-    if [[ -n "$requested_python" ]]; then
-        if ! pyenv versions --bare | grep -qx "$requested_python"; then
-            echo "Installing Python $requested_python via pyenv..."
-            pyenv install "$requested_python" || return 1
-        fi
-        export AUTOSWITCH_DEFAULT_PYTHON="$(pyenv root)/versions/$requested_python/bin/python"
-    fi
-
-    if [[ "$venv_type" == "pipenv" ]]; then
-        command -v pipenv > /dev/null || { _missing_error_message pipenv; return; }
-        pipenv install --dev "${params[@]}"
-        _activate_pipenv
-    elif [[ "$venv_type" == "poetry" ]]; then
-        command -v poetry > /dev/null || { _missing_error_message poetry; return; }
-        poetry install "${params[@]}"
-        _activate_poetry
-    else
-        command -v virtualenv > /dev/null || { _missing_error_message virtualenv; return; }
-        if [[ -f "$AUTOSWITCH_FILE" ]]; then
-            printf "$AUTOSWITCH_FILE file already exists. If this is a mistake use the rmvenv command\n"
-        else
-            local venv_name="$(basename "$PWD")-$(randstr)"
-            printf "Creating ${AUTOSWITCH_PURPLE}%s${NONE} virtualenv\n" "$venv_name"
-            if [[ -n "$AUTOSWITCH_DEFAULT_PYTHON" && ! "${params[*]}" =~ --python ]]; then
-                echo "${AUTOSWITCH_PURPLE}Using AUTOSWITCH_DEFAULT_PYTHON=${AUTOSWITCH_DEFAULT_PYTHON}${NONE}"
-                params+=("--python=$AUTOSWITCH_DEFAULT_PYTHON")
-            fi
-            mkdir -p "$VIRTUAL_ENV_DIR"
-            if [[ ${params[(I)--verbose]} -eq 0 ]]; then
-                virtualenv "${params[@]}" "$(_virtual_env_dir "$venv_name")"
-            else
-                virtualenv "${params[@]}" "$(_virtual_env_dir "$venv_name")" > /dev/null
-            fi
-            echo "$venv_name" > "$AUTOSWITCH_FILE"
-            chmod 600 "$AUTOSWITCH_FILE"
-            _maybeworkon "$(_virtual_env_dir "$venv_name")" "virtualenv"
-            install_requirements
-        fi
-    fi
-}
-
 # The following snippet causes mcd to be completed like mkdir
 compdefas () {
   if (($+_comps[$1])); then
@@ -731,74 +567,128 @@ compdefas () {
 }
 compdefas mkdir mcd
 
-# VS Code / Cursor + zsh-autoswitch-virtualenv
-# --------------------------------------------
-# The Python extension does not read the autoswitch `.venv` pointer file. Wrappers
-# walk upward from the opened folder for a `.venv` pointer file; when found, they
-# prepend that env's bin/ to PATH and set VIRTUAL_ENV (venv root) for the editor
-# process only — no python.defaultInterpreterPath in settings; the Python extension
-# auto-selects. When there is no autoswitch env, nothing is set (fall back to normal
-# discovery / global tooling). Clear inherited shell activation first.
+# Agent Chat Archive (specstory)
+# ------------------------------
 
-_dotfiles_editor_workspace_dir_from_args() {
-  local arg root=""
-  for arg in "$@"; do
-    [[ "$arg" == -* ]] && continue
-    [[ -e "$arg" ]] || continue
-    if [[ -d "$arg" ]]; then
-      root="${arg:A}"
+# Archive specstory chat history, or open the archive to browse it.
+#
+# No flags — SYNC: pull specstory history from every repo under src_dir (default
+# ~/gits) into one accumulating archive (default ~/.secrets/agent-chats; override
+# SSYNC_ARCHIVE) and rebuild the offline viewer index (data.js). `specstory sync`
+# captures all agents with activity (claude, codex, cursor, gemini, droid,
+# deepseek).
+#
+# Any viewing flag — OPEN (no sync): just open the existing archive in VS Code
+# (-v), Cursor (-c), Finder (-f), or the browser viewer (-b). ~/.secrets is
+# hidden, so these are how you browse it.
+# Usage: ssync [src_dir]        # sync + rebuild index
+#        ssync -v|-c|-f|-b      # open the archive for viewing (no sync)
+ssync() {
+  emulate -L zsh
+  setopt null_glob
+
+  local open_vscode=0 open_cursor=0 open_finder=0 open_browser=0
+  local OPTIND opt
+  while getopts "vcfb" opt; do
+    case $opt in
+      v) open_vscode=1 ;;
+      c) open_cursor=1 ;;
+      f) open_finder=1 ;;
+      b) open_browser=1 ;;
+      *) echo "usage: ssync [src_dir] | ssync -v|-c|-f|-b" >&2; return 1 ;;
+    esac
+  done
+  shift $((OPTIND - 1))
+
+  local dest="${SSYNC_ARCHIVE:-$HOME/.secrets/agent-chats}"
+
+  # Keep the archive's viewer assets current with the repo. They must be REAL
+  # files (a symlinked file:// document canonicalizes to the repo dir, so the
+  # viewer's relative data.js/marked/purify wouldn't resolve). Copy any that are
+  # missing, stale, or a leftover symlink. `command cp` dodges a `cp -i` alias.
+  local _acsrc="${DOTFILES:-$HOME/dotfiles}/config/agent-chats"
+  if [[ -d "$_acsrc" ]]; then
+    mkdir -p "$dest"
+    local _f _from _to
+    for _f in viewer.html:viewer.html build-index.py:build-index.py \
+              collect-native.py:collect-native.py \
+              vendor/marked.min.js:marked.min.js vendor/purify.min.js:purify.min.js; do
+      _from="$_acsrc/${_f%%:*}"; _to="$dest/${_f##*:}"
+      [[ -f "$_from" ]] || continue
+      if [[ -L "$_to" || ! -e "$_to" || "$_from" -nt "$_to" ]]; then
+        rm -f "$_to"; command cp "$_from" "$_to"
+      fi
+    done
+  fi
+
+  # Sync only when no viewing flag is given — viewing flags are view-only.
+  if (( ! (open_vscode || open_cursor || open_finder || open_browser) )); then
+    if ! command -v specstory >/dev/null 2>&1; then
+      echo "ssync: specstory not found (brew install specstory)" >&2
+      return 1
+    fi
+
+    local src="${1:-$HOME/gits}"
+    if [[ ! -d "$src" ]]; then
+      echo "ssync: source dir not found: $src" >&2
+      return 1
+    fi
+
+    mkdir -p "$dest"
+
+    local dir repo synced=0
+    for dir in "$src"/*/; do
+      # Only touch real project dirs (a git repo or one specstory already knows).
+      [[ -d "${dir}.git" || -d "${dir}.specstory" ]] || continue
+      repo=$(basename "$dir")
+      echo "=== $repo ==="
+      ( cd "$dir" && specstory sync )
+      if [[ -d "${dir}.specstory/history" ]]; then
+        mkdir -p "$dest/$repo"
+        rsync -a "${dir}.specstory/history/" "$dest/$repo/"
+        (( synced++ ))
+      fi
+    done
+
+    # Pull in GUI/IDE chats that `specstory sync` doesn't cover — Claude Code
+    # (all of ~/.claude/projects) and Cursor IDE (Cursor's globalStorage db).
+    # build-index dedupes any session that also came from specstory.
+    local collector="$dest/collect-native.py"
+    [[ -f "$collector" ]] || collector="${DOTFILES:-$HOME/dotfiles}/config/agent-chats/collect-native.py"
+    if command -v python3 >/dev/null 2>&1 && [[ -f "$collector" ]]; then
+      python3 "$collector" "$dest"
+    fi
+
+    # Rebuild the offline viewer index (data.js). Prefer the archive-local copy
+    # so the archive stays self-contained; fall back to the repo source.
+    local builder="$dest/build-index.py"
+    [[ -f "$builder" ]] || builder="${DOTFILES:-$HOME/dotfiles}/config/agent-chats/build-index.py"
+    if command -v python3 >/dev/null 2>&1 && [[ -f "$builder" ]]; then
+      python3 "$builder" "$dest"
     else
-      root="${arg:A:h}"
+      echo "ssync: skipped index rebuild (need python3 + build-index.py; run install.sh)" >&2
     fi
-    print -r -- "$root"
+
+    echo "Done. Synced ${synced} repo(s) → $dest"
     return 0
-  done
-  print -r -- "${PWD:A}"
-}
+  fi
 
-_dotfiles_autoswitch_python_for_workspace_dir() {
-  local dir="$1" check name py
-  dir="${dir:A}"
-  while [[ "$dir" != "/" ]]; do
-    check="$dir/.venv"
-    if [[ -f "$check" && ! -d "$check" ]]; then
-      name="$(LC_ALL=C tr -d '\r\n' <"$check")"
-      for py in "${HOME}/.virtualenvs/${name}/bin/python" \
-                "${HOME}/.virtualenvs/${name}/bin/python3"; do
-        [[ -x "$py" ]] && {
-          print -r -- "$py"
-          return 0
-        }
-      done
+  # Viewing mode: open the existing archive, no sync.
+  if [[ ! -d "$dest" ]]; then
+    echo "ssync: archive not found: $dest (run \`ssync\` first to populate it)" >&2
+    return 1
+  fi
+  (( open_vscode )) && code "$dest"
+  (( open_cursor )) && cursor "$dest"
+  (( open_finder )) && open "$dest"
+  if (( open_browser )); then
+    if [[ -f "$dest/viewer.html" ]]; then
+      open "$dest/viewer.html"
+    else
+      echo "ssync: viewer.html not found in $dest (run install.sh to create it)" >&2
     fi
-    dir="${dir:h}"
-  done
-  return 1
-}
-
-_dotfiles_prepare_vscode_python_env() {
-  local ws py
-  ws="$(_dotfiles_editor_workspace_dir_from_args "$@")"
-  if py="$(_dotfiles_autoswitch_python_for_workspace_dir "$ws")"; then
-    export PATH="${py:h}:$PATH"
-    export VIRTUAL_ENV="${py:h:h}"
-  else
-    unset VIRTUAL_ENV
   fi
 }
-
-cursor() (
-  unset VIRTUAL_ENV
-  _dotfiles_prepare_vscode_python_env "$@"
-  exec command cursor "$@"
-)
-
-code() (
-  unset VIRTUAL_ENV
-  _dotfiles_prepare_vscode_python_env "$@"
-  exec command code "$@"
-)
-
 # ssh: prompt to replace a CHANGED host key instead of hard-failing.
 # ------------------------------------------------------------------
 # Stock ssh treats a changed host key as fatal with NO prompt, because a key
@@ -843,3 +733,4 @@ ssh() {
   ssh-keygen -R "$target" >/dev/null 2>&1
   command ssh -o StrictHostKeyChecking=accept-new "$@"
 }
+

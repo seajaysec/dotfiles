@@ -121,51 +121,33 @@ data = plistlib.loads(p.read_bytes())
 ORIGINAL_DEFAULT_GUID = "74FD8F10-9C21-4853-AF71-8801DCF39FD7"
 default = next(b for b in data["New Bookmarks"] if b.get("Guid") == ORIGINAL_DEFAULT_GUID)
 default["Show Status Bar"] = True
-default["StatusBarPosition"] = 1  # 0=top, 1=bottom
+default.pop("StatusBarPosition", None)  # not a profile key; position is global (below)
 default["Status Bar Layout"] = layout
 
 plistlib.dump(data, p.open("wb"))
 print(f"  Wrote Status Bar Layout from {layout_path.name} (username|cwd|venv|git|composer).")
 PY
 
-# -- B2: Prune orphan GUI-created dynamic profile bookmarks ------------------
-# APS profiles live ONLY in DynamicProfiles/*.json. Tagging "Dynamic" in the GUI
-# creates broken bookmark rows (often empty Bound Hosts) and can crash profile
-# editors. Keep dotfiles-owned GUIDs; drop everything else tied to our APS file.
-python3 - "$(cd "$(dirname "$0")" && pwd)/DynamicProfiles/aps-projects.json" <<'PY'
-import json, plistlib, sys
+# -- B2: One profile, running zsh -----------------------------------------
+# The system login shell is bash (so AI tools get a stock environment). iTerm's
+# single Default profile runs zsh as a login shell instead ("Custom Shell").
+# Also drops every non-Default bookmark (old APS "Project: *" clones etc).
+python3 <<'PY'
+import plistlib
 from pathlib import Path
 
-aps_path = Path(sys.argv[1])
-valid_guids = {p["Guid"] for p in json.loads(aps_path.read_text())["Profiles"]}
 ORIGINAL_DEFAULT_GUID = "74FD8F10-9C21-4853-AF71-8801DCF39FD7"
-
+ZSH = next(z for z in ("/opt/homebrew/bin/zsh", "/usr/local/bin/zsh", "/bin/zsh") if Path(z).exists())
 p = Path.home() / "Library/Preferences/com.googlecode.iterm2.plist"
 data = plistlib.loads(p.read_bytes())
 bookmarks = data.get("New Bookmarks", [])
-cleaned = []
-removed = []
-for b in bookmarks:
-    guid = b.get("Guid", "")
-    dyn_file = b.get("Dynamic Profile Filename", "")
-    is_our_aps = "aps-projects.json" in (dyn_file or "")
-    if guid == ORIGINAL_DEFAULT_GUID:
-        cleaned.append(b)
-        continue
-    if is_our_aps and guid not in valid_guids:
-        removed.append(b.get("Name", guid))
-        continue
-    if is_our_aps and not (b.get("Bound Hosts") or []):
-        removed.append(f"{b.get('Name', guid)} (empty Bound Hosts)")
-        continue
-    cleaned.append(b)
-
-data["New Bookmarks"] = cleaned
+default = next(b for b in bookmarks if b.get("Guid") == ORIGINAL_DEFAULT_GUID)
+removed = [b.get("Name", "?") for b in bookmarks if b is not default]
+default["Custom Command"] = "Custom Shell"
+default["Command"] = ZSH
+data["New Bookmarks"] = [default]
 plistlib.dump(data, p.open("wb"))
-if removed:
-    print(f"  Removed {len(removed)} orphan APS bookmark(s): {', '.join(removed)}")
-else:
-    print("  No orphan APS bookmarks to remove.")
+print(f"  Default profile shell = {ZSH}; removed {len(removed)} other profile(s): {', '.join(removed) or 'none'}")
 PY
 
 # -- B3: Snippets seeded from aliases + history ------------------------------
@@ -303,9 +285,59 @@ plistlib.dump(data, p.open("wb"))
 print(f"  Installed {len(dotfiles_bindings)} dotfiles keybindings.")
 PY
 
-# Instant Replay memory: 32 MB per session (default 4 MB). Lets you scrub
+# -- B6: Splits, mouse, copy ergonomics -------------------------------------
+# Status bar at the bottom. Global key; iTerm ignores it inside a profile.
+defaults write "$DOMAIN" StatusBarPosition -int 1
+# Keystrokes go to the pane you clicked, not whichever pane the pointer is
+# hovering over (focus-follows-mouse made typing jump between splits).
+defaults write "$DOMAIN" FocusFollowsMouse -bool false
+# Inactive splits dim, so the pane you're typing in is obvious.
+defaults write "$DOMAIN" DimInactiveSplitPanes -bool true
+defaults write "$DOMAIN" SplitPaneDimmingAmount -float 0.35
+# Copy-on-select stays on; strip trailing spaces TUIs pad lines with.
+defaults write "$DOMAIN" CopySelection -bool true
+defaults write "$DOMAIN" TrimWhitespaceOnCopy -bool true
+python3 <<'PY'
+import plistlib
+from pathlib import Path
+
+ORIGINAL_DEFAULT_GUID = "74FD8F10-9C21-4853-AF71-8801DCF39FD7"
+p = Path.home() / "Library/Preferences/com.googlecode.iterm2.plist"
+data = plistlib.loads(p.read_bytes())
+default = next(b for b in data["New Bookmarks"] if b.get("Guid") == ORIGINAL_DEFAULT_GUID)
+# Left ⌥ = Esc+ so ⌥←/⌥→/⌥⌫ jump/delete by word in zsh and TUIs.
+# Right ⌥ stays Normal for typing special characters (— é ©).
+default["Option Key Sends"] = 2
+default["Right Option Key Sends"] = 0
+# Session logs are full plain-text transcripts (secrets included). Keep them
+# out of ~/Documents, which iCloud "Desktop & Documents" may sync on some Macs.
+log_dir = Path.home() / "Library/Logs/iTerm2"
+log_dir.mkdir(parents=True, exist_ok=True)
+default["Log Directory"] = str(log_dir)
+# Plain text, not HTML: HTML wraps every span in styles + timestamps (one
+# Claude Code session produced a 3.4 GB log). 0=raw 1=plain 2=HTML 3=asciicast
+default["Plain Text Logging"] = 1
+default["Automatically Log"] = True
+
+# ⌘⌥C: smart copy. Runs unwrap-clipboard as a coprocess (action 35) — it
+# re-joins hard-wrapped TUI lines in the clipboard. Select text (copy-on-
+# select already copied it), then press ⌘⌥C. Coprocess output would be typed
+# into the session, so the script prints nothing.
+gkm = data.get("GlobalKeyMap", {}) or {}
+gkm["0x63-0x180000"] = {
+    "Version": 1, "Action": 35,
+    "Text": "PATH=/opt/homebrew/bin:/usr/local/bin:$PATH $HOME/.local/bin/unwrap-clipboard",
+    "Label": "dotfiles: Smart copy, unwrap lines (⌘⌥C)",
+}
+data["GlobalKeyMap"] = gkm
+plistlib.dump(data, p.open("wb"))
+print("  Left Option = Esc+; ⌘⌥C smart copy bound.")
+PY
+
+# Instant Replay memory: default 4 MB per session. It is per pane, so 32 MB x
+# 20 splits = 640 MB of RAM. Lets you scrub
 # much farther back via View > Step Back in Time (Cmd+Opt+B).
-defaults write "$DOMAIN" IRMemory -int 32
+defaults write "$DOMAIN" IRMemory -int 4
 
 echo "Applied. Relaunch iTerm — sessions now restore via iTermServer daemons."
 echo

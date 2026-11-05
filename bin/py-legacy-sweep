@@ -1,0 +1,348 @@
+#!/usr/bin/env -S uv run --quiet --script
+# /// script
+# requires-python = ">=3.11"
+# ///
+"""py-legacy-sweep: move a machine from pyenv / pipx / ~/.virtualenvs /
+zsh-autoswitch-virtualenv to the uv setup in ~/dotfiles, and archive the rest.
+
+Run it after `git pull && ./install.sh --link-only`. It asks before anything
+that installs or deletes. Safe to re-run; finished steps are skipped.
+
+  py-legacy-sweep          interactive
+  py-legacy-sweep --yes    accept every prompt
+  py-legacy-sweep --check  report only, change nothing
+
+Steps
+  1. Project venvs: venv-migrate --all (pointer files -> ./.venv built by uv)
+  2. Home-folder default venv (~/.venv pointer): save its package list, remove
+  3. pipx tools -> uv tool (same source; private ones rebuilt from installed files)
+  4. Command-line tools living in pyenv Pythons -> uv tool (same version)
+  5. Report scripts whose #! still points at pyenv / ~/.virtualenvs / pipx
+  6. Security: report .venv dirs that are not on the trust list
+  7. Archive ~/.virtualenvs ~/.pyenv ~/.local/pipx into ~/temp/python-legacy-<date>/
+     (zip + restore.sh + MANIFEST.txt), verify the zip, then delete the originals
+  8. brew uninstall pyenv / pyenv-virtualenv / pipx
+"""
+import json, os, shutil, subprocess, sys, tempfile, zipfile
+from datetime import date
+from pathlib import Path
+
+HOME = Path.home()
+VENVS = HOME / ".virtualenvs"
+PYENV = HOME / ".pyenv"
+PIPX = HOME / ".local/pipx"
+TRUST = Path(os.environ.get("XDG_STATE_HOME", HOME / ".local/state")) / "uv-autovenv/trusted"
+YES = "--yes" in sys.argv
+CHECK = "--check" in sys.argv
+ENV = {**os.environ, "UV_PYTHON_PREFERENCE": "only-managed", "ALLOW_LEGACY_PY": "1"}
+# Libraries/frameworks that merely ship a command: they belong in each project's
+# .venv (uv add / uv run), so the sweep defaults to "no" for them.
+LIBRARY_LIKE = {"fastapi", "flask", "django", "gunicorn", "uvicorn", "pytest", "python-dotenv",
+                "tabulate", "jsonschema", "tqdm", "typer", "click", "pygments", "wheel",
+                "build", "markdown-it-py", "distro", "normalizer", "charset-normalizer",
+                "fonttools", "websocket-client", "numpy", "jupyter-core"}
+LEGACY_MARKERS = (str(VENVS) + "/", str(PYENV) + "/", "/.local/pipx/")
+
+
+def say(msg=""):
+    print(msg, flush=True)
+
+
+def ask(question, default=True):
+    if CHECK:
+        say(f"  (check mode: would ask) {question}")
+        return False
+    if YES:
+        return default
+    hint = "[Y/n]" if default else "[y/N]"
+    try:
+        a = input(f"  {question} {hint} ").strip().lower()
+    except EOFError:
+        return False
+    return default if a == "" else a in ("y", "yes")
+
+
+def run(*cmd, **kw):
+    return subprocess.run(cmd, env=ENV, text=True, capture_output=True, **kw)
+
+
+def uv_tool_install(label, args, pyver=None):
+    extra = ["--python", pyver] if pyver else []
+    r = run("uv", "tool", "install", "--force", "-q", *extra, *args)
+    say(f"  {'OK  ' if r.returncode == 0 else 'FAIL'} {label}" + ("" if r.returncode == 0 else f": {r.stderr.strip().splitlines()[-1] if r.stderr.strip() else ''}"))
+    return r.returncode == 0
+
+
+def wheel_from_installed(dist_info: Path, out_dir: Path) -> Path | None:
+    """Rebuild a pure-Python wheel from an installed distribution (for packages
+    that can't be downloaded again, e.g. vendor-private ones)."""
+    wheel_meta = (dist_info / "WHEEL").read_text(errors="ignore") if (dist_info / "WHEEL").exists() else ""
+    if "py3-none-any" not in wheel_meta and "py2.py3-none-any" not in wheel_meta:
+        return None
+    record = dist_info / "RECORD"
+    if not record.exists():
+        return None
+    name, ver = dist_info.name[: -len(".dist-info")].rsplit("-", 1)
+    whl = out_dir / f"{name}-{ver}-py3-none-any.whl"
+    site = dist_info.parent
+    with zipfile.ZipFile(whl, "w", zipfile.ZIP_DEFLATED) as z:
+        for line in record.read_text().splitlines():
+            rel = line.split(",")[0]
+            if not rel or rel.startswith("..") or "__pycache__" in rel:
+                continue
+            p = site / rel
+            if p.is_file():
+                z.write(p, rel)
+    return whl
+
+
+def console_scripts(dist_info: Path) -> list[str]:
+    ep = dist_info / "entry_points.txt"
+    if not ep.exists():
+        return []
+    out, sec = [], None
+    for line in ep.read_text(errors="ignore").splitlines():
+        line = line.strip()
+        if line.startswith("["):
+            sec = line
+        elif sec == "[console_scripts]" and "=" in line:
+            out.append(line.split("=")[0].strip())
+    return out
+
+
+def meta(dist_info: Path, key: str) -> str:
+    for line in (dist_info / "METADATA").read_text(errors="ignore").splitlines():
+        if line.startswith(key + ":"):
+            return line.split(":", 1)[1].strip()
+    return ""
+
+
+def source_args(dist_info: Path, name: str, ver: str) -> list[str]:
+    du = dist_info / "direct_url.json"
+    if du.exists():
+        d = json.loads(du.read_text())
+        url = d.get("url", "")
+        if url.startswith("file://"):
+            path = url[len("file://"):]
+            if Path(path).is_dir():
+                return ["-e", path] if d.get("dir_info", {}).get("editable") else [path]
+        elif "vcs_info" in d:
+            return [f"git+{url}" if not url.startswith("git+") else url]
+    return [f"{name}=={ver}"]
+
+
+def uv_tool_commands() -> set[str]:
+    r = run("uv", "tool", "list")
+    return {l.strip()[2:] for l in r.stdout.splitlines() if l.startswith("- ")}
+
+
+# ---------------------------------------------------------------------------
+def step1_project_venvs():
+    say("\n1. Project venvs (pointer files -> ./.venv)")
+    migrate = HOME / ".local/bin/venv-migrate"
+    if not migrate.exists():
+        say("  venv-migrate missing: run ./install.sh --link-only first"); return
+    r = subprocess.run(["find", str(HOME), "-maxdepth", "6", "-name", ".venv", "-type", "f",
+                        "-not", "-path", f"{HOME}/Library/*", "-not", "-path", "*/node_modules/*"],
+                       text=True, capture_output=True)
+    ptrs = [p for p in r.stdout.splitlines() if p and Path(p).parent != HOME]
+    if not ptrs:
+        say("  none left"); return
+    say(f"  {len(ptrs)} pointer file(s) found")
+    if ask("Convert them all now (same Python version and packages)?"):
+        subprocess.run([str(migrate), "--all"], env=ENV)
+
+
+def step2_home_venv(out_dir: Path):
+    say("\n2. Home-folder default venv")
+    ptr = HOME / ".venv"
+    if not ptr.is_file():
+        say("  none"); return
+    name = ptr.read_text().strip()
+    say(f"  ~/.venv points at {name}: it activates in every folder without its own env")
+    if ask("Save its package list into the archive folder and remove the pointer?"):
+        out_dir.mkdir(parents=True, exist_ok=True)
+        py = VENVS / name / "bin/python"
+        if py.exists():
+            r = run("uv", "pip", "freeze", "--python", str(py))
+            (out_dir / "home-default-venv-packages.txt").write_text(r.stdout)
+        ptr.unlink()
+        say("  removed (use `uv run --with <pkg>` for one-off scripts in ~)")
+
+
+def step3_pipx(out_dir: Path):
+    say("\n3. pipx tools -> uv tool")
+    venvs = PIPX / "venvs"
+    if not venvs.is_dir():
+        say("  no pipx tools"); return
+    tools = sorted(p for p in venvs.iterdir() if (p / "pipx_metadata.json").exists())
+    say("  " + (", ".join(t.name for t in tools) or "none"))
+    if not tools or not ask(f"Reinstall these {len(tools)} with uv tool?"):
+        return
+    for t in tools:
+        m = json.loads((t / "pipx_metadata.json").read_text())["main_package"]
+        spec = m.get("package_or_url") or m.get("package")
+        extras = m.get("pip_args") or []
+        if not uv_tool_install(t.name, [spec, *extras]):
+            sp = next(t.glob("lib/python*/site-packages"), None)
+            di = next(sp.glob(f"{m['package'].replace('-', '_')}-*.dist-info"), None) if sp else None
+            whl = wheel_from_installed(di, out_dir) if di else None
+            if whl:
+                uv_tool_install(f"{t.name} (rebuilt from installed files)", [str(whl)])
+
+
+def step4_pyenv_tools(out_dir: Path):
+    say("\n4. Command-line tools inside pyenv Pythons -> uv tool")
+    if not (PYENV / "versions").is_dir():
+        say("  no pyenv"); return
+    have = uv_tool_commands()
+    cands = []
+    for ver in sorted((PYENV / "versions").iterdir()):
+        for sp in ver.glob("lib/python*/site-packages"):
+            for di in sorted(sp.glob("*.dist-info")):
+                if not (di / "REQUESTED").exists():  # pulled in as a dependency
+                    continue
+                cmds = [c for c in console_scripts(di) if c not in have and not c.startswith(("pip", "python"))]
+                name = meta(di, "Name")
+                if cmds and name.lower() not in ("pip", "setuptools", "wheel", "virtualenv", "pipenv", "poetry"):
+                    pyminor = ".".join(ver.name.split(".")[:2])
+                    cands.append((name, meta(di, "Version"), cmds, di, pyminor))
+    if not cands:
+        say("  nothing to move"); return
+    say("  Installed by hand into pyenv (libraries you import belong in a project's .venv, not here):")
+    for name, v, cmds, _, py in cands:
+        lib = "  [library: usually belongs in a project]" if name.lower() in LIBRARY_LIKE else ""
+        say(f"    {name}=={v} (python {py}) -> {', '.join(cmds)}{lib}")
+    for name, v, cmds, di, py in cands:
+        if not ask(f"Install {name} as a global tool ({', '.join(cmds)})?", default=name.lower() not in LIBRARY_LIKE):
+            continue
+        if not uv_tool_install(name, source_args(di, name, v), pyver=py):
+            whl = wheel_from_installed(di, out_dir)
+            if whl:
+                uv_tool_install(f"{name} (rebuilt from installed files)", [str(whl)], pyver=py)
+
+
+def step5_shebangs():
+    say("\n5. Scripts still pointing at the old setup")
+    hits = []
+    for d in (HOME / ".local/bin", HOME / "bin", Path("/usr/local/bin")):
+        if not d.is_dir():
+            continue
+        for f in d.iterdir():
+            try:
+                if f.is_symlink():
+                    t = os.readlink(f)
+                    if any(m in t for m in LEGACY_MARKERS):
+                        hits.append(f"{f} -> {t}")
+                elif f.is_file():
+                    with open(f, "rb") as fh:
+                        first = fh.readline(300).decode(errors="ignore")
+                    if first.startswith("#!") and any(m in first for m in LEGACY_MARKERS):
+                        hits.append(f"{f}: {first.strip()}")
+            except OSError:
+                pass
+    for h in hits:
+        say(f"  {h}")
+    say("  none" if not hits else "  Reinstall each with: uv tool install --force <package>")
+
+
+def step6_untrusted():
+    say("\n6. Security: .venv folders that won't auto-activate")
+    trusted = set(TRUST.read_text().split("\n")) if TRUST.exists() else set()
+    r = subprocess.run(["find", str(HOME), "-maxdepth", "6", "-name", ".venv", "-type", "d",
+                        "-not", "-path", f"{HOME}/Library/*", "-not", "-path", "*/node_modules/*",
+                        "-not", "-path", f"{VENVS}/*"], text=True, capture_output=True)
+    untrusted = [p for p in r.stdout.splitlines() if p and p not in trusted]
+    for p in untrusted:
+        cfg = Path(p) / "pyvenv.cfg"
+        how = "made by uv here" if cfg.exists() and "uv =" in cfg.read_text(errors="ignore") else "unknown origin"
+        say(f"  {p}  ({how})")
+    if untrusted:
+        say("  Inspect each; if it's yours: cd <project> && venv-trust. Otherwise: rmvenv && mkvenv")
+    else:
+        say("  none")
+
+
+def step7_archive(out_dir: Path):
+    say("\n7. Archive the old folders")
+    stamp = date.today().isoformat()
+    srcs = [p for p in (VENVS, PYENV, PIPX) if p.exists()]
+    if not srcs:
+        say("  nothing left to archive"); return
+    sizes = run("du", "-sh", *map(str, srcs)).stdout.strip().replace("\n", ", ")
+    say(f"  {sizes}")
+    say(f"  -> {out_dir}/python-legacy.zip + restore.sh + MANIFEST.txt")
+    say("  (Integrity-tested with unzip -t before anything is deleted.)")
+    if not ask("Zip them, verify the zip, then delete the originals?"):
+        return
+    out_dir.mkdir(parents=True, exist_ok=True)
+    zpath = out_dir / "python-legacy.zip"
+    rel = [str(p.relative_to(HOME)) for p in srcs]
+    z = subprocess.run(["zip", "-qry", str(zpath), *rel, "-x", "*/__pycache__/*", "-x", "*.pyc"], cwd=HOME)
+    t = subprocess.run(["unzip", "-tq", str(zpath)], capture_output=True, text=True)
+    if z.returncode != 0 or t.returncode != 0:
+        say("  zip failed verification; originals NOT deleted"); return
+    log = HOME / "Library/Logs/venv-migrate.log"
+    mapping = log.read_text() if log.exists() else ""
+    (out_dir / "MANIFEST.txt").write_text(
+        f"Pre-uv Python setup archived {stamp}\nContents: {', '.join('~/' + r for r in rel)}\n\n"
+        f"venv-migrate log (project -> old env name):\n{mapping}")
+    (out_dir / "restore.sh").write_text(RESTORE)
+    (out_dir / "restore.sh").chmod(0o755)
+    for p in srcs:
+        shutil.rmtree(p)
+    say(f"  archived {run('du', '-sh', str(zpath)).stdout.split()[0]}, originals removed")
+
+
+RESTORE = r'''#!/bin/bash
+# Restore the pre-uv Python setup archived by py-legacy-sweep.
+#   ./restore.sh              everything back to ~/.virtualenvs ~/.pyenv ~/.local/pipx
+#   ./restore.sh <venv-name>  one env into ~/.virtualenvs/<venv-name>
+#   ./restore.sh --list       list archived venvs
+# Nothing in the shell uses these any more; activate by hand:
+#   source ~/.virtualenvs/<name>/bin/activate
+set -euo pipefail
+zip="$(cd "$(dirname "$0")" && pwd)/python-legacy.zip"
+cd "$HOME"
+case "${1:-}" in
+  --list) unzip -Z1 "$zip" '.virtualenvs/*' | cut -d/ -f2 | grep -v '^$' | sort -u ;;
+  "")
+    for d in .virtualenvs .pyenv .local/pipx; do
+      [ -e "$d" ] && { echo "~/$d already exists; move it aside first."; exit 1; }
+    done
+    unzip -q "$zip" -d "$HOME"; echo "Restored." ;;
+  *)
+    case "$1" in */*|.|..) echo "bad name"; exit 1 ;; esac
+    [ -e ".virtualenvs/$1" ] && { echo "~/.virtualenvs/$1 already exists."; exit 1; }
+    unzip -q "$zip" ".virtualenvs/$1/*" -d "$HOME"; echo "Restored ~/.virtualenvs/$1" ;;
+esac
+'''
+
+
+def step8_brew():
+    say("\n8. Homebrew leftovers")
+    r = run("brew", "list", "--formula", "-1")
+    left = [f for f in ("pyenv", "pyenv-virtualenv", "pipx") if f in r.stdout.split()]
+    say("  " + (", ".join(left) if left else "none"))
+    if left and ask(f"brew uninstall {' '.join(left)}?"):
+        subprocess.run(["brew", "uninstall", "-q", *left])
+
+
+def main():
+    if not shutil.which("uv"):
+        sys.exit("uv not found: run ./install.sh first")
+    out_dir = HOME / "temp" / f"python-legacy-{date.today().isoformat()}"
+    say("py-legacy-sweep" + (" (check only)" if CHECK else ""))
+    step1_project_venvs()
+    step2_home_venv(out_dir)
+    step3_pipx(out_dir)
+    step4_pyenv_tools(out_dir)
+    step5_shebangs()
+    step6_untrusted()
+    step7_archive(out_dir)
+    step8_brew()
+    say("\nDone. Open a new terminal so PATH picks up the changes.")
+
+
+if __name__ == "__main__":
+    main()

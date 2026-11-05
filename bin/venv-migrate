@@ -1,0 +1,95 @@
+#!/bin/bash
+# venv-migrate: convert zsh-autoswitch-virtualenv pointer files (.venv files
+# naming an env in ~/.virtualenvs) into standard in-project .venv/ directories
+# built by uv, with the same Python minor version and the same packages.
+#
+#   venv-migrate              # current directory
+#   venv-migrate DIR...       # specific projects
+#   venv-migrate --all        # every pointer under ~ (skips ~ itself)
+#
+# Safe: the pointer file is restored if the new env fails to build, and the old
+# env in ~/.virtualenvs is left alone (delete that folder once you're happy).
+# Pointers whose env no longer exists are just removed.
+set -u
+export UV_PYTHON_PREFERENCE=only-managed
+OLD_ROOT="${AUTOSWITCH_VIRTUAL_ENV_DIR:-$HOME/.virtualenvs}"
+LOG="$HOME/Library/Logs/venv-migrate.log"
+TRUST="${UV_AUTOVENV_TRUST:-${XDG_STATE_HOME:-$HOME/.local/state}/uv-autovenv/trusted}"
+mkdir -p "$(dirname "$TRUST")"
+mkdir -p "$(dirname "$LOG")"
+
+migrate_one() {
+  local dir="$1" ptr="$1/.venv" name old pyver tmp
+  [ -f "$ptr" ] || return 0
+  # Security: a cloned or downloaded repo can ship its own .venv pointer. Only
+  # handle pointers owned by you that name a plain directory resolving inside
+  # ~/.virtualenvs (no ../ escapes, no symlinks out). Then the worst a planted
+  # pointer can do is name one of YOUR envs, which just copies your packages
+  # into a fresh env built here. Deliberately no `git` call: a repo's own
+  # .git/config (core.fsmonitor etc.) can make even `git ls-files` run code.
+  if [ ! -O "$ptr" ] || [ ! -O "$dir" ]; then
+    printf 'SKIP    %s (not owned by you)\n' "$dir" | tee -a "$LOG"; return 0
+  fi
+  name="$(tr -d ' \r\n' < "$ptr")"
+  case "$name" in
+    */*|.|..|-*) printf 'SKIP    %s (invalid pointer name %s)\n' "$dir" "$name" | tee -a "$LOG"; return 0 ;;
+  esac
+  old="$OLD_ROOT/$name"
+  if [ -n "$name" ] && [ -e "$old" ]; then
+    local old_real root_real
+    old_real="$(cd "$old" 2>/dev/null && pwd -P)"
+    root_real="$(cd "$OLD_ROOT" && pwd -P)"
+    case "$old_real/" in
+      "$root_real"/?*/) ;;
+      *) printf 'SKIP    %s (pointer escapes %s)\n' "$dir" "$OLD_ROOT" | tee -a "$LOG"; return 0 ;;
+    esac
+  fi
+  if [ -z "$name" ] || [ ! -d "$old" ]; then
+    rm -f "$ptr"
+    printf 'STALE   %s (env %s no longer exists; pointer removed)\n' "$dir" "$name" | tee -a "$LOG"
+    return 0
+  fi
+  pyver="$("$old/bin/python" -c 'import sys; print("%d.%d" % sys.version_info[:2])' 2>/dev/null || echo 3.12)"
+  tmp="$(mktemp -t venv-migrate)"
+  # uv reads the old env directly (no pip needed). Editable/local installs are
+  # re-done from the project itself below.
+  uv pip freeze --python "$old/bin/python" 2>/dev/null \
+    | grep -v -E '^-e |@ file://' > "$tmp"
+  mv "$ptr" "$ptr.pointer-backup"
+  if uv venv -q --seed --prompt "$(basename "$dir")" --python "$pyver" "$dir/.venv" \
+     && { [ ! -s "$tmp" ] || uv pip install -q --python "$dir/.venv/bin/python" -r "$tmp"; } \
+  then
+    # Installing the project itself (-e .) runs its build code, so only do it
+    # when you named this project explicitly, never during an unattended --all.
+    if [ -f "$dir/pyproject.toml" ] || [ -f "$dir/setup.py" ]; then
+      if [ "$ALL_MODE" = 1 ]; then
+        printf 'NOTE    %s has its own package; to install it: cd %s && pysync\n' "$dir" "$dir" | tee -a "$LOG"
+      else
+        uv pip install -q --python "$dir/.venv/bin/python" -e "$dir" 2>/dev/null || true
+      fi
+    fi
+    rm -f "$ptr.pointer-backup"
+    grep -qxF -- "$dir/.venv" "$TRUST" 2>/dev/null || echo "$dir/.venv" >> "$TRUST"   # we built it: auto-activate OK
+    printf 'OK      %s (python %s, %s packages, was %s)\n' "$dir" "$pyver" "$(wc -l < "$tmp" | tr -d ' ')" "$name" | tee -a "$LOG"
+  else
+    rm -rf "$dir/.venv"
+    mv "$ptr.pointer-backup" "$ptr"
+    printf 'FAILED  %s (python %s, env %s) - pointer restored; try: cd %s && mkvenv %s\n' "$dir" "$pyver" "$name" "$dir" "$pyver" | tee -a "$LOG"
+  fi
+  rm -f "$tmp"
+}
+
+ALL_MODE=0
+if [ "${1:-}" = "--all" ]; then
+  ALL_MODE=1
+  find "$HOME" -maxdepth 6 -name .venv -type f \
+       -not -path "$HOME/Library/*" -not -path '*/node_modules/*' -not -path "$OLD_ROOT/*" 2>/dev/null \
+    | while IFS= read -r p; do
+        d="$(dirname "$p")"
+        [ "$d" = "$HOME" ] && continue
+        migrate_one "$d"
+      done
+else
+  [ $# -eq 0 ] && set -- .
+  for d in "$@"; do migrate_one "$(cd "$d" && pwd)"; done
+fi

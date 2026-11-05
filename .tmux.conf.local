@@ -345,5 +345,8 @@ set -g @save-complete-history-path "$HOME/tmuxlogs"
 
 # set -g status-right 'Continuum status: #{continuum_status}'
 
+# Panes run zsh (your interactive shell) while $SHELL stays /bin/bash for tools.
+set -g default-command "exec zsh -l"   # Homebrew zsh is first on PATH
+
 # Initialize TMUX plugin manager (keep this line at the very bottom of tmux.conf)
 run -b '~/.tmux/plugins/tpm/tpm'

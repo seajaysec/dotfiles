@@ -1,0 +1,43 @@
+# Tracked git preferences. ~/.gitconfig includes this file (install.sh sets it
+# up) and keeps machine-local bits: git-lfs filter, credential helpers, and any
+# per-machine overrides.
+[user]
+	name = Chris Farrell
+	# GitHub no-reply address: pushes are rejected under email privacy otherwise.
+	email = 7016191+seajaysec@users.noreply.github.com
+
+[core]
+	excludesfile = ~/.gitignore_global
+	pager = delta
+
+[init]
+	defaultBranch = main
+
+[push]
+	default = upstream
+	autoSetupRemote = true
+	followTags = true
+
+[pull]
+	rebase = true
+
+[merge]
+	conflictstyle = zdiff3
+
+[interactive]
+	diffFilter = delta --color-only
+
+[delta]
+	navigate = true
+	dark = true
+	side-by-side = true
+	line-numbers = true
+
+[color]
+	ui = auto
+	interactive = true
+	branch = true
+	status = true
+
+[url "https://"]
+	insteadOf = git://

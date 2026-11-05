@@ -1,6 +1,13 @@
 # My Personal Additions
 mySecrets.py
 
+# SpecStory conversation transcripts (local only, never commit anywhere)
+.specstory/
+
+# Local Claude Code per-project settings (migrated from ~/.config/git/ignore
+# when core.excludesfile was pointed here)
+**/.claude/settings.local.json
+
 # Github's Global macOS Recommendations
 # General
 .DS_Store
@@ -30,7 +37,6 @@ Temporary Items
 .apdisk
 
 # Github's Global VSCode Recommendations
-.vscode
 .vscode/*
 !.vscode/settings.json
 !.vscode/tasks.json
@@ -52,14 +58,11 @@ __pycache__/
 
 # Distribution / packaging
 .Python
-build/
 develop-eggs/
 dist/
 downloads/
 eggs/
 .eggs/
-lib/
-lib64/
 parts/
 sdist/
 var/
@@ -69,6 +72,9 @@ share/python-wheels/
 .installed.cfg
 *.egg
 MANIFEST
+
+# NOTE: build/, lib/, lib64/ removed from global scope
+# Add these to project .gitignore if needed (language-specific)
 
 # PyInstaller
 #  Usually these files are written by a python script from a template
@@ -86,7 +92,7 @@ htmlcov/
 .nox/
 .coverage
 .coverage.*
-.cache
+# .cache removed from global — used by too many unrelated tools to ignore everywhere
 nosetests.xml
 coverage.xml
 *.cover
@@ -100,7 +106,7 @@ cover/
 *.pot
 
 # Django stuff:
-*.log
+# *.log removed from global — way too broad; add per-project if needed
 local_settings.py
 db.sqlite3
 db.sqlite3-journal
@@ -117,7 +123,8 @@ docs/_build/
 
 # PyBuilder
 .pybuilder/
-target/
+
+# NOTE: target/ (Rust) removed — use per-project .gitignore for language-specific builds
 
 # Jupyter Notebook
 .ipynb_checkpoints
@@ -181,22 +188,17 @@ dmypy.json
 # Cython debug symbols
 cython_debug/
 
-# Github's Virtual Environment recommendations
-# Virtualenv
-# http://iamzed.com/2009/05/07/a-primer-on-virtualenv/
-[Bb]in
-[Ii]nclude
-[Ll]ib
-[Ll]ib64
-[Ll]ocal
-[Ss]cripts
-pyvenv.cfg
-pip-selfcheck.json
+# NOTE: Virtualenv patterns removed from global scope.
+# If using a local venv in a project, add these to the project's .gitignore instead.
+# venv/
+# [Bb]in/
+# [Ss]cripts/
+# pyvenv.cfg
+# Better: keep venvs outside the repo at ~/.virtualenvs/ (zsh-autoswitch-virtualenv)
 
 # Github's VIM recommendations
 # Swap
 [._]*.s[a-v][a-z]
-!*.svg  # comment out if you don't need vector files
 [._]*.sw[a-p]
 [._]s[a-rt-v][a-z]
 [._]ss[a-gi-z]
@@ -213,3 +215,6 @@ Sessionx.vim
 tags
 # Persistent undo
 [._]*.un~
+
+# SVG files (comment out if you don't need vector files)
+!*.svg
