@@ -14,6 +14,8 @@ set -u
 export UV_PYTHON_PREFERENCE=only-managed
 OLD_ROOT="${AUTOSWITCH_VIRTUAL_ENV_DIR:-$HOME/.virtualenvs}"
 LOG="$HOME/Library/Logs/venv-migrate.log"
+TRUST="${UV_AUTOVENV_TRUST:-${XDG_STATE_HOME:-$HOME/.local/state}/uv-autovenv/trusted}"
+mkdir -p "$(dirname "$TRUST")"
 mkdir -p "$(dirname "$LOG")"
 
 migrate_one() {
@@ -39,6 +41,7 @@ migrate_one() {
           || uv pip install -q --python "$dir/.venv/bin/python" -e "$dir" 2>/dev/null || true; }
   then
     rm -f "$ptr.pointer-backup"
+    grep -qxF -- "$dir/.venv" "$TRUST" 2>/dev/null || echo "$dir/.venv" >> "$TRUST"   # we built it: auto-activate OK
     printf 'OK      %s (python %s, %s packages, was %s)\n' "$dir" "$pyver" "$(wc -l < "$tmp" | tr -d ' ')" "$name" | tee -a "$LOG"
   else
     rm -rf "$dir/.venv"

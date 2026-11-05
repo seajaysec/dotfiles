@@ -12,6 +12,32 @@ export UV_PYTHON_PREFERENCE=only-managed
 # --- auto-activate the nearest ./.venv on cd ---------------------------------
 # Walks up from $PWD, stops before $HOME (no home-wide venv). Only deactivates
 # envs it activated itself, so a venv you sourced by hand stays put.
+#
+# Security: activating means sourcing .venv/bin/activate, i.e. running code from
+# the project. A cloned repo (exploit PoCs!) can ship its own .venv, so only envs
+# on the trust list are activated: ones mkvenv / pysync / pipr / venv-migrate
+# created, or that you approved with `venv-trust`. Claude's shell-init reads the
+# same list.
+export UV_AUTOVENV_TRUST="${XDG_STATE_HOME:-$HOME/.local/state}/uv-autovenv/trusted"
+
+_uv_trusted() {  # $1 = absolute .venv path
+  [[ -O $1/bin/activate ]] && grep -qxF -- "$1" "$UV_AUTOVENV_TRUST" 2>/dev/null
+}
+
+_uv_trust_add() {
+  mkdir -p "${UV_AUTOVENV_TRUST:h}"
+  grep -qxF -- "$1" "$UV_AUTOVENV_TRUST" 2>/dev/null || print -r -- "$1" >> "$UV_AUTOVENV_TRUST"
+}
+
+# venv-trust: approve the nearest ./.venv for auto-activation (look first!).
+venv-trust() {
+  local v
+  v=$(_uv_find_venv) || { print "No .venv found here."; return 1; }
+  [[ -O $v/bin/activate ]] || { print "Not owned by you, refusing: $v"; return 1; }
+  _uv_trust_add "$v" && print "Trusted: $v"
+  _uv_autovenv
+}
+
 _uv_find_venv() {
   local d=${1:-$PWD}
   while [[ $d != $HOME && $d != / ]]; do
@@ -24,6 +50,13 @@ _uv_find_venv() {
 _uv_autovenv() {
   local venv
   venv=$(_uv_find_venv) || venv=
+  if [[ -n $venv ]] && ! _uv_trusted $venv; then
+    if [[ $_UV_WARNED != $venv ]]; then
+      print -P "%F{yellow}Not auto-activating untrusted ${venv/#$HOME/~} (it may have come with the repo). Inspect it, then: venv-trust%f"
+      typeset -g _UV_WARNED=$venv
+    fi
+    venv=
+  fi
   if [[ -n $venv ]]; then
     [[ $VIRTUAL_ENV == $venv ]] && return
     [[ -n $VIRTUAL_ENV ]] && (( $+functions[deactivate] )) && deactivate
@@ -54,6 +87,7 @@ mkvenv() {
   local -a py
   [[ -n $1 ]] && py=(--python ${1#--python=})
   uv venv --seed --prompt ${PWD:t} $py .venv || return
+  _uv_trust_add ${PWD}/.venv
   source .venv/bin/activate
   typeset -g _UV_AUTO_VENV=$VIRTUAL_ENV
   pysync
@@ -63,7 +97,7 @@ mkvenv() {
 pysync() {
   emulate -L zsh
   if [[ -f uv.lock ]]; then
-    uv sync
+    uv sync && _uv_trust_add ${PWD}/.venv && _uv_autovenv
   elif [[ -f pyproject.toml || -f setup.py ]]; then
     uv pip install -e .
   elif [[ -f requirements.txt ]]; then
@@ -79,6 +113,10 @@ rmvenv() {
   [[ -d .venv ]] || { print "No .venv here."; return 1; }
   [[ $VIRTUAL_ENV == ${PWD}/.venv ]] && (( $+functions[deactivate] )) && deactivate
   unset _UV_AUTO_VENV
+  if [[ -f $UV_AUTOVENV_TRUST ]]; then
+    grep -vxF -- "${PWD}/.venv" "$UV_AUTOVENV_TRUST" > "$UV_AUTOVENV_TRUST.tmp"
+    mv "$UV_AUTOVENV_TRUST.tmp" "$UV_AUTOVENV_TRUST"
+  fi
   rm -rf .venv && print "Removed .venv"
 }
 
@@ -133,6 +171,8 @@ Python with uv: each project has its own ./.venv (auto-activates on cd)
     uv run cmd           run anything with the project env, no activation needed
     rmvenv               delete ./.venv
     ipy                  IPython in this project
+    venv-trust           allow a .venv you didn't make with mkvenv to auto-activate
+                         (cloned repos can ship one: look before trusting)
 
   Without a project
     uv run --with requests python script.py   one-off, nothing left behind
