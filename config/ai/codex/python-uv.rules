@@ -1,0 +1,35 @@
+# Codex command rules (CLI + IDE extension; app per Codex docs). Installed to
+# ~/.codex/rules/ by dotfiles install.sh. Exact-prefix matching only, so the
+# PreToolUse hook (same guard script as Claude/Cursor) catches the rest.
+prefix_rule(
+    pattern = [["pip", "pip3"], "install"],
+    decision = "forbidden",
+    justification = "Use uv: 'uv pip install <pkg>' (into ./.venv) or 'uv add <pkg>' in a uv project. See the python-env skill.",
+    match = ["pip install requests", "pip3 install -r requirements.txt"],
+    not_match = ["pip list", "pip show requests"],
+)
+prefix_rule(
+    pattern = [["python", "python3"], "-m", "pip", "install"],
+    decision = "forbidden",
+    justification = "Use uv: 'uv pip install <pkg>' (into ./.venv) or 'uv add <pkg>' in a uv project.",
+)
+prefix_rule(
+    pattern = [["python", "python3"], "-m", ["venv", "virtualenv"]],
+    decision = "forbidden",
+    justification = "Create envs with uv: 'uv venv --seed .venv' (project-local ./.venv).",
+)
+prefix_rule(
+    pattern = ["virtualenv"],
+    decision = "forbidden",
+    justification = "Create envs with uv: 'uv venv --seed .venv' (project-local ./.venv).",
+)
+prefix_rule(
+    pattern = ["pipx"],
+    decision = "forbidden",
+    justification = "pipx is retired: use 'uv tool install <pkg>' or 'uvx <tool>'.",
+)
+prefix_rule(
+    pattern = ["pyenv", ["install", "global", "local", "shell", "virtualenv"]],
+    decision = "forbidden",
+    justification = "pyenv is retired: use 'uv python install <ver>' and a .python-version file.",
+)

@@ -100,8 +100,12 @@ setup_python_uv() {
   command -v uv >/dev/null 2>&1 || return 0
   UV_PYTHON_PREFERENCE=only-managed uv python install 3.12 --default >/dev/null 2>&1 \
     && echo "   python: $(~/.local/bin/python3 --version 2>&1) via uv (default python3)"
-  if find "$HOME" -maxdepth 6 -name .venv -type f -not -path "$HOME/Library/*" 2>/dev/null | grep -q .; then
-    echo "   python: old ~/.virtualenvs pointer files found. Convert: venv-migrate --all"
+  if [[ -d "$HOME/.virtualenvs" || -d "$HOME/.pyenv" || -d "$HOME/.local/pipx" ]] \
+     || find "$HOME" -maxdepth 6 -name .venv -type f -not -path "$HOME/Library/*" 2>/dev/null | grep -q .; then
+    echo ""
+    echo "   ⚠️  python: old pyenv / pipx / ~/.virtualenvs setup found on this machine."
+    echo "      Move it to uv and archive the rest (asks before each step): py-legacy-sweep"
+    echo ""
   fi
 }
 
@@ -139,6 +143,7 @@ link_dotfiles() {
   symlink_init "bin/unwrap-clipboard" "${HOME}/.local/bin/unwrap-clipboard"
   symlink_init "bin/iterm-log-retention" "${HOME}/.local/bin/iterm-log-retention"
   symlink_init "bin/venv-migrate" "${HOME}/.local/bin/venv-migrate"
+  symlink_init "bin/py-legacy-sweep" "${HOME}/.local/bin/py-legacy-sweep"
   symlink_init ".zsh.aliases" "${DOTFILES_TARGET}/.zsh.aliases"
   symlink_init ".zsh.functions" "${DOTFILES_TARGET}/.zsh.functions"
   symlink_init "config/starship/starship.toml" "${DOTFILES_TARGET}/config/starship/starship.toml"
@@ -176,6 +181,13 @@ link_dotfiles() {
     echo "   agent-chats: viewer + libs copied → ${ac_dest}"
   fi
   setup_iterm_dynamic_profiles
+  # Shared AI-tool layer: rules, python-env skill, uv command guard for Claude
+  # Code, Cursor and Codex (CLI + app each). Needs jq (installed by full bootstrap).
+  if command -v jq >/dev/null 2>&1; then
+    "${REPO_ROOT}/config/ai/install-ai.sh"
+  else
+    echo "   ai: skipped (install jq, then re-run)" >&2
+  fi
   # Neovim config (whole directory).
   if [[ -d "${REPO_ROOT}/config/nvim" ]]; then
     mkdir -p "${HOME}/.config"
@@ -237,6 +249,7 @@ brew install \
     zsh \
     neovim \
     jq \
+    pkgconf \
     uv \
     node \
     go \

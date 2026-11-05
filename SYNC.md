@@ -33,6 +33,36 @@ cd ~/dotfiles && git pull && ./install.sh --link-only
 - removes a stale `/usr/local/go` if Homebrew go exists (sudo prompt the first time)
 - switches iTerm to the single zsh profile: right away if iTerm is closed, otherwise on your next ⌘Q (iTerm relaunches itself)
 
+- installs the shared AI-tool layer (`config/ai/`) for Claude Code, Cursor and Codex, CLI and app: shared rules, the `python-env` skill, and the uv command guard
+
 Re-run full `./install.sh` only when the package list changed.
+
+### First sync on a machine that still has the old Python setup
+
+The installer warns if it sees pyenv / pipx / `~/.virtualenvs`. Then:
+
+```sh
+py-legacy-sweep --check   # see what it would do
+py-legacy-sweep           # do it, asking before each step
+```
+
+It converts project venvs to `./.venv` (uv), moves pipx and pyenv command-line
+tools to `uv tool` (same versions; private packages rebuilt from the installed
+files), lists leftover scripts and untrusted `.venv` folders, then zips
+`~/.virtualenvs`, `~/.pyenv` and `~/.local/pipx` into
+`~/temp/python-legacy-<date>/` with a `restore.sh`, and removes the originals.
+
+### One-time steps per machine (the tools don't allow scripting these)
+
+- **Codex:** hooks must be trusted once. CLI: run `codex`, then `/hooks`, and trust the uv guard. App: Settings → Hooks.
+- **Cursor:** global rules live in the app, not a file. Settings → Rules → User Rules, add:
+  `Follow the shared rules in ~/dotfiles/config/ai/rules/global.md (read it at the start of a task).`
+- **Claude Desktop chat / claude.ai** (account-wide, once): `sync-skills-to-claude --only python-env --overwrite`
+
+### claude-setup vs dotfiles
+
+`~/gits/claude-setup` is the public, generic installer. On your own machines
+dotfiles owns the AI layer. Don't run claude-setup's `install.sh` there: it
+replaces `~/.claude/settings.json` and `CLAUDE.md` wholesale.
 
 Note: upstream installers (rustup, LM Studio, etc.) like to append to `~/.zshrc` / `~/.bashrc`. Those are symlinks into this repo, so check `git status` after installing new tools.
