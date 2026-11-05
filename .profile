@@ -31,7 +31,7 @@ unset GOROOT   # must follow whichever `go` is on PATH
 export UV_PYTHON_PREFERENCE=only-managed   # uv uses only its own Pythons
 
 # PATH — same order as zsh, then whatever the parent passed in, de-duplicated.
-PATH="$HOME/.local/bin:$LAUNCH_HOME/bin:/opt/homebrew/bin:/opt/homebrew/sbin:/opt/homebrew/opt/openssl@3/bin:/usr/local/bin:/usr/local/sbin:/usr/bin:/usr/sbin:/bin:/sbin:$HOME/.npm-packages/bin:$HOME/.cargo/bin:$HOME/.dotnet/tools:$GOPATH/bin:$BUN_INSTALL/bin:${PATH:+$PATH:}$HOME/.lmstudio/bin"
+PATH="$HOME/.local/bin:$LAUNCH_HOME/bin:/opt/homebrew/bin:/opt/homebrew/sbin:/opt/homebrew/opt/openssl@3/bin:/usr/local/bin:/usr/local/sbin:/usr/bin:/usr/sbin:/bin:/sbin:$HOME/.npm-packages/bin:$HOME/.cargo/bin:$HOME/.dotnet/tools:$GOPATH/bin:$BUN_INSTALL/bin:${PATH:+$PATH:}$HOME/.lmstudio/bin:$HOME/.cache/lm-studio/bin"
 PATH="$(printf '%s' "$PATH" | awk -v RS=: -v ORS=: 'length && !seen[$0]++' | sed 's/:$//')"
 export PATH
 
