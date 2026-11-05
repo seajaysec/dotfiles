@@ -14,10 +14,14 @@ find_up() {  # nearest ancestor (below $HOME) containing $1
 
 if d="$(find_up .venv)" && [ -f "$d/.venv" ]; then
   echo "[python] Old-style ~/.virtualenvs pointer at $d/.venv. Convert it first: venv-migrate \"$d\""
-elif d="$(find_up .venv)" && [ -x "$d/.venv/bin/python" ]; then
+elif d="$(find_up .venv)" && [ -d "$d/.venv" ]; then
+  # Never execute anything from the env here (a cloned repo can ship its own
+  # .venv): read the version from pyvenv.cfg. Fail closed: no trust list, not
+  # owned by you, or not listed => untrusted.
   _t="${XDG_STATE_HOME:-$HOME/.local/state}/uv-autovenv/trusted"
-  if [ ! -f "$_t" ] || grep -qxF -- "$d/.venv" "$_t"; then   # no trust list = feature not installed
-    echo "[python] uv env: $d/.venv ($("$d/.venv/bin/python" --version 2>&1)). Run code with: uv run <cmd>"
+  _ver="$(sed -n 's/^version_info *= *//p; s/^version *= *//p' "$d/.venv/pyvenv.cfg" 2>/dev/null | head -1)"
+  if [ -f "$_t" ] && [ -O "$d/.venv" ] && [ -O "$d/.venv/pyvenv.cfg" ] && grep -qxF -- "$d/.venv" "$_t"; then
+    echo "[python] uv env: $d/.venv (Python ${_ver:-unknown}). Run code with: uv run <cmd>"
   else
     echo "[python] UNTRUSTED $d/.venv (not created by the user here; may have come with the repo). Don't run it. Ask the user to inspect and run venv-trust, or rebuild: rm -rf .venv && uv venv --seed .venv"
   fi
