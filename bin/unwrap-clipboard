@@ -12,37 +12,53 @@ exactly as they are.
 
 iTerm runs it as a coprocess, so it must never print to stdout.
 """
+import re
 import subprocess
 import sys
 import textwrap
 
 
-def should_join(prev: str, nxt: str) -> bool:
-    """Decide whether `nxt` is a wrapped continuation of `prev`.
+# Lines that start their own thing: list items, headings, quotes, tables, prompts.
+_STARTS_BLOCK = re.compile(r"^\s*([-*+•▪◦]\s|\d+[.)]\s|#{1,6}\s|>\s?|\||\$ |>>> |❯ )")
+# Lines that look like code / commands rather than prose.
+_CODEISH = re.compile(r"^\s*(def |class |import |from \S+ import|return\b|if .*:$|for .*:$|\w[\w.]*\(.*\)\s*$|[\w.-]+\s*=\s|[{}\[\]]\s*$)")
 
-    Both lines have trailing whitespace stripped and the common indent removed.
-    Neither is blank (blank lines always separate paragraphs) and neither is
-    inside a ``` fence.
 
-    TODO(you): return True to merge `nxt` onto the end of `prev` with a space.
+def should_join(prev: str, nxt: str, prev_len: int, width: int) -> bool:
+    """Is `nxt` a wrapped continuation of `prev`?
+
+    prev_len is the ORIGINAL length of the previous screen line (prev may
+    already hold earlier joins); width is the longest line in the selection,
+    i.e. roughly where the app wrapped.
     """
-    return False
+    if _STARTS_BLOCK.match(nxt) or _CODEISH.match(nxt) or _CODEISH.match(prev):
+        return False
+    tail = prev.rstrip()
+    if tail.endswith((":", "\\", "{", "[", "(")):  # intro to a block, or code continuation
+        return False
+    # A wrapped line runs close to the wrap width; a short one ended on purpose.
+    if width and prev_len < 0.6 * width:
+        return False
+    return True
 
 
 def unwrap(text: str) -> str:
     lines = textwrap.dedent("\n".join(l.rstrip() for l in text.splitlines())).split("\n")
+    width = max((len(l) for l in lines), default=0)
     out: list[str] = []
     in_fence = False
+    last_len = 0
     for line in lines:
         fence = line.lstrip().startswith("```")
         if fence:
             in_fence = not in_fence
         if (not fence and not in_fence and out and out[-1].strip() and line.strip()
                 and not out[-1].lstrip().startswith("```")
-                and should_join(out[-1], line)):
+                and should_join(out[-1], line, last_len, width)):
             out[-1] = out[-1] + " " + line.strip()
         else:
             out.append(line)
+        last_len = len(line)
     return "\n".join(out).strip("\n")
 
 
