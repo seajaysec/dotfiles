@@ -185,7 +185,8 @@
   },
   "markdownlint.config": {
     "MD013": false,
-    "MD033": false
+    "MD033": false,
+    "MD060": false
   },
   "cursor.cpp.disabledLanguages": [
     "plaintext",
@@ -348,5 +349,8 @@
   "markdownlint.run": "onSave",
   "editor.minimap.enabled": true,
   "cursor.inlineDiff.mode": "unified",
-  "python.defaultInterpreterPath": "/Users/chris.j.farrell/.virtualenvs/chris.j.farrell-axed"
+  "git.replaceTagsWhenPull": true,
+  "python.defaultInterpreterPath": "~/.local/bin/python3",
+  "hediet.vscode-drawio.resizeImages": null,
+  "cursor.composer.queueMessageDefaultBehavior": "steer"
 }
