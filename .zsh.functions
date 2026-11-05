@@ -578,6 +578,74 @@ rmenv() {
   sudo rm -rf env_*(N) 2>/dev/null
 }
 
+# pipr: same pipeline as the old alias, but bound to the active venv's interpreter.
+#   pip install pipreqs pip-tools
+#   → pipreqs (imports → requirements.in, unpinned)
+#   → pip-compile (full locked tree with # via annotations → requirements.txt)
+#   → pip install -r requirements.txt
+#   → rm requirements.in
+# Fixes: Homebrew pip-compile/pip skew; clear error with no venv; local project
+# packages named `build/` must not shadow PyPI `build` during `python -m piptools`.
+# Usage: pipr [path]   # default: .
+unalias pipr 2>/dev/null || true
+pipr() {
+  emulate -L zsh
+  local root="${1:-.}"
+  local py in_file out_file
+
+  if [[ -z "${VIRTUAL_ENV:-}" ]]; then
+    print -u2 "pipr: no virtualenv active. Activate one first (e.g. cd into a project with .venv / autoswitch), then retry."
+    return 1
+  fi
+  if [[ ! -d "$root" ]]; then
+    print -u2 "pipr: not a directory: $root"
+    return 1
+  fi
+
+  py="${VIRTUAL_ENV}/bin/python"
+  if [[ ! -x "$py" ]]; then
+    print -u2 "pipr: VIRTUAL_ENV is set ($VIRTUAL_ENV) but $py is missing"
+    return 1
+  fi
+
+  # Absolute paths so compile can run outside the project tree.
+  root="$(builtin cd -q -- "$root" && pwd)" || return 1
+  in_file="$root/requirements.in"
+  out_file="$root/requirements.txt"
+
+  "$py" -m pip install -q pipreqs 'pip-tools>=7.6' || {
+    print -u2 "pipr: failed to install pipreqs/pip-tools into $VIRTUAL_ENV"
+    return 1
+  }
+
+  # Same as: pipreqs . --force --mode no-pin --savepath requirements.in
+  # Ignore vendored trees that ship non-project / Py2 scripts (e.g. toolchain gdbinit).
+  if ! "$py" -m pipreqs.pipreqs "$root" --force --mode no-pin --savepath "$in_file" \
+      --ignore "toolchain,node_modules,.mypy_cache,.pytest_cache,.ruff_cache,__pycache__,dist,.eggs"; then
+    print -u2 "pipr: pipreqs failed"
+    return 1
+  fi
+
+  # Same as: pip-compile requirements.in — keep default header + # via annotations.
+  # Run from $VIRTUAL_ENV so a project-local build/ (or similarly named top-level
+  # package) cannot shadow pip-tools' dependency on PyPI's `build` package.
+  # Always python -m piptools so PATH never picks Homebrew's stale pip-compile.
+  if ! (builtin cd -q -- "$VIRTUAL_ENV" && "$py" -m piptools compile --output-file="$out_file" "$in_file"); then
+    print -u2 "pipr: pip-compile failed — upgrading pip-tools and retrying once"
+    "$py" -m pip install -q -U 'pip-tools>=7.6' pip || return 1
+    if ! (builtin cd -q -- "$VIRTUAL_ENV" && "$py" -m piptools compile --output-file="$out_file" "$in_file"); then
+      print -u2 "pipr: pip-compile still failing; leaving $in_file for inspection"
+      return 1
+    fi
+  fi
+
+  "$py" -m pip install -r "$out_file" || {
+    print -u2 "pipr: install from $out_file failed"
+    return 1
+  }
+  rm -f -- "$in_file"
+}
+
 fff() {
   if [[ -z $1 ]]; then
     echo "usage: fff <iname-pattern>" >&2

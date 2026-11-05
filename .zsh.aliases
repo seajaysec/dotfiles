@@ -56,7 +56,9 @@ alias dockrm='docker rm $(docker ps -a -q)'      # Remove all stopped containers
 
 # Python & Virtual Environment
 alias de='deactivate'                       # Deactivate Python virtual environment
-alias pipr='pip install pipreqs pip-tools && pipreqs . --force --mode no-pin --savepath requirements.in && pip-compile requirements.in && pip install -r requirements.txt && rm requirements.in'  # Generate & Install Python requirements
+# pipr is a function in .zsh.functions (scan → lock → install on the active interpreter).
+# Clear any stale alias so the function wins (zsh expands aliases before functions).
+unalias pipr 2>/dev/null || true
 alias srcenv='source env_*/bin/activate'    # Activate virtual environment
 
 # Text Processing & Clipboard
@@ -154,3 +156,6 @@ alias gm='git merge'                        # Merge
 alias gmom='git merge origin/$(git_main_branch)'  # Merge origin main
 alias gbl='git blame -b -w'                 # Show file blame
 alias gwip='git add -A; git rm $(git ls-files --deleted) 2> /dev/null; git commit --no-verify --no-gpg-sign -m "--wip-- [skip ci]"'  # Save work in progress
+
+# Strip Gatekeeper quarantine flag (browser-downloaded apps showing "damaged"): unquar /Applications/Foo.app
+alias unquar='xattr -dr com.apple.quarantine'

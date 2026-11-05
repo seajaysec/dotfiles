@@ -1,4 +1,15 @@
 {
+  // Privacy (minimal telemetry/local history). Daily wipe: ~/.local/bin/privacy-wipe
+  "telemetry.telemetryLevel": "off",
+  "telemetry.feedback.enabled": false,
+  "workbench.enableExperiments": false,
+  "workbench.settings.enableNaturalLanguageSearch": false,
+  "workbench.localHistory.enabled": false,
+  "terminal.integrated.enablePersistentSessions": false,
+  "terminal.integrated.persistentSessionReviveProcess": "never",
+  "terminal.integrated.shellIntegration.history": 0,
+  "npm.fetchOnlinePackageInfo": false,
+  "update.showReleaseNotes": false,
   "editor.largeFileOptimizations": false,
   "workbench.editorAssociations": {
     "*.ipynb": "jupyter.notebook.ipynb",
@@ -350,5 +361,6 @@
   "editor.minimap.enabled": true,
   "cursor.inlineDiff.mode": "unified",
   "git.replaceTagsWhenPull": true,
-  "hediet.vscode-drawio.resizeImages": null
+  "hediet.vscode-drawio.resizeImages": null,
+  "cursor.composer.queueMessageDefaultBehavior": "steer"
 }
