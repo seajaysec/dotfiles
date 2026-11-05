@@ -21,14 +21,14 @@ mkdir -p "$(dirname "$LOG")"
 migrate_one() {
   local dir="$1" ptr="$1/.venv" name old pyver tmp
   [ -f "$ptr" ] || return 0
-  # Security: a cloned repo can ship its own .venv pointer. Only handle pointers
-  # that autoswitch wrote on this machine: owned by you, not committed to git,
-  # naming a plain directory inside ~/.virtualenvs (no ../ escapes, no symlinks out).
+  # Security: a cloned or downloaded repo can ship its own .venv pointer. Only
+  # handle pointers owned by you that name a plain directory resolving inside
+  # ~/.virtualenvs (no ../ escapes, no symlinks out). Then the worst a planted
+  # pointer can do is name one of YOUR envs, which just copies your packages
+  # into a fresh env built here. Deliberately no `git` call: a repo's own
+  # .git/config (core.fsmonitor etc.) can make even `git ls-files` run code.
   if [ ! -O "$ptr" ] || [ ! -O "$dir" ]; then
     printf 'SKIP    %s (not owned by you)\n' "$dir" | tee -a "$LOG"; return 0
-  fi
-  if git -C "$dir" ls-files --error-unmatch .venv >/dev/null 2>&1; then
-    printf 'SKIP    %s (.venv is committed in the repo: not yours, not touched)\n' "$dir" | tee -a "$LOG"; return 0
   fi
   name="$(tr -d ' \r\n' < "$ptr")"
   case "$name" in
